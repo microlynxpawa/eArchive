@@ -1,0 +1,16 @@
+<div class="page-title">
+    <div class="row">
+      <div class="col-sm-6">
+        <h3><%= title %></h3>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/admin/dashboard"><i data-feather="home"></i></a></li>
+          <li class="breadcrumb-item"><%= title %></li>
+          <% if (typeof subTitle !== 'undefined') { %>
+            <li class="breadcrumb-item active"><%= subTitle %></li>
+          <% } %>
+        </ol>
+      </div>
+    </div>
+  </div>

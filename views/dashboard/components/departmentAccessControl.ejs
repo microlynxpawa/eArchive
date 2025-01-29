@@ -1,0 +1,187 @@
+<style>
+  /* Modal Overlay */
+  #edit-department-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Modal Content */
+  .modal-content-department {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 60%;
+    margin: 20% auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1100;
+    position: relative;
+  }
+
+  /* Close Button */
+  .close-button-department {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  /* Input Field and Button Styling */
+  #department-search-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  #department-input {
+    width: calc(100% - 50px);
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  #department-search-button {
+    margin-left: 10px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+
+  /* Permissions Section */
+  #department-permissions-container {
+    margin-top: 20px;
+  }
+
+  .permission-item {
+    margin-bottom: 10px;
+  }
+</style>
+  
+  <div id="edit-department-modal">
+    <div class="modal-content-department">
+      <button class="close-button-department" id="close-edit-department-modal">&times;</button>
+      <h2>Edit Department Permissions</h2>
+      <div id="department-search-container">
+        <input type="text" id="department-input" placeholder="Type department name" />
+        <button id="department-search-button">🔍 Search</button>
+      </div>
+      <div id="department-info">
+        <!-- This section will display the department information dynamically -->
+      </div>
+      <div id="department-permissions-container" style="display: none;">
+        <p>Select or modify this department's permissions:</p>
+        <label class="permission-item">
+          <input type="checkbox" id="department-admin-rights" /> Admin Rights
+        </label>
+        <label class="permission-item">
+          <input type="checkbox" id="department-supervisor-rights" /> Supervisor Rights
+        </label>
+        <label class="permission-item">
+          <input type="checkbox" id="department-personnel-rights" /> Personnel Rights
+        </label>
+        <button id="update-department-permissions-button" class="btn btn-success">Update Permissions</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const editDepartmentModal = document.getElementById("edit-department-modal");
+      const closeEditDepartmentModal = document.getElementById("close-edit-department-modal");
+      const departmentSearchButton = document.getElementById("department-search-button");
+      const departmentInput = document.getElementById("department-input");
+      const departmentInfo = document.getElementById("department-info");
+      const departmentPermissionsContainer = document.getElementById("department-permissions-container");
+      const updateDepartmentPermissionsButton = document.getElementById("update-department-permissions-button");
+      
+
+      const departmentCheckboxes = [
+        document.getElementById("department-admin-rights"),
+        document.getElementById("department-supervisor-rights"),
+        document.getElementById("department-personnel-rights"),
+      ];
+  
+  
+      // Close Department Modal
+      closeEditDepartmentModal.addEventListener("click", () => {
+        editDepartmentModal.style.display = "none";
+      });
+  
+      // Fetch Department Info
+      departmentSearchButton.addEventListener("click", async () => {
+        const departmentName = departmentInput.value.trim();
+        if (!departmentName) return alert("Please enter a department name.");
+  
+        try {
+          const response = await fetch(`/admin/getDepartment/${departmentName}`);
+          if (!response.ok) throw new Error("Department not found.");
+  
+          const department = await response.json();
+          departmentInfo.innerHTML = `<p>Department: <strong>${department.name}</strong></p>`;
+          departmentPermissionsContainer.style.display = "block";
+        } catch (error) {
+          alert("Error: " + error.message);
+        }
+      });
+  
+      // Ensure Only One Checkbox Can Be Checked
+      departmentCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) {
+            departmentCheckboxes.forEach((otherCheckbox) => {
+              if (otherCheckbox !== checkbox) {
+                otherCheckbox.checked = false;
+              }
+            });
+          }
+        });
+      });
+  
+      // Update Department Permissions
+      updateDepartmentPermissionsButton.addEventListener("click", async () => {
+        const confirmation = confirm("Are you sure you want to update permissions?");
+        if (!confirmation) return;
+  
+        const departmentName = departmentInput.value.trim();
+        const permissions = {
+          admin: document.getElementById("department-admin-rights").checked,
+          supervisor: document.getElementById("department-supervisor-rights").checked,
+          personnel: document.getElementById("department-personnel-rights").checked,
+        };
+  
+        try {
+          const response = await fetch(`/admin/updateDepartmentPermissions/${departmentName}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(permissions),
+          });
+  
+          if (!response.ok) throw new Error("Failed to update permissions.");
+          alert("Permissions updated successfully.");
+          editDepartmentModal.style.display = "none";
+        } catch (error) {
+          alert("Error: " + error.message);
+        }
+      });
+    });
+
+  </script>
+  

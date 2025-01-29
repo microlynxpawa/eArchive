@@ -1,0 +1,202 @@
+<div class="container-fluid dashboard-default">
+  <div class="row">
+    <div class="col-xxl-6 col-xl-5 col-lg-6 dash-45 box-col-40">
+      <div class="card profile-greeting">
+        <div class="card-body">
+          <div class="d-sm-flex d-block justify-content-between">
+            <div class="flex-grow-1">
+              <div class="weather d-flex">
+                <h2 class="f-w-400"> <span>28<sup><i class="fa fa-circle-o f-10"></i></sup>C </span></h2>
+                <div class="span sun-bg"><i class="icofont icofont-sun font-primary"></i></div>
+              </div><span class="font-primary f-w-700">Sunny Day</span>
+              <p>Beautiful Sunny Day Walk</p>
+            </div>
+            <div class="badge-group">
+              <div class="badge badge-light-primary f-12"> <i class="fa fa-clock-o"></i><span id="txt"></span></div>
+            </div>
+          </div>
+          <div class="greeting-user">
+            <div class="profile-vector">
+              <ul class="dots-images">
+                <li class="dot-small bg-info dot-1"></li>
+                <li class="dot-medium bg-primary dot-2"></li>
+                <li class="dot-medium bg-info dot-3"></li>
+                <li class="semi-medium bg-primary dot-4"></li>
+                <li class="dot-small bg-info dot-5"></li>
+                <li class="dot-big bg-info dot-6"></li>
+                <li class="dot-small bg-primary dot-7"></li>
+                <li class="semi-medium bg-primary dot-8"></li>
+                <li class="dot-big bg-info dot-9"></li>
+              </ul><img class="img-fluid" src="<%= user.profilePicturePath ? '/profile-pictures/' + user.profilePicturePath.split(/\/|\\/).pop() : '../assets/images/user/7.jpg' %>" alt="profile picture">
+              <ul class="vector-image">
+                <li> <img src="../assets/images/dashboard/default/ribbon1.png" alt=""></li>
+                <li> <img src="../assets/images/dashboard/default/ribbon3.png" alt=""></li>
+                <li> <img src="../assets/images/dashboard/default/ribbon4.png" alt=""></li>
+                <li> <img src="../assets/images/dashboard/default/ribbon5.png" alt=""></li>
+                <li> <img src="../assets/images/dashboard/default/ribbon6.png" alt=""></li>
+                <li> <img src="../assets/images/dashboard/default/ribbon7.png" alt=""></li>
+              </ul>
+            </div>
+            <h4><a href="edit-profile"><span>Welcome Back</span> <%= user.username %> </a><span class="right-circle"><i
+                  class="fa fa-check-circle font-primary f-14 middle"></i></span></h4>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-6 box-col-25">
+      <div class="card total-revenue overflow-hidden">
+        <div class="card-header">
+          <div class="d-flex justify-content-between">
+            <div class="flex-grow-1">
+              <p class="square-after f-w-600 header-text-primary">Current Date and Time<i class="fa fa-circle"></i></p>
+              <p id="current-date-time" class="f-w-800 mt-2"></p> <!-- Placeholder for date and time -->
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-body p-0">
+          <div class="revenue-chart" id="revenue-chart"></div>
+          <div class="code-box-copy">
+            <button class="code-box-copy__btn btn-clipboard" data-clipboard-target="#revenue"><i
+                class="icofont icofont-copy-alt"></i></button>
+            <pre><code class="language-html" id="revenue">&lt;div class="card total-revenue overflow-hidden"&gt;
+&lt;div class="card-header"&gt;
+&lt;div class="d-flex justify-content-between"&gt;
+&lt;div class="flex-grow-1"&gt;
+&lt;p class="square-after f-w-600 header-text-primary"&gt; Total Revenue
+  &lt;i class="fa fa-circle"&gt;&lt;/i&gt;
+&lt;/p&gt;
+&lt;h4&gt; 96.564%&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div class="setting-list"&gt;
+&lt;ul class="list-unstyled setting-option"&gt;
+  &lt;li&gt;&lt;div class="setting-light"&gt;&lt;i class="icon-layout-grid2"&gt;&lt;/i&gt;&lt;/div&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="view-html fa fa-code font-white"&gt;&lt;/i&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="icofont icofont-maximize full-card font-white"&gt;&lt;/i&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="icofont icofont-minus minimize-card font-white"&gt;&lt;/i&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="icofont icofont-refresh reload-card font-white"&gt;&lt;/i&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="icofont icofont-error close-card font-white"&gt; &lt;/i&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="card-body p-0"&gt;
+&lt;div class="revenue-chart" id="revenue-chart"&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="card total-investment">
+        <div class="card-header pb-0">
+          <div class="d-flex justify-content-between">
+            <div class="flex-grow-1">
+              <p class="square-after f-w-600 header-text-primary">History<i class="fa fa-circle"> </i></p>
+              <h4 class="mb-2">Latest Login History</h4>
+              <h4>
+                <% if (user && user.AuditLogs && user.AuditLogs.length > 0) { %>
+                  <p>Last Login Time: <%= user.AuditLogs[0].loginTime %></p>
+                  <p>Last Logout Time: <%= user.AuditLogs[0].logoutTime %></p>
+                <% } else { %>
+                  <p>No login or logout time data available.</p>
+                <% } %>
+              </h4>
+              
+            </div>
+            <div class="setting-list">
+              <ul class="list-unstyled setting-option">
+                <li>
+                  <div class="setting-light"><i class="icon-layout-grid2"></i></div>
+                </li>
+                <li><i class="icofont icofont-maximize full-card font-white"></i></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xxl-3 col-xl-4 col-md-6 dash-30 box-col-35">
+      <div class="card our-user">
+        <div class="card-header pb-0">
+          <div class="d-flex justify-content-between">
+            <div class="flex-grow-1">
+              <p class="square-after f-w-600 header-text-primary">Information<i class="fa fa-circle"></i></p>
+              <h4>Guide Lines</h4>
+            </div>
+            <div class="setting-list">
+              <ul class="list-unstyled setting-option">
+                <li>
+                  <div class="setting-light"><i class="icon-layout-grid2"></i></div>
+                </li>
+                <li><i class="icofont icofont-maximize full-card font-white"></i></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="user-chart">
+            <div id="user-chart"></div>
+          </div>
+          <ul>
+            <li>
+              <p class="f-w-200 font-primary f-12">News </p><span class="f-w-100">This is a message from Management</span>
+            </li>
+          </ul>
+          <div class="code-box-copy">
+            <button class="code-box-copy__btn btn-clipboard" data-clipboard-target="#users"><i
+                class="icofont icofont-copy-alt"></i></button>
+            <pre><code class="language-html" id="users">&lt;div class="card our-user"&gt;
+&lt;div class="card-header pb-0"&gt;
+&lt;div class="d-flex justify-content-between"&gt;
+&lt;div class="flex-grow-1"&gt;
+&lt;p class="square-after f-w-600 header-text-primary"&gt; Our Total Users
+  &lt;i class="fa fa-circle"&gt;&lt;/i&gt;
+&lt;/p&gt;
+&lt;h4&gt; 96.564% &lt;/h4&gt;
+&lt;/div&gt;
+&lt;div class="setting-list"&gt;
+&lt;ul class="list-unstyled setting-option"&gt;
+  &lt;li&gt;&lt;div class="setting-light"&gt;&lt;i class="icon-layout-grid2"&gt;&lt;/i&gt;&lt;/div&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="view-html fa fa-code font-white"&gt;&lt;/i&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="icofont icofont-maximize full-card font-white"&gt;&lt;/i&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="icofont icofont-minus minimize-card font-white"&gt;&lt;/i&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="icofont icofont-refresh reload-card font-white"&gt;&lt;/i&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;i class="icofont icofont-error close-card font-white"&gt; &lt;/i&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="card-body"&gt;
+&lt;div class="user-chart"&gt;
+&lt;div id="user-chart"&gt;&lt;/div&gt;
+&lt;div class="icon-donut"&gt;
+&lt;i class="feather feather-arrow-up-circle"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p class="f-w-600 font-primary f-12"&gt; Desktop &lt;/p&gt;
+&lt;span class="f-w-600"&gt; 96.564% &lt;/span&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p class="f-w-600 font-primary f-12"&gt; Mobile &lt;/p&gt;
+&lt;span class="f-w-600"&gt; 92.624% &lt;/span&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p class="f-w-600 font-primary f-12"&gt; Tablet &lt;/p&gt;
+&lt;span class="f-w-600"&gt; 46.564% &lt;/span&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor("pageHeader") %>
+  <%- include('../components/page-title.ejs', {title: 'Dashboard' }) %>

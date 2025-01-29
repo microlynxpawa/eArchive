@@ -1,0 +1,364 @@
+<style>
+  .folder-icon {
+    margin-right: 5px;
+  }
+
+  .file-icon {
+    margin-right: 5px;
+  }
+
+  .file-name {
+    cursor: pointer;
+    color: blue;
+  }
+
+  .file-content {
+    border: 1px solid #ccc;
+    height: 300px;
+    overflow-y: auto;
+    padding: 15px;
+  }
+
+  .sub-items {
+    margin-left: 20px;
+  }
+
+  .file-name:hover {
+    text-decoration: underline;
+  }
+
+  .folder-button {
+    all: unset;
+    cursor: pointer;
+  }
+
+  .folder-button:hover {
+    text-decoration: underline;
+  }
+</style>
+<style>
+  .file-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .file-checkbox {
+    margin-right: 10px;
+  }
+
+  .box-shadow {
+    box-shadow: 2px 2px 4px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #ffffff;
+  }
+</style>
+
+<div class="container mt-5 mb-5">
+  <div class="row">
+    <!-- Folder Panel -->
+    <div class="bg-white box-shadow col-4 border p-3">
+      <div id="folder-tree">
+        <% 
+        // Function to render a folder
+        function renderFolder(key, structure, parentKey = '') { 
+        %>
+        <div>
+          <% const currentPath = parentKey ? `${parentKey}/${key}` : key; %>
+          <button class="folder-button" data-folder="<%= currentPath %>">
+            <i class="fas fa-folder folder-icon"></i>
+            <strong><%= key %></strong>
+          </button>
+          <div class="sub-items" style="display: none;">
+            <% renderStructure(structure, currentPath); %>
+          </div>
+        </div>
+        <% } %>
+
+        <% 
+        // Function to render files in a folder
+        function renderFiles(files) { 
+        %>
+        <% files.forEach(file => { %>
+        <div class="file-item">
+          <input type="checkbox" class="file-checkbox" data-file="<%= file %>" style="display: none;" />
+          <span class="file-icon"><i class="fas fa-file"></i></span>
+          <span class="file-name" data-file="<%= file %>"><%= file %></span>
+        </div>
+        <% }) %>
+        <% } %>
+
+        <% 
+        // Function to render the folder structure recursively
+        function renderStructure(structure, parentKey = '') { 
+        %>
+        <% for (let key in structure) { %>
+        <% if (key === 'files') { %>
+        <% renderFiles(structure[key]); %>
+        <% } else if (Array.isArray(structure[key])) { %>
+        <% renderFiles(structure[key]); %>
+        <% } else { %>
+        <% renderFolder(key, structure[key], parentKey); %>
+        <% } %>
+        <% } %>
+        <% } %>
+
+        <% 
+        // Render the file structure if available
+        if (fileStructure) { 
+          renderStructure(fileStructure); 
+        } 
+        %>
+      </div>
+    </div>
+
+
+
+    <!-- File Viewer Panel -->
+    <div class="col-8">
+      <div class="bg-white box-shadow file-content" id="file-viewer">
+        <em>Select a file to preview its content here.</em>
+      </div>
+
+      <!-- Pick and send -->
+      <div>
+        <button id="pick-send-button" class="btn btn-primary mt-3">Pick & Send</button>
+
+        <button id="delete-button" class="btn btn-secondary mt-3">Delete</button>
+        <button id="cancel-delete-button" style="display: none;" class="btn btn-secondary mt-3">Cancel Delete</button>
+        <button id="send-button" style="display: none;" class="btn btn-primary mt-3">Send</button>
+        <p id="select-file-message" style="display: none; color: green;">Please select a file.</p>
+
+        <p id="delete-info" class="delete-info">Select file(s) to delete.</p>
+        <div id="send-options" class="mt-5" style="display: none;">
+          <button class="btn btn-success" id="send-via-email">Send via Email</button>
+          <button class="btn btn-info" id="send-earchive">Send to eArchive</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor("pageHeader") %>
+<%- include('../components/page-title.ejs', {title: 'See File' }) %>
+<%- contentFor("customJS") %>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const pickSendButton = document.getElementById("pick-send-button");
+    const selectFileMessage = document.getElementById("select-file-message");
+    const sendOptions = document.getElementById("send-options");
+
+    const deleteButton = document.getElementById("delete-button");
+    const cancelDeleteButton = document.getElementById("cancel-delete-button");
+    const deleteInfo = document.getElementById("delete-info");
+    const fileCheckboxes = document.querySelectorAll(".file-checkbox");
+    const sendButton = document.getElementById("send-button");
+    window.selectedFiles = [];
+
+    let selectedFilesForDelete = [];
+    let deleteActive = false;
+
+    let isActive = false; // Flag to track the toggle state
+
+    pickSendButton.addEventListener("click", () => {
+      if (isActive) {
+        // Reset everything to the default state
+        selectFileMessage.style.display = "none";
+        fileCheckboxes.forEach(checkbox => {
+          checkbox.style.display = "none";
+          checkbox.checked = false; // Uncheck all checkboxes
+        });
+        pickSendButton.innerText = "Pick & Send";
+        pickSendButton.classList.remove("btn-danger");
+        pickSendButton.classList.add("btn-primary");
+
+        isActive = false; // Update state
+      } else {
+        // Activate the "Pick & Send" functionality
+        selectFileMessage.style.display = "block";
+        fileCheckboxes.forEach(checkbox => {
+          checkbox.style.display = "inline-block";
+        });
+        pickSendButton.innerText = "Cancel";
+        pickSendButton.classList.remove("btn-primary");
+        pickSendButton.classList.add("btn-danger");
+
+
+        isActive = true; // Update state
+      }
+    });
+
+    fileCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener("change", () => {
+        const fileName = checkbox.dataset.file; // Get the file name from data attribute
+
+        if (checkbox.checked) {
+          // Add the file name to the selectedFiles array if not already present
+          if (!selectedFiles.includes(fileName)) {
+            selectedFiles.push(fileName);
+          }
+        } else {
+          // Remove the file name from the selectedFiles array
+          const index = selectedFiles.indexOf(fileName);
+          if (index > -1) {
+            selectedFiles.splice(index, 1);
+          }
+        }
+
+        const anyChecked = selectedFiles.length > 0; // Check if any files are selected
+        const isDeleteActive = cancelDeleteButton.style.display = 'none'
+
+        if (anyChecked) {
+          selectFileMessage.style.display = "none";
+          pickSendButton.style.display = "none";
+          sendButton.style.display = "block";
+        } else {
+          selectFileMessage.style.display = "block";
+          sendButton.style.display = "none";
+          pickSendButton.style.display = "block";
+          pickSendButton.innerText = "Cancel";
+          pickSendButton.classList.remove("btn-primary");
+          pickSendButton.classList.add("btn-danger");
+          sendOptions.style.display = "none";
+          pickSendButton.disabled = false;
+        }
+      });
+    });
+
+    // Attach sendButton click listener ONCE
+    sendButton.addEventListener("click", () => {
+      if (selectedFiles.length > 0) {
+        sendOptions.style.display = "block";
+        console.log("this is send button");
+        console.log("Selected files:", selectedFiles); // Log selected files for debugging
+      } else {
+        alert("No files selected.");
+      }
+    });
+
+    deleteButton.addEventListener("click", () => {
+      if (deleteActive) {
+        if (selectedFilesForDelete.length > 0) {
+          // Send DELETE request to backend
+          fetch('/admin/deletefile', {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                files: selectedFilesForDelete
+              }),
+            })
+            .then(response => {
+              if (response.ok) {
+                alert("Files deleted successfully.");
+                location.reload(); // Refresh the page to update the file tree
+              } else {
+                alert("Failed to delete files.");
+              }
+            })
+            .catch(error => {
+              console.error("Error deleting files:", error);
+            });
+        } else {
+          alert("No files selected.");
+        }
+      } else {
+        // Activate delete mode
+        deleteInfo.style.display = "block";
+        cancelDeleteButton.style.display = "inline-block";
+        fileCheckboxes.forEach(checkbox => {
+          checkbox.style.display = "inline-block";
+          checkbox.checked = false; // Reset checkboxes
+        });
+        deleteButton.textContent = "Confirm Delete";
+        deleteButton.classList.remove('btn-secondary');
+        deleteButton.classList.add('btn-danger');
+        deleteActive = true;
+      }
+    });
+
+    cancelDeleteButton.addEventListener("click", () => {
+      // Cancel delete mode
+      deleteInfo.style.display = "none";
+      cancelDeleteButton.style.display = "none";
+      fileCheckboxes.forEach(checkbox => {
+        checkbox.style.display = "none";
+        checkbox.checked = false;
+      });
+      deleteButton.textContent = "Delete";
+
+      deleteButton.classList.add('btn-secondary');
+      deleteButton.classList.remove('btn-danger');
+      deleteActive = false;
+      selectedFilesForDelete = [];
+    });
+
+    fileCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener("change", () => {
+        const fileName = checkbox.dataset.file;
+        if (checkbox.checked) {
+          if (!selectedFilesForDelete.includes(fileName)) {
+            selectedFilesForDelete.push(fileName);
+          }
+        } else {
+          selectedFilesForDelete = selectedFilesForDelete.filter(file => file !== fileName);
+        }
+
+        // Update delete button text based on selection
+        deleteButton.textContent = selectedFilesForDelete.length > 0 ? "Confirm Delete" : "Delete";
+      });
+    });
+  });
+</script>
+
+
+<script>
+  $(document).ready(function() {
+    // Toggle folders
+    $(".folder-button").on("click", function() {
+      const subItems = $(this).next(".sub-items");
+      subItems.toggle();
+    });
+
+    // Display file content
+    $('.file-name').on('click', function() {
+      const fileName = $(this).data('file');
+
+      $.ajax({
+        url: '/file-content',
+        method: 'GET',
+        xhrFields: {
+          responseType: 'blob' // Receive the response as a binary Blob
+        },
+        data: {
+          fileName
+        },
+        success: function(blob) {
+          const fileUrl = URL.createObjectURL(blob);
+          const mimeType = blob.type;
+
+          if (mimeType.startsWith('image/')) {
+            // Display image
+            $('#file-viewer').html(`<img src="${fileUrl}" alt="${fileName}" class="img-fluid" />`);
+          } else if (mimeType.startsWith('text/')) {
+            // Display text
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              $('#file-viewer').html(`<pre>${e.target.result}</pre>`);
+            };
+            reader.readAsText(blob);
+          } else {
+            // Handle other file types (e.g., PDFs)
+            $('#file-viewer').html(`<a href="${fileUrl}" target="_blank">Download ${fileName}</a>`);
+          }
+        },
+        error: function() {
+          $('#file-viewer').html('<strong>Error:</strong> Could not load file content.');
+        }
+      });
+    });
+  });
+</script>

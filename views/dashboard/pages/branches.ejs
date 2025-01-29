@@ -1,0 +1,337 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header pb-0">
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#userGroupModal"
+          >
+            Add branch
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive theme-scrollbar">
+            <table class="display" id="basic-1">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Contact person</th>
+                  <th>Address</th>
+                  <th>Email</th>
+                  <th>Phone number</th>
+                  <th>Registration number</th>
+                  <th>Created on</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div
+            class="modal fade"
+            id="userGroupModal"
+            tabindex="-1"
+            aria-labelledby="userGroupModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="userGroupModalLabel">
+                    Create Branch
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="name" class="form-label">Name</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="name"
+                          placeholder="e.g micro branch"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="person" class="form-label"
+                          >Contact Person</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="person"
+                          placeholder="e.g john doe"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="address" class="form-label"
+                          >Location Address</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="address"
+                          placeholder="e.g ak 18.345"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="email" class="form-label">Email</label>
+                        <input
+                          type="email"
+                          class="form-control"
+                          id="email"
+                          placeholder="e.g johndoe@mail.com"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="phone" class="form-label"
+                          >Phone number</label
+                        >
+                        <input
+                          type="tel"
+                          class="form-control"
+                          id="phone"
+                          placeholder="e.g 034739282339"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="reg" class="form-label"
+                          >Registration number</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="reg"
+                          placeholder="e.g R002"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                  <button type="button" id="btnSave" class="btn btn-primary">
+                    Create
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="modal fade"
+            id="removeUserGroupModal"
+            tabindex="-1"
+            aria-labelledby="removeUserGroupModalLabel"
+            aria-hidden="true"
+            data-bs-dismiss="modal"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="removeUserGroupModalLabel">
+                    Confirm Delete
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">Are you sure?</div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                  >
+                    No, cancel
+                  </button>
+                  <button
+                    type="submit"
+                    id="btnDeleteRecord"
+                    class="btn btn-danger"
+                  >
+                    Yes, delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor("pageHeader") %> <%- include('../components/page-title.ejs',
+{title: 'Branches'}) %> <%- contentFor("customJS") %>
+<script>
+  $(document).ready(function () {
+    $("#basic-1").DataTable();
+    getUserGroup();
+  });
+  let records = null;
+  let updateRecord = null;
+  let deleteRecord = null;
+  // save user group
+  $("#btnSave").click(() => {
+    let name = $("#name").val();
+    let person = $("#person").val();
+    let address = $("#address").val();
+    let phone = $("#phone").val();
+    let reg = $("#reg").val();
+    let email = $("#email").val();
+
+    if (name.trim().length < 1) return errorAlert("Name is required");
+    else if (person.trim().length < 1)
+      return errorAlert("Person contact is required");
+    else if (address.trim().length < 1)
+      return errorAlert("Address is required");
+    else if (email.trim().length < 1) return errorAlert("Email is required");
+    else if (phone.trim().length < 1) return errorAlert("Phone is required");
+    else if (reg.trim().length < 1)
+      return errorAlert("Registration is required");
+
+    let btnAction = $("#btnSave").text();
+    //  send user request
+    $.post(
+      "/admin/branches",
+      { name, person, address, email, phone, reg, btnAction,updateRecord },
+      function (data) {
+        if (data.statusCode != 200) return errorAlert(data.message);
+
+        $("#userGroupModal").modal("hide");
+        successAlert(data.message);
+        $("#name").val(null);
+        $("#person").val(null);
+        $("#address").val(null);
+        $("#phone").val(null);
+        $("#reg").val(null);
+        $("#email").val(null);
+        getUserGroup();
+      }
+    );
+  });
+
+  //   delete user group
+  $("#btnDeleteRecord").click(() => {
+    $.post("/admin/remove-branch", { deleteRecord }, (data) => {
+      if (data.statusCode == 404) return errorAlert(data.message);
+      console.log(data);
+      
+      successAlert(data.message);
+      $("#btnDeleteRecord").modal("hide");
+      getUserGroup();
+    })
+  })
+ 
+
+  //   get user group
+  function getUserGroup() {
+    $.get("/admin/retrieve-branches", function (data) {
+      if (data.statusCode === 200) {
+        records = data.records;
+        const tbody = $("#basic-1 tbody");
+        tbody.empty();
+        records.forEach((group) => {
+          const row = `
+            <tr>
+              <td>${group.name}</td>
+              <td>${group.contact_person}</td>
+              <td>${group.address}</td>
+              <td>${group.email}</td>
+              <td>${group.phone_number}</td>
+              <td>${group.reg_number}</td>
+              <td>${new Date(group.createdAt).toDateString()}</td>
+              <td>
+                <ul class="action">
+                  <li class="edit" data-value="${
+                    group.id
+                  }" data-bs-toggle="modal"
+              data-bs-target="#userGroupModal">
+                    <a href="#"><i class="icon-pencil-alt"></i></a>
+                  </li>
+                  <li class="delete" data-value="${
+                    group.id
+                  }" data-bs-toggle="modal"
+              data-bs-target="#removeUserGroupModal">
+                    <a href="#"><i class="icon-trash"></i></a>
+                  </li>
+                </ul>
+              </td>
+            </tr>
+          `;
+          tbody.append(row);
+        });
+        $("#basic-1").DataTable();
+      } else {
+        errorAlert(data.message);
+      }
+    });
+  }
+
+  $("#userGroupModal").on("show.bs.modal", (e) => {
+    const id = $(e.relatedTarget).data("value");
+    if (typeof id != "undefined") {
+      $("#userGroupModalLabel").text("Edit Branch");
+      $("#btnSave").text("Update");
+      // display selected data in the modal
+      let record = records.filter((record) => record.id == id);
+      if (record.length > 0) {
+        record = record[0];
+        $("#name").val(record.name);
+        $("#person").val(record.contact_person);
+        $("#address").val(record.address);
+        $("#phone").val(record.phone_number);
+        $("#reg").val(record.reg_number);
+        $("#email").val(record.email);
+        updateRecord = record.id;
+      }
+    } else {
+      $("#userGroupModalLabel").text("Create Branch");
+      $("#btnSave").text("Create");
+      $("#name").val(null);
+      $("#person").val(null);
+      $("#address").val(null);
+      $("#phone").val(null);
+      $("#reg").val(null);
+      $("#email").val(null);
+    }
+  });
+
+  $("#removeUserGroupModal").on("show.bs.modal", (e) => {
+    const id = $(e.relatedTarget).data("value");
+    deleteRecord = id;
+  });
+
+  getUserGroup();
+</script>

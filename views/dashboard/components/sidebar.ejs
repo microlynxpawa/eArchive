@@ -1,0 +1,137 @@
+<div class="sidebar-wrapper">
+  <div>
+    <div class="logo-wrapper">
+      <a href="/admin/dashboard"><img style="max-width: 80%" class="img-fluid for-light" src="/assets/images/logo/logo.png" alt="" /></a>
+      <div class="back-btn"><i data-feather="grid"></i></div>
+      <div class="toggle-sidebar icon-box-sidebar">
+        <i class="status_toggle middle sidebar-toggle" data-feather="grid"> </i>
+      </div>
+    </div>
+    <div class="logo-icon-wrapper">
+      <a href="/admin/dashboard">
+        <div class="icon-box-sidebar"><i data-feather="grid"></i></div>
+      </a>
+    </div>
+    <nav class="sidebar-main">
+      <div class="left-arrow" id="left-arrow">
+        <i data-feather="arrow-left"></i>
+      </div>
+      <div id="sidebar-menu">
+        <ul class="sidebar-links" id="simple-bar">
+          <li class="back-btn">
+            <div class="mobile-back text-end">
+              <span>Back</span><i class="fa fa-angle-right ps-2" aria-hidden="true"></i>
+            </div>
+          </li>
+          <li class="pin-title sidebar-list">
+            <h6>Pinned</h6>
+          </li>
+          <hr />
+          <% if(permissions.includes('view-upload')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" href="dashboard">
+              <i data-feather="home"></i>
+              <span class="lan-3">Dashboard</span>
+            </a>
+          </li>
+          <% } %>
+
+          <% if(permissions.includes('view-upload')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" href="see-file">
+              <i data-feather="file"></i>
+              <span>View Files</span>
+            </a>
+          </li>
+          <% } %>
+
+          <% if(permissions.includes('view-upload')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" href="file-upload">
+              <i data-feather="file-plus"></i>
+              <span>Upload Files</span>
+            </a>
+          </li>
+          <% } %>
+
+          <% if(permissions.includes('view-upload')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" href="audit-log">
+              <i data-feather="activity"></i>
+              <span>Activity</span>
+            </a>
+          </li>
+          <% } %>
+
+          <% if(permissions.includes('supervision-right')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" id="scan-button" href="scanFiles">
+              <i data-feather="printer"></i>
+              <span>Scan Files</span>
+            </a>
+          </li>
+          <% } %>
+
+          <% if(permissions.includes('view-upload')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" href="pick-send">
+              <i data-feather="send"></i>
+              <span>Pick and Send</span>
+            </a>
+          </li>
+          <% } %>
+
+          <% if(permissions.includes('supervision-right')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" id="access-control-button" href="">
+              <i data-feather="sliders"></i>
+              <span>Access Ctrl</span>
+            </a>
+          </li>
+          <% } %>
+
+          <% if(permissions.includes('supervision-right')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" href="user-management">
+              <i data-feather="users"></i>
+              <span>User Mgmnt</span>
+            </a>
+          </li>
+          <% } %>
+
+          <% if(permissions.includes('supervision-right')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" href="user-group">
+              <i data-feather="grid"></i>
+              <span>User Group</span>
+            </a>
+          </li>
+          <% } %>
+
+          <% if(permissions.includes('supervision-right')) { %>
+          <li class="sidebar-list">
+            <i class="fa fa-thumb-tack"></i>
+            <a class="sidebar-link sidebar-title link-nav" href="branches">
+              <i data-feather="git-branch"></i>
+              <span>Branches</span>
+            </a>
+          </li>
+          <% } %>
+
+        </ul>
+      </div>
+      <div class="right-arrow" id="right-arrow">
+        <i data-feather="arrow-right"></i>
+      </div>
+    </nav>
+  </div>
+</div>

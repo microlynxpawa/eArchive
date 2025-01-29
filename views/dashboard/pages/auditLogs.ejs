@@ -1,0 +1,45 @@
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card">
+          <div class="card-header pb-0">
+            <h3>User Login and Logout History</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive theme-scrollbar">
+              <table class="display" id="audit-log-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Login Time</th>
+                    <th>Logout Time</th>
+                    <th>Created At</th>
+                    <th>Updated At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% logs.forEach(log => { %>
+                    <tr>
+                      <td><%= log.name %></td>
+                      <td><%= log.loginTime ? log.loginTime.toLocaleString() : 'N/A' %></td>
+                      <td><%= log.logoutTime ? log.logoutTime.toLocaleString() : 'N/A' %></td>
+                      <td><%= log.createdAt.toLocaleString() %></td>
+                      <td><%= log.updatedAt.toLocaleString() %></td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <%- contentFor("pageHeader") %> 
+  <%- include('../components/page-title.ejs', {title: 'See File' }) %> 
+  <%- contentFor("customJS") %>
+    <script>
+    $("#audit-log-table").DataTable();
+  </script>
+  

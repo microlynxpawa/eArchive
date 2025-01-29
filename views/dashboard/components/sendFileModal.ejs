@@ -1,0 +1,211 @@
+<style>
+  /* Modal Overlay */
+  #send-files-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Modal Content */
+  .modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 60%;
+    margin: 20% auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1100;
+    position: relative;
+  }
+
+  /* Close Button */
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  /* Input Field and Button Styling */
+  #user-search-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  #user-search-input {
+    width: calc(100% - 50px);
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  #user-search-button {
+    margin-left: 10px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+
+  /* User List Section */
+  #user-list-container {
+    margin-top: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+  }
+
+  .user-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .user-item input {
+    margin-right: 10px;
+  }
+
+  #send-files-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+</style>
+
+<div id="send-files-modal">
+  <div class="modal-content">
+    <button class="close-button" id="close-send-files-modal">&times;</button>
+    <h2>Send Files to eArchive</h2>
+
+    <div id="user-search-container">
+      <input type="text" id="user-search-input" placeholder="Type username(s)" />
+      <button id="user-search-button">🔍 Search</button>
+    </div>
+
+    <div id="user-list-container">
+      <!-- Dynamically populated list of users -->
+    </div>
+
+    <button id="send-files-button" disabled>Send Files</button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const sendFilesModal = document.getElementById("send-files-modal");
+    const closeSendFilesModal = document.getElementById("close-send-files-modal");
+    const sendToEArchiveButton = document.getElementById("send-earchive");
+    const userSearchButton = document.getElementById("user-search-button");
+    const userSearchInput = document.getElementById("user-search-input");
+    const userListContainer = document.getElementById("user-list-container");
+    const sendFilesButton = document.getElementById("send-files-button");
+
+    let selectedUsers = []; // Array to store selected user IDs
+
+    // Open Modal
+    sendToEArchiveButton.addEventListener("click", () => {
+      sendFilesModal.style.display = "flex";
+    });
+
+    // Close Modal
+    closeSendFilesModal.addEventListener("click", () => {
+      sendFilesModal.style.display = "none";
+    });
+
+    // Search Users
+    userSearchButton.addEventListener("click", async () => {
+      const query = userSearchInput.value.trim();
+      if (!query) return alert("Please enter a username or search term.");
+
+      try {
+        const response = await fetch(`/admin/searchUsers?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error("Failed to fetch user list.");
+
+        const users = await response.json();
+
+        userListContainer.innerHTML = ""; // Clear previous results
+        users.forEach(user => {
+          const userItem = document.createElement("div");
+          userItem.classList.add("user-item");
+
+          userItem.innerHTML = `
+              <input type="checkbox" value="${user.username}" class="user-checkbox" />
+              <span>${user.username}</span>
+            `;
+
+          userListContainer.appendChild(userItem);
+        });
+
+        // Enable/Disable Send Button Based on Selection
+        const checkboxes = document.querySelectorAll(".user-checkbox");
+        checkboxes.forEach(checkbox => {
+          checkbox.addEventListener("change", () => {
+            selectedUsers = Array.from(checkboxes)
+              .filter(cb => cb.checked)
+              .map(cb => cb.value);
+
+            sendFilesButton.disabled = selectedUsers.length === 0;
+          });
+        });
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    });
+
+    // Send Files
+    sendFilesButton.addEventListener("click", async () => {
+      if (selectedUsers.length === 0) return alert("No users selected.");
+      const confirmation = confirm("Are you sure you want to Share file(s) ?");
+      if (!confirmation) {
+        // User clicked "Cancel," so stop the execution
+        return;
+      }
+      const users = selectedUsers;
+      const files = selectedFiles;
+
+      try {
+        const response = await fetch("/admin/sendFilesToUsers", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            users,
+            files
+          }),
+        });
+        console.log(users, files);
+        if (!response.ok) throw new Error("Failed to send files.");
+
+        alert("Files sent successfully.");
+        sendFilesModal.style.display = "none";
+      } catch (error) {
+        alert("Error: file not in the database" + error.message);
+        console.log(error);
+      }
+    });
+  });
+</script>

@@ -1,0 +1,255 @@
+<div class="container-fluid">
+  <div class="edit-profile">
+    <div class="row">
+      <div class="col-xl-4 col-lg-5">
+        <div class="card">
+          <div class="card-header pb-0">
+            <h4 class="card-title mb-0">My Profile</h4>
+            <div class="card-options">
+              <a
+                class="card-options-collapse"
+                href="#"
+                data-bs-toggle="card-collapse"
+                ><i class="fe fe-chevron-up"></i></a
+              ><a
+                class="card-options-remove"
+                href="#"
+                data-bs-toggle="card-remove"
+                ><i class="fe fe-x"></i
+              ></a>
+            </div>
+          </div>
+          <div class="card-body">
+            <form>
+              <div class="row mb-2">
+                <div class="profile-title">
+                  <div class="d-lg-flex d-block align-items-center">
+                    <div class="pp" style="position: relative;">
+                      <!-- <img class="img-70 rounded-circle" alt="" src="../assets/images/user/7.jpg" /> -->
+                      <img class="img-70 rounded-circle" alt="" src="<%= user.profilePicturePath ? '/profile-pictures/' + user.profilePicturePath.split(/\/|\\/).pop() : '../assets/images/user/7.jpg' %>" />
+                    
+                      <!-- Edit Profile Picture Text (hidden by default) -->
+                      <span id="edit-profile-text" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: none; background: rgba(0, 0, 0, 0.6); color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+                        Edit Profile Picture
+                      </span>
+                    
+                      <!-- Hidden file input to trigger file selection -->
+                      <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)" name="profilePicture">
+                    </div>
+
+                    <div class="flex-grow-1">
+                      <h3 class="mb-1 f-20 txt-primary">
+                        <a href="#"> <%= user.fullname %> </a>
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label f-w-500">Email Address</label>
+                <input
+                  class="form-control"
+                  value="<%= user.email %>"
+                  disabled
+                  placeholder="your-email@domain.com"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label f-w-500">Private Email Address</label>
+                <input
+                  class="form-control"
+                  value="<%= user.private_email %>"
+                  disabled
+                  placeholder="your-email@domain.com"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="username" class="form-label f-w-500"
+                  >Username</label
+                >
+                <input
+                  id="username"
+                  class="form-control"
+                  value="<%= user.username %>"
+                  disabled
+                  placeholder="your-email@domain.com"
+                />
+              </div>
+              <!-- <div class="mb-3">
+                  <label class="form-label f-w-500">Password</label>
+                  <input class="form-control" type="password" value="password">
+                </div> -->
+              <div class="mb-3">
+                <label for="branch" class="form-label f-w-500">Branch</label>
+                <input
+                  id="branch"
+                  value="<%= user.branch.name%>"
+                  disabled
+                  class="form-control"
+                  placeholder=""
+                />
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-8 col-lg-7">
+        <form class="card">
+          <div class="card-header pb-0">
+            <h4 class="card-title mb-0">Change Password</h4>
+            <div class="card-options">
+              <a
+                class="card-options-collapse"
+                href="#"
+                data-bs-toggle="card-collapse"
+                ><i class="fe fe-chevron-up"></i></a
+              ><a
+                class="card-options-remove"
+                href="#"
+                data-bs-toggle="card-remove"
+                ><i class="fe fe-x"></i
+              ></a>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="mb-3">
+                  <label for="oldPass" class="form-label f-w-500"
+                    >Old Password</label
+                  >
+                  <input
+                    id="oldPass"
+                    name="login[old_password]"
+                    class="form-control"
+                    type="password"
+                    placeholder="Provide old password"
+                  />
+                  <div class="show-hide" data-target="oldPass">
+                    <span class="show"> </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-6">
+                <div class="mb-3">
+                  <label for="newPass" class="form-label f-w-500"
+                    >New Password</label
+                  >
+                  <input
+                    id="newPass"
+                    name="login[new_password]"
+                    class="form-control"
+                    type="password"
+                    placeholder="Provide new password"
+                  />
+                  <div class="show-hide" data-target="newPass">
+                    <span class="show"> </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-6">
+                <div class="mb-3">
+                  <label for="newConfirmPass" class="form-label f-w-500"
+                    >Confirm Password</label
+                  >
+                  <input
+                    id="newConfirmPass"
+                    name="login[new_confirm_password]"
+                    class="form-control"
+                    type="password"
+                    placeholder="Confirm new password"
+                  />
+                  <div class="show-hide" data-target="newConfirmPass">
+                    <span class="show"> </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <button id="btnChangePass" class="btn btn-primary" type="submit">
+              Change password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor("pageHeader") %> <%- include('../components/page-title.ejs',
+{title: 'Edit profile' }) %> <%- contentFor("customJS") %>
+<script>
+  $("#btnChangePass").click((e) => {
+    e.preventDefault();
+
+    const oldPass = $("#oldPass").val();
+    const newPass = $("#newPass").val();
+    const confirmPass = $("#newConfirmPass").val();
+
+    if (oldPass.trim().length < 1) return errorAlert("Old password required");
+    else if (newPass.trim().length < 1)
+      return errorAlert("New password required");
+    else if (confirmPass.trim().length < 1)
+      return errorAlert("Confirm password required");
+
+    if (newPass != confirmPass) return errorAlert("New password mis-match");
+
+    $.post("/admin/update-password", { oldPass, newPass }, (data) => {
+        if(data.statusCode == 404)
+            return errorAlert(data.message)
+    
+        if(data.statusCode == 200){
+            successAlert(data.message)
+            setTimeout(e=>{
+                location.href = data.route;
+            }, 500)
+        }
+
+    });
+  });
+</script>
+
+<script>
+  // Show the "Edit Profile Picture" text on hover
+  const ppDiv = document.querySelector('.pp');
+  const editProfileText = document.getElementById('edit-profile-text');
+
+  ppDiv.addEventListener('mouseenter', () => {
+    editProfileText.style.display = 'block';
+  });
+
+  ppDiv.addEventListener('mouseleave', () => {
+    editProfileText.style.display = 'none';
+  });
+
+  // Trigger file input when clicking on the "Edit Profile Picture" text
+  editProfileText.addEventListener('click', () => {
+    document.getElementById('file-input').click();
+  });
+
+  // Handle file selection
+  function handleFileSelect(event) {
+    const file = event.target.files[0]; // Get the selected file
+
+    if (!file) return alert("No file selected.");
+
+    const formData = new FormData();
+    formData.append("profilePicture", file);
+
+    // Send the file to the server using fetch
+    fetch("/admin/upload-profile-picture", {
+      method: "POST",
+      body: formData,
+    })
+      .then(response => response.json())
+      .then(data => {
+        alert("File uploaded successfully!");
+      })
+      .catch(error => {
+        console.error("Error uploading file:", error);
+        alert("Error uploading file.");
+      });
+  }
+</script>

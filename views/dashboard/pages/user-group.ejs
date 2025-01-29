@@ -1,0 +1,270 @@
+<div class="container-fluid">
+  <div class="row">
+    <!-- Zero Configuration  Starts-->
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header pb-0">
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#userGroupModal"
+          >
+            Add group
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive theme-scrollbar">
+            <table class="display" id="basic-1">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Created by</th>
+                  <th>Created on</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div
+            class="modal fade"
+            id="userGroupModal"
+            tabindex="-1"
+            aria-labelledby="userGroupModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="userGroupModalLabel">
+                    Create User Group
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label"
+                      >Category Name</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="catName"
+                      placeholder="e.g financial"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label"
+                      >Description</label
+                    >
+                    <textarea
+                      class="form-control"
+                      id="catDescription"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                  <button type="button" id="btnSave" class="btn btn-primary">
+                    Create
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="modal fade"
+            id="removeUserGroupModal"
+            tabindex="-1"
+            aria-labelledby="removeUserGroupModalLabel"
+            aria-hidden="true" data-bs-dismiss="modal"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="removeUserGroupModalLabel">
+                    Confirm Delete
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">Are you sure?</div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                  >
+                    No, cancel
+                  </button>
+                  <button type="submit" id="btnDeleteRecord" class="btn btn-danger">
+                    Yes, delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Zero Configuration  Ends-->
+  </div>
+</div>
+
+<%- contentFor("pageHeader") %>
+<%- include('../components/page-title.ejs', {title: 'User Group'}) %>
+
+<%- contentFor("customJS") %>
+<script>
+  $(document).ready(function () {
+    $("#basic-1").DataTable();
+    getUserGroup();
+  });
+  let records = null;
+  let updateRecord = null;
+  let deleteRecord = null;
+
+  function errorAlert(message) {
+    Toast.fire({
+      icon: "error",
+      title: message,
+    });
+  }
+
+  function successAlert(message) {
+    Toast.fire({
+      icon: "success",
+      title: message,
+    });
+  }
+
+  // save user group
+  $("#btnSave").click(() => {
+    let catName = $("#catName").val();
+    let catDescription = $("#catDescription").val();
+
+    if (catName.trim().length < 1)
+      return errorAlert("Category name is required");
+    else if (catDescription.trim().length < 1)
+      return errorAlert("Category description is required");
+
+    let btnAction = $("#btnSave").text();
+    //  send user request
+    $.post(
+      "/admin/user-group",
+      { catName, catDescription, btnAction, updateRecord },
+      function (data) {
+        if (data.statusCode != 200) return errorAlert(data.message);
+
+        $("#userGroupModal").modal("hide");
+        successAlert(data.message);
+        $("#catName").val(null);
+        $("#catDescription").val(null);
+        getUserGroup();
+      }
+    );
+  });
+
+//   delete user group
+$('#btnDeleteRecord').click(()=>[
+    $.post('/admin/remove-user-group',{deleteRecord},(data)=>{
+        if(data.statusCode == 404)
+        return errorAlert(data.message)
+
+        successAlert(data.message)
+        $("#btnDeleteRecord").modal("hide");
+        getUserGroup();
+    })
+])
+
+  //   get user group
+  function getUserGroup() {
+    $.get("/admin/retrieve-user-group", function (data) {
+      if (data.statusCode === 200) {
+        records = data.records;
+        const tbody = $("#basic-1 tbody");
+        tbody.empty();
+        records.forEach((group) => {
+          const row = `
+          <tr>
+            <td>${group.id}</td>
+            <td>${group.name}</td>
+            <td>${group.description}</td>
+            <td>${group.created_by}</td>
+            <td>${new Date(group.createdAt).toDateString()}</td>
+            <td>
+              <ul class="action">
+                <li class="edit" data-value="${group.id}" data-bs-toggle="modal"
+            data-bs-target="#userGroupModal">
+                  <a href="#"><i class="icon-pencil-alt"></i></a>
+                </li>
+                <li class="delete" data-value="${
+                  group.id
+                }" data-bs-toggle="modal"
+            data-bs-target="#removeUserGroupModal">
+                  <a href="#"><i class="icon-trash"></i></a>
+                </li>
+              </ul>
+            </td>
+          </tr>
+        `;
+          tbody.append(row);
+        });
+        // Reinitialize the DataTable
+        //   $("#basic-1").DataTable().clear().destroy();
+        $("#basic-1").DataTable();
+      } else {
+        errorAlert(data.message);
+      }
+    });
+  }
+
+  $("#userGroupModal").on("show.bs.modal", (e) => {
+    const id = $(e.relatedTarget).data("value");
+    if (typeof id != "undefined") {
+      $("#userGroupModalLabel").text("Edit User Group");
+      $("#btnSave").text("Update");
+      // display selected data in the modal
+      let record = records.filter((record) => record.id == id);
+      if (record.length > 0) {
+        record = record[0];
+        $("#catName").val(record.name);
+        $("#catDescription").val(record.description);
+        updateRecord = record.id;
+      }
+    } else {
+      $("#userGroupModalLabel").text("Create User Group");
+      $("#btnSave").text("Create");
+      $("#catName").val(null);
+      $("#catDescription").val(null);
+    }
+  });
+
+  $("#removeUserGroupModal").on("show.bs.modal", (e) => {
+    const id = $(e.relatedTarget).data("value");
+    deleteRecord = id;
+  });
+
+  getUserGroup();
+</script>

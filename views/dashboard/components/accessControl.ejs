@@ -1,0 +1,201 @@
+<style>
+  /* Modal Overlay */
+  #access-control-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Transparent gray background */
+    display: none;
+    z-index: 1000;
+    /* Ensure it appears above all other elements */
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Modal Content */
+  .modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    width: 60%;
+    margin: 20% auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1100;
+    position: relative;
+  }
+
+  /* Close Button */
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  /* Input Field and Button Styling */
+  #username-search-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  #username-input {
+    width: calc(100% - 50px);
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  #search-button {
+    margin-left: 10px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+
+  /* Permissions Section */
+  #permissions-container {
+    margin-top: 20px;
+  }
+
+  .permission-item {
+    margin-bottom: 10px;
+  }
+</style>
+
+<div id="access-control-modal">
+  <div class="modal-content">
+    <button class="close-button" id="close-access-control-modal">&times;</button>
+    <h2>Access Control</h2>
+    <div id="username-search-container">
+      <input type="text" id="username-input" placeholder="Type username" />
+      <button id="search-button">🔍 Search</button>
+    </div>
+    <div id="user-info">
+      <!-- This section will display the user information dynamically -->
+    </div>
+    <div id="permissions-container" style="display: none;">
+      <p>Select or modify this user's permissions:</p>
+      <label class="permission-item">
+        <input type="checkbox" id="admin-rights" /> Admin Rights
+      </label>
+      <label class="permission-item">
+        <input type="checkbox" id="supervisor-rights" /> Supervisor Rights
+      </label>
+      <label class="permission-item">
+        <input type="checkbox" id="personnel-rights" /> Personnel Rights
+      </label>
+      <button id="update-permissions-button" class="btn btn-success">Update Permissions</button>
+    </div>
+
+    <div class="">
+      <div id="departmentPermission" class="button btn btn-danger mt-2">Edit Department permission</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const accessControlModal = document.getElementById("access-control-modal");
+    const closeAccessControlModal = document.getElementById("close-access-control-modal");
+    const accessControlButton = document.getElementById("access-control-button");
+    const searchButton = document.getElementById("search-button");
+    const usernameInput = document.getElementById("username-input");
+    const userInfo = document.getElementById("user-info");
+    const permissionsContainer = document.getElementById("permissions-container");
+    const updatePermissionsButton = document.getElementById("update-permissions-button");
+    const editDepartmentModal = document.getElementById("edit-department-modal");
+
+    const checkboxes = [
+      document.getElementById("admin-rights"),
+      document.getElementById("supervisor-rights"),
+      document.getElementById("personnel-rights")
+    ];
+
+    // Open Modal
+    accessControlButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      accessControlModal.style.display = "flex";
+    });
+
+    // Close Modal
+    closeAccessControlModal.addEventListener("click", () => {
+      accessControlModal.style.display = "none";
+    });
+
+    // Fetch User Info
+    searchButton.addEventListener("click", async () => {
+      const username = usernameInput.value.trim();
+      if (!username) return alert("Please enter a username.");
+
+      try {
+        const response = await fetch(`/admin/getUser/${username}`);
+        if (!response.ok) throw new Error("User not found.");
+
+        const user = await response.json();
+        userInfo.innerHTML = `<p>Username: <strong>${user.username}</strong></p>`;
+        permissionsContainer.style.display = "block";
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    });
+
+    // Ensure Only One Checkbox Can Be Checked
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) {
+          checkboxes.forEach((otherCheckbox) => {
+            if (otherCheckbox !== checkbox) {
+              otherCheckbox.checked = false; // Uncheck other checkboxes
+            }
+          });
+        }
+      });
+    });
+
+    // Update Permissions
+    updatePermissionsButton.addEventListener("click", async () => {
+      const confirmation = confirm("Are you sure you want to update permissions?");
+      if (!confirmation) {
+        // User clicked "Cancel," so stop the execution
+        return;
+      }
+      const username = usernameInput.value.trim();
+      const permissions = {
+        admin: document.getElementById("admin-rights").checked,
+        supervisor: document.getElementById("supervisor-rights").checked,
+        personnel: document.getElementById("personnel-rights").checked,
+      };
+
+      try {
+        const response = await fetch(`/admin/getUser/${username}/permissions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(permissions),
+        });
+
+        if (!response.ok) throw new Error("Failed to update permissions.");
+        alert("Permissions updated successfully.");
+        accessControlModal.style.display = "none";
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    });
+  });
+
+
+</script>

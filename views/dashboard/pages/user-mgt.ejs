@@ -1,0 +1,567 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header pb-0">
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#userGroupModal"
+          >
+            Add User
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive theme-scrollbar">
+            <table class="display" id="basic-1">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Private Email</th>
+                  <th>Branch</th>
+                  <th>Department</th>
+                  <th>Created on</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div
+            class="modal fade"
+            id="userGroupModal"
+            tabindex="-1"
+            aria-labelledby="userGroupModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="userGroupModalLabel">
+                    Create User
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <label for="fullname" class="form-label"
+                          >Full name</label
+                        >
+                        <input
+                          required
+                          type="text"
+                          class="form-control"
+                          id="fullname"
+                          placeholder="e.g john doe"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="branch" class="form-label">Branch</label>
+                        <select
+                          required
+                          id="branchSelect"
+                          class="form-select"
+                          aria-label="Default select example"
+                        >
+                          <option selected disabled>
+                            --- Select branch ----
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label for="user-group" class="form-label"
+                          >User group</label
+                        >
+                      
+                        <select
+                          required
+                          id="selectUserGroup"
+                          class="form-select"
+                          aria-label="Default select example"
+                        >
+                          <option selected disabled>
+                            --- Select group ----
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="email" class="form-label">Email</label>
+                        <input
+                          required
+                          type="email"
+                          class="form-control"
+                          id="email"
+                          placeholder="e.g doe@mail.com"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="pEmail" class="form-label"
+                          >Private email</label
+                        >
+                        <input
+                          required
+                          type="email"
+                          class="form-control"
+                          id="pEmail"
+                          placeholder="e.g john@mail.com"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="password" class="form-label"
+                          >Password</label
+                        >
+                        <input
+                          required
+                          type="password"
+                          class="form-control"
+                          id="password"
+                          placeholder="e.g 1234"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <label for="confirm_pass" class="form-label"
+                          >Confirm Password</label
+                        >
+                        <input
+                          required
+                          type="password"
+                          class="form-control"
+                          id="confirm_pass"
+                          placeholder="e.g 1234"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <label for="username" class="form-label"
+                          >Username</label
+                        >
+                        <input
+                          required
+                          type="text"
+                          class="form-control"
+                          id="username"
+                          placeholder="e.g john615"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-4">
+                    <h5>Permissions</h5>
+                  
+                    <div class="col">
+                      <div class="m-t-15 m-checkbox-inline">
+                        <!-- Existing permissions -->
+                        <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
+                          <input class="form-check-input" id="scanning" type="checkbox" />
+                          <label class="form-check-label" for="scanning">Scanning</label>
+                        </div>
+                        <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
+                          <input class="form-check-input" id="archiving" type="checkbox" />
+                          <label class="form-check-label" for="archiving">Archiving</label>
+                        </div>
+                        <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
+                          <input class="form-check-input" id="view-upload" type="checkbox" />
+                          <label class="form-check-label" for="view-upload">View/Upload</label>
+                        </div>
+                        <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
+                          <input class="form-check-input" id="supervision-right" type="checkbox" />
+                          <label class="form-check-label" for="supervision-right">Supervision Rights</label>
+                        </div>
+                        <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
+                          <input class="form-check-input" id="email-notification" type="checkbox" />
+                          <label class="form-check-label" for="email-notification">Email Notification</label>
+                        </div>
+                  
+                        <!-- New permissions -->
+                        <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
+                          <input class="form-check-input" id="canViewOwnFiles" type="checkbox" />
+                          <label class="form-check-label" for="canViewOwnFiles">Can View Own Files</label>
+                        </div>
+                        <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
+                          <input class="form-check-input" id="canViewBranchFiles" type="checkbox" />
+                          <label class="form-check-label" for="canViewBranchFiles">Can View Branch Files</label>
+                        </div>
+                        <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
+                          <input class="form-check-input" id="canViewDepartmentFiles" type="checkbox" />
+                          <label class="form-check-label" for="canViewDepartmentFiles">Can View Department Files</label>
+                        </div>
+                        <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
+                          <input class="form-check-input" id="can_delete" type="checkbox" />
+                          <label class="form-check-label" for="can_delete">Can Delate</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                  <button id="btnSave" type="button" class="btn btn-primary">
+                    Save changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="modal fade"
+            id="removeUserGroupModal"
+            tabindex="-1"
+            aria-labelledby="removeUserGroupModalLabel"
+            aria-hidden="true"
+            data-bs-dismiss="modal"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="removeUserGroupModalLabel">
+                    Confirm Delete
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">Are you sure?</div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                  >
+                    No, cancel
+                  </button>
+                  <button
+                    type="submit"
+                    id="btnDeleteRecord"
+                    class="btn btn-danger"
+                  >
+                    Yes, delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor("pageHeader") %> <%- include('../components/page-title.ejs',
+{title: 'User Management'}) %> <%- contentFor("customJS") %>
+<script>
+  $(document).ready(function () {
+    $("#basic-1").DataTable();
+    getBranches();
+    getUserGroup();
+    getUsers();
+  });
+  let records = null;
+  let updateRecord = null;
+  let deleteRecord = null;
+
+  function errorAlert(message) {
+    Toast.fire({
+      icon: "error",
+      title: message,
+    });
+  }
+
+  function successAlert(message) {
+    Toast.fire({
+      icon: "success",
+      title: message,
+    });
+  }
+
+  // save user group
+  $("#btnSave").click(() => {
+    let fullname = $("#fullname").val();
+    let branchSelect = $("#branchSelect").val();
+    let selectUserGroup = $("#selectUserGroup").val();
+    let email = $("#email").val();
+    let pEmail = $("#pEmail").val();
+    let password = $("#password").val();
+    let confirm_pass = $("#confirm_pass").val();
+    let username = $("#username").val();
+
+    // Email validation regex
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (fullname.trim().length < 1) return errorAlert("Full name is required");
+    else if (!branchSelect) return errorAlert("Branch is required");
+    else if (!selectUserGroup) return errorAlert("User group is required");
+    else if (email.trim().length < 1) return errorAlert("Email is required");
+    else if (pEmail.trim().length < 1)
+      return errorAlert("Private Email is required");
+    else if (!emailRegex.test(email) || !emailRegex.test(pEmail))
+      return errorAlert("Email invalid");
+    else if (username.trim().length < 1)
+      return errorAlert("Username is required");
+    else if (password.trim().length < 1)
+      return errorAlert("Password is required");
+    else if (confirm_pass.trim().length < 1)
+      return errorAlert("Confirm password is required");
+
+    if (password != confirm_pass) return errorAlert("Password do not match");
+
+    let checkedPermissions = [];
+    $(".form-check-input:checked").each(function () {
+      checkedPermissions.push(this.id);
+    });
+
+    if (checkedPermissions.length === 0) {
+      return errorAlert("At least one permission must be selected.");
+    } else {
+      console.log("Checked Permissions:", checkedPermissions);
+    }
+
+    let btnAction = $("#btnSave").text();
+
+    const userFormData = new FormData();
+    userFormData.append("fullname", fullname);
+    userFormData.append("username", username);
+    userFormData.append("branchId", branchSelect);
+    userFormData.append("userGroup", selectUserGroup);
+    userFormData.append("email", email);
+    userFormData.append("pEmail", pEmail);
+    userFormData.append("password", password);
+    userFormData.append("permissions", JSON.stringify(checkedPermissions));
+    userFormData.append("btnAction", btnAction);
+    userFormData.append("updateRecord", updateRecord);
+  
+    //  send user request
+    $.ajax({
+      url: "/admin/user-management",
+      type: "POST",
+      data: userFormData,
+      processData: false,
+      contentType: false,
+
+      
+      success: async function (data) {
+        if (data.statusCode == 500) {
+          errorAlert(data.message?.errors[0]?.message);
+          return;
+        }
+
+        successAlert(data.message);
+        $("#userGroupModal").modal("hide");
+        clearForm();
+        getUsers();
+      },
+      error: function (error) {
+        console.log(userFormData)
+        console.error("Error saving user:", error);
+        errorAlert("An error occurred while saving the user");
+      },
+    });
+  });
+
+  //   delete user group
+  $("#btnDeleteRecord").click(() => [
+    $.post("/admin/remove-user", { deleteRecord }, (data) => {
+      if (data.statusCode == 404) return errorAlert(data.message);
+
+      successAlert(data.message);
+      $("#btnDeleteRecord").modal("hide");
+      getUsers();
+    }),
+  ]);
+
+  //   get user group
+  function getBranches() {
+    $.get("/admin/retrieve-branches", function (data) {
+      if (data.statusCode === 200) {
+        const records = data.records;
+        const branchSelect = $("#branchSelect");
+        // Clear existing options except for the first one
+        branchSelect.find("option:not(:first)").remove();
+        // Loop through records and append new options
+        records.forEach((record) => {
+          branchSelect.append(
+            `<option value="${record.id}">${record.name}</option>`
+          );
+        });
+      } else {
+        console.error("Failed to retrieve branches");
+      }
+    });
+  }
+
+  function getUserGroup() {
+    $.get("/admin/retrieve-user-group", function (data) {
+      if (data.statusCode === 200) {
+        const records = data.records;
+        const selectUserGroup = $("#selectUserGroup");
+
+        // Clear existing options except for the first one
+        selectUserGroup.find("option:not(:first)").remove();
+        // Loop through records and append new options
+        records.forEach((record) => {
+          selectUserGroup.append(
+            `<option value="${record.id}">${record.name}</option>`
+          );
+        });
+      } else {
+        console.error("Failed to retrieve user group");
+      }
+    });
+  }
+
+  // retrieve user management
+  function getUsers() {
+    $.get("/admin/retrieve-users", function (data) {
+      if (data.statusCode === 200) {
+        records = data.records;
+        const tbody = $("#basic-1 tbody");
+        tbody.empty();
+        records.forEach((group) => {
+          const row = `
+            <tr>
+              <td>${group.fullname}</td>
+              <td>${group.username}</td>
+              <td>${group.email}</td>
+              <td>${group.private_email}</td>
+              <td>${group.branch.name}</td>
+              <td>${group.archive_category.name}</td>
+              <td>${new Date(group.createdAt).toDateString()}</td>
+              <td>
+                <ul class="action">
+                  <li class="edit" data-value="${
+                    group.id
+                  }" data-bs-toggle="modal"
+              data-bs-target="#userGroupModal">
+                    <a href="#"><i class="icon-pencil-alt"></i></a>
+                  </li>
+                  <li class="delete" data-value="${
+                    group.id
+                  }" data-bs-toggle="modal"
+              data-bs-target="#removeUserGroupModal">
+                    <a href="#"><i class="icon-trash"></i></a>
+                  </li>
+                </ul>
+              </td>
+            </tr>
+          `;
+          tbody.append(row);
+        });
+        $("#basic-1").DataTable();
+      } else {
+        errorAlert(data.message);
+      }
+    });
+  }
+
+  function clearForm() {
+    $("#scanning").prop("checked", false);
+    $("#archiving").prop("checked", false);
+    $("#view-upload").prop("checked", false);
+    $("#supervision-right").prop("checked", false);
+    $("#email-notification").prop("checked", false);
+    $("#canViewOwnFiles").prop("checked", false);
+    $("#canViewDepartmentFiles").prop("checked", false);
+    $("#canViewBranchFiles").prop("checked", false);
+    $("#can_delete").prop("checked", false);
+    $("#fullname").val(null);
+    $("#branchSelect").val(null);
+    $("#selectUserGroup").val(null);
+    $("#email").val(null);
+    $("#pEmail").val(null);
+    $("#username").val(null);
+    $("#password").val(null);
+    $("#confirm_pass").val(null);
+  }
+
+  $("#userGroupModal").on("show.bs.modal", (e) => {
+    const id = $(e.relatedTarget).data("value");
+
+    if (typeof id != "undefined") {
+      $("#userGroupModalLabel").text("Edit User");
+      $("#btnSave").text("Update");
+      // display selected data in the modal
+      let record = records.filter((record) => record.id == id);
+      if (record.length > 0) {
+        record = record[0];
+        $("#fullname").val(record.fullname);
+        $("#branchSelect").val(record.branch.id);
+        $("#selectUserGroup").val(record.archive_category.id);
+        $("#email").val(record.email);
+        $("#pEmail").val(record.private_email);
+        $("#username").val(record.username);
+        const permissions = JSON.parse(record.permissions);
+        if (permissions.includes("scanning"))
+          $("#scanning").prop("checked", true);
+        if (permissions.includes("archiving"))
+          $("#archiving").prop("checked", true);
+        if (permissions.includes("view-upload"))
+          $("#view-upload").prop("checked", true);
+        if (permissions.includes("supervision-right"))
+          $("#supervision-right").prop("checked", true);
+        if (permissions.includes("email-notification"))
+          $("#email-notification").prop("checked", true);
+        if (permissions.includes("canViewOwnFiles"))
+          $("#canViewOwnFiles").prop("checked", true);
+        if (permissions.includes("canViewDepartmentFiles"))
+          $("#canViewDepartmentFiles").prop("checked", true);
+        if (permissions.includes("canViewBranchFiles"))
+          $("#canViewBranchFiles").prop("checked", true);
+        if (permissions.includes("can_delete"))
+          $("#can_delete").prop("checked", true)
+
+        updateRecord = record.id;
+      }
+    } else {
+      $("#userGroupModalLabel").text("Create User");
+      $("#btnSave").text("Create");
+
+      clearForm();
+    }
+  });
+
+  $("#removeUserGroupModal").on("show.bs.modal", (e) => {
+    const id = $(e.relatedTarget).data("value");
+    deleteRecord = id;
+  });
+</script>

@@ -1,0 +1,28 @@
+{
+  "name": "microlyxe-archive",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app"
+  },
+  "keywords": [],
+  "author": "JOEL OSEI",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-fileupload": "^1.5.1",
+    "express-session": "^1.18.0",
+    "microlyxe-archive": "file:",
+    "mime": "^2.4.6",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.10.3",
+    "node-cron": "^3.0.3",
+    "nodemon": "^3.1.7",
+    "sequelize": "^6.37.3"
+  }
+}
