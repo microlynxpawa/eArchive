@@ -129,7 +129,7 @@
         <button id="send-button" style="display: none;" class="btn btn-primary mt-3">Send</button>
         <p id="select-file-message" style="display: none; color: green;">Please select a file.</p>
 
-        <p id="delete-info" class="delete-info">Select file(s) to delete.</p>
+        <p id="delete-info" class="delete-info" style="display: none;">Select file(s) to delete.</p>
         <div id="send-options" class="mt-5" style="display: none;">
           <button class="btn btn-success" id="send-via-email">Send via Email</button>
           <button class="btn btn-info" id="send-earchive">Send to eArchive</button>
@@ -184,7 +184,7 @@
         pickSendButton.innerText = "Cancel";
         pickSendButton.classList.remove("btn-primary");
         pickSendButton.classList.add("btn-danger");
-
+        deleteButton.style.display = "none"
 
         isActive = true; // Update state
       }
@@ -276,6 +276,7 @@
         deleteButton.textContent = "Confirm Delete";
         deleteButton.classList.remove('btn-secondary');
         deleteButton.classList.add('btn-danger');
+        pickSendButton.style.display = "none"
         deleteActive = true;
       }
     });
