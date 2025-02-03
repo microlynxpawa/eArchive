@@ -12,36 +12,35 @@ const deleteFiles = async (files) => {
   const missingFiles = [];
   const errors = [];
 
-  for (const file of files) {
+  for (const fileName of files) {
     try {
       // Fetch file record from the database
-      const fileRecord = await File.findOne({ where: { fileName: file } });
-
+      const fileRecord = await File.findOne({ where: { fileName } });
       if (!fileRecord) {
-        missingFiles.push(file);
-        console.warn(`File not found in database: ${file}`);
+        missingFiles.push(fileName);
+        console.warn(`File not found in database: ${fileName}`);
         continue;
       }
 
       // Construct the full path of the file
-      const filePath = Path.join(fileRecord.filePath, file);
+      const filePath = Path.join(fileRecord.filePath, fileName);
 
       if (!fs.existsSync(filePath)) {
-        missingFiles.push(file);
-        console.warn(`File does not exist at path: ${file}`);
+        missingFiles.push(fileName);
+        console.warn(`File does not exist at path: ${filePath}`);
         continue;
       }
 
       // Delete the file from the filesystem
-      fs.unlinkSync(filePath);
+      fs.unlinkSync(filePath);      
 
       // Delete the file record from the database
-      await File.destroy({ where: { fileName: file } });
+      await File.destroy({ where: { fileName } });
 
-      deletedFiles.push(file);
+      deletedFiles.push(fileName);
     } catch (err) {
-      console.error(`Error deleting file ${file}:`, err);
-      errors.push({ file, error: err.message });
+      console.error(`Error deleting file ${fileName}:`, err);
+      errors.push({ file: fileName, error: err.message });
     }
   }
 

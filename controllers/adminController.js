@@ -471,20 +471,20 @@ const departmentAccessControl = async (req, res) => {
 
 const deleteFile = async (req, res) => {
   try {
-    const { fileName } = req.body;
+    const { files } = req.body; // Expect an array of file names
 
-    if (!fileName) {
-      return res.status(400).json({ error: 'File name is required.' });
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({ error: 'Files array is required and must not be empty.' });
     }
 
-    const { deletedFiles, missingFiles, errors } = await deleteFiles([fileName]);
+    const { deletedFiles, missingFiles, errors } = await deleteFiles(files);
 
     if (errors.length > 0) {
       return res.status(500).json({ error: 'Failed to delete some files.', details: errors });
     }
 
     if (missingFiles.length > 0) {
-      return res.status(404).json({ error: `File "${fileName}" not found.` });
+      return res.status(404).json({ error: 'Some files not found.', details: missingFiles });
     }
 
     res.json({ success: true, deletedFiles });
@@ -492,7 +492,7 @@ const deleteFile = async (req, res) => {
     console.error('Error in /delete-file:', err);
     res.status(500).json({ error: 'Internal server error.' });
   }
-}
+};
 
 
 module.exports = {

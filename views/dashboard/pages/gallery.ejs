@@ -146,173 +146,240 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const pickSendButton = document.getElementById("pick-send-button");
-    const selectFileMessage = document.getElementById("select-file-message");
-    const sendOptions = document.getElementById("send-options");
+  // DOM elements
+  const pickSendButton = document.getElementById("pick-send-button");
+  const selectFileMessage = document.getElementById("select-file-message");
+  const sendOptions = document.getElementById("send-options");
+  const deleteButton = document.getElementById("delete-button");
+  const cancelDeleteButton = document.getElementById("cancel-delete-button");
+  const deleteInfo = document.getElementById("delete-info");
+  const fileCheckboxes = document.querySelectorAll(".file-checkbox");
+  const sendButton = document.getElementById("send-button");
 
-    const deleteButton = document.getElementById("delete-button");
-    const cancelDeleteButton = document.getElementById("cancel-delete-button");
-    const deleteInfo = document.getElementById("delete-info");
-    const fileCheckboxes = document.querySelectorAll(".file-checkbox");
-    const sendButton = document.getElementById("send-button");
-    window.selectedFiles = [];
+  // State variables
+  let selectedFilesForSending = [];
+  let selectedFilesForDeleting = [];
+  let isDeleteModeActive = false;
+  let isPickSendModeActive = false;
 
-    let selectedFilesForDelete = [];
-    let deleteActive = false;
+  // Initialize global state
+  window.selectedFiles = [];
 
-    let isActive = false; // Flag to track the toggle state
+  // Event listeners
+  pickSendButton.addEventListener("click", togglePickSendMode);
 
-    pickSendButton.addEventListener("click", () => {
-      if (isActive) {
-        // Reset everything to the default state
+  fileCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener("change", handleFileCheckboxChange);
+  });
+
+  sendButton.addEventListener("click", handleSendButtonClick);
+
+  deleteButton.addEventListener("click", toggleDeleteMode);
+
+  cancelDeleteButton.addEventListener("click", cancelDeleteMode);
+
+  // Functions
+
+  /**
+   * Toggles between normal and pick & send modes.
+   */
+  function togglePickSendMode() {
+    if (isPickSendModeActive) {
+      resetPickSendMode();
+    } else {
+      activatePickSendMode();
+    }
+  }
+
+  /**
+   * Resets the UI to the default state after canceling pick & send mode.
+   */
+  function resetPickSendMode() {
+    selectFileMessage.style.display = "none";
+    fileCheckboxes.forEach(checkbox => {
+      checkbox.style.display = "none";
+      checkbox.checked = false;
+    });
+    pickSendButton.innerText = "Pick & Send";
+    pickSendButton.classList.remove("btn-danger");
+    pickSendButton.classList.add("btn-primary");
+    deleteButton.style.display = "block";
+    isPickSendModeActive = false;
+  }
+
+  /**
+   * Activates the pick & send mode in the UI.
+   */
+  function activatePickSendMode() {
+    selectFileMessage.style.display = "block";
+    fileCheckboxes.forEach(checkbox => {
+      checkbox.style.display = "inline-block";
+      checkbox.checked = false;
+    });
+    pickSendButton.innerText = "Cancel file sending";
+    pickSendButton.classList.remove("btn-primary");
+    pickSendButton.classList.add("btn-danger");
+    deleteButton.style.display = "none";
+    isPickSendModeActive = true;
+  }
+
+  /**
+   * Handles changes in file checkboxes.
+   */
+  function handleFileCheckboxChange(event) {
+    const fileName = event.target.dataset.file;
+
+    if (isDeleteModeActive) {
+      updateSelectedFilesForDeleting(fileName, event.target.checked);
+    } else if (isPickSendModeActive) {
+      updateSelectedFilesForSending(fileName, event.target.checked);
+    }
+
+    updateUIBasedOnSelection();
+  }
+
+  /**
+   * Updates the list of files selected for sending.
+   * @param {string} fileName - The name of the file.
+   * @param {boolean} isChecked - Whether the checkbox is checked.
+   */
+  function updateSelectedFilesForSending(fileName, isChecked) {
+    if (isChecked) {
+      if (!selectedFilesForSending.includes(fileName)) {
+        selectedFilesForSending.push(fileName);
+      }
+    } else {
+      selectedFilesForSending = selectedFilesForSending.filter(file => file !== fileName);
+    }
+  }
+
+  /**
+   * Updates the list of files selected for deletion.
+   * @param {string} fileName - The name of the file.
+   * @param {boolean} isChecked - Whether the checkbox is checked.
+   */
+  function updateSelectedFilesForDeleting(fileName, isChecked) {
+    if (isChecked) {
+      if (!selectedFilesForDeleting.includes(fileName)) {
+        selectedFilesForDeleting.push(fileName);
+      }
+    } else {
+      selectedFilesForDeleting = selectedFilesForDeleting.filter(file => file !== fileName);
+    }
+    deleteButton.textContent = selectedFilesForDeleting.length > 0 ? "Confirm Delete" : "Delete";
+  }
+
+  /**
+   * Updates the UI based on the current selection of files.
+   */
+  function updateUIBasedOnSelection() {
+    if (isPickSendModeActive) {
+      const anyFilesSelected = selectedFilesForSending.length > 0;
+      if (anyFilesSelected) {
         selectFileMessage.style.display = "none";
-        fileCheckboxes.forEach(checkbox => {
-          checkbox.style.display = "none";
-          checkbox.checked = false; // Uncheck all checkboxes
-        });
-        pickSendButton.innerText = "Pick & Send";
-        pickSendButton.classList.remove("btn-danger");
-        pickSendButton.classList.add("btn-primary");
-
-        isActive = false; // Update state
+        pickSendButton.style.display = "none";
+        sendButton.style.display = "block";
       } else {
-        // Activate the "Pick & Send" functionality
         selectFileMessage.style.display = "block";
-        fileCheckboxes.forEach(checkbox => {
-          checkbox.style.display = "inline-block";
-        });
+        sendButton.style.display = "none";
+        pickSendButton.style.display = "block";
         pickSendButton.innerText = "Cancel";
         pickSendButton.classList.remove("btn-primary");
         pickSendButton.classList.add("btn-danger");
-        deleteButton.style.display = "none"
-
-        isActive = true; // Update state
+        sendOptions.style.display = "none";
+        pickSendButton.disabled = false;
       }
-    });
+    }
+  }
 
+  /**
+   * Handles the click event for the send button.
+   */
+  function handleSendButtonClick() {
+    if (selectedFilesForSending.length > 0) {
+      sendOptions.style.display = "block";
+      console.log("Selected files for sending:", selectedFilesForSending);
+    } else {
+      alert("No files selected.");
+    }
+  }
+
+  /**
+   * Toggles between normal and delete modes.
+   */
+  function toggleDeleteMode() {
+    if (isDeleteModeActive) {
+      performFileDeletion();
+    } else {
+      activateDeleteMode();
+    }
+  }
+
+  /**
+   * Activates the delete mode in the UI.
+   */
+  function activateDeleteMode() {
+    deleteInfo.style.display = "block";
+    cancelDeleteButton.style.display = "inline-block";
     fileCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener("change", () => {
-        const fileName = checkbox.dataset.file; // Get the file name from data attribute
+      checkbox.style.display = "inline-block";
+      checkbox.checked = false;
+    });
+    deleteButton.textContent = "Confirm Delete";
+    deleteButton.classList.remove('btn-secondary');
+    deleteButton.classList.add('btn-danger');
+    pickSendButton.style.display = "none";
+    isDeleteModeActive = true;
+  }
 
-        if (checkbox.checked) {
-          // Add the file name to the selectedFiles array if not already present
-          if (!selectedFiles.includes(fileName)) {
-            selectedFiles.push(fileName);
-          }
+  /**
+   * Sends a request to the server to delete selected files.
+   */
+  function performFileDeletion() {
+    if (selectedFilesForDeleting.length > 0) {      
+      fetch('/admin/delete-file', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          files: selectedFilesForDeleting
+        }),
+      })
+      .then(response => {
+        if (response.ok) {
+          alert("Files deleted successfully.");
+          location.reload(); // Refresh the page to update the file tree
         } else {
-          // Remove the file name from the selectedFiles array
-          const index = selectedFiles.indexOf(fileName);
-          if (index > -1) {
-            selectedFiles.splice(index, 1);
-          }
+          alert("Failed to delete files.");
         }
-
-        const anyChecked = selectedFiles.length > 0; // Check if any files are selected
-        const isDeleteActive = cancelDeleteButton.style.display = 'none'
-
-        if (anyChecked) {
-          selectFileMessage.style.display = "none";
-          pickSendButton.style.display = "none";
-          sendButton.style.display = "block";
-        } else {
-          selectFileMessage.style.display = "block";
-          sendButton.style.display = "none";
-          pickSendButton.style.display = "block";
-          pickSendButton.innerText = "Cancel";
-          pickSendButton.classList.remove("btn-primary");
-          pickSendButton.classList.add("btn-danger");
-          sendOptions.style.display = "none";
-          pickSendButton.disabled = false;
-        }
+      })
+      .catch(error => {
+        console.error("Error deleting files:", error);
       });
-    });
+    } else {
+      alert("No files selected.");
+    }
+  }
 
-    // Attach sendButton click listener ONCE
-    sendButton.addEventListener("click", () => {
-      if (selectedFiles.length > 0) {
-        sendOptions.style.display = "block";
-        console.log("this is send button");
-        console.log("Selected files:", selectedFiles); // Log selected files for debugging
-      } else {
-        alert("No files selected.");
-      }
-    });
-
-    deleteButton.addEventListener("click", () => {
-      if (deleteActive) {
-        if (selectedFilesForDelete.length > 0) {
-          // Send DELETE request to backend
-          fetch('/admin/deletefile', {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                files: selectedFilesForDelete
-              }),
-            })
-            .then(response => {
-              if (response.ok) {
-                alert("Files deleted successfully.");
-                location.reload(); // Refresh the page to update the file tree
-              } else {
-                alert("Failed to delete files.");
-              }
-            })
-            .catch(error => {
-              console.error("Error deleting files:", error);
-            });
-        } else {
-          alert("No files selected.");
-        }
-      } else {
-        // Activate delete mode
-        deleteInfo.style.display = "block";
-        cancelDeleteButton.style.display = "inline-block";
-        fileCheckboxes.forEach(checkbox => {
-          checkbox.style.display = "inline-block";
-          checkbox.checked = false; // Reset checkboxes
-        });
-        deleteButton.textContent = "Confirm Delete";
-        deleteButton.classList.remove('btn-secondary');
-        deleteButton.classList.add('btn-danger');
-        pickSendButton.style.display = "none"
-        deleteActive = true;
-      }
-    });
-
-    cancelDeleteButton.addEventListener("click", () => {
-      // Cancel delete mode
-      deleteInfo.style.display = "none";
-      cancelDeleteButton.style.display = "none";
-      fileCheckboxes.forEach(checkbox => {
-        checkbox.style.display = "none";
-        checkbox.checked = false;
-      });
-      deleteButton.textContent = "Delete";
-
-      deleteButton.classList.add('btn-secondary');
-      deleteButton.classList.remove('btn-danger');
-      deleteActive = false;
-      selectedFilesForDelete = [];
-    });
-
+  /**
+   * Cancels the delete mode and resets the UI.
+   */
+  function cancelDeleteMode() {
+    pickSendButton.style.display = "block";
+    deleteInfo.style.display = "none";
+    cancelDeleteButton.style.display = "none";
     fileCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener("change", () => {
-        const fileName = checkbox.dataset.file;
-        if (checkbox.checked) {
-          if (!selectedFilesForDelete.includes(fileName)) {
-            selectedFilesForDelete.push(fileName);
-          }
-        } else {
-          selectedFilesForDelete = selectedFilesForDelete.filter(file => file !== fileName);
-        }
-
-        // Update delete button text based on selection
-        deleteButton.textContent = selectedFilesForDelete.length > 0 ? "Confirm Delete" : "Delete";
-      });
+      checkbox.style.display = "none";
+      checkbox.checked = false;
     });
-  });
+    deleteButton.textContent = "Delete";
+    deleteButton.classList.add('btn-secondary');
+    deleteButton.classList.remove('btn-danger');
+    isDeleteModeActive = false;
+    selectedFilesForDeleting = [];
+  }
+});
 </script>
 
 
