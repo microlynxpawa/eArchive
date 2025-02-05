@@ -58,7 +58,6 @@ const dashboard = async (req, res) => {
       },
     ],
   });
-// const auths = await Auths.findOne({ where: { userId: userSession } });
 res.render("dashboard/pages/index", { layout: DashboardLayout, user });
 };
 

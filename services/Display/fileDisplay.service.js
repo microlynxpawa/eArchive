@@ -25,6 +25,7 @@ async function buildFolderStructure(basePath, userId) {
       folderParts[4],
     ];
 
+    const adminFolderPath = path.join(basePath);
     const adminPath = path.join(basePath, branch);
     const supervisorPath = path.join(adminPath, department);
     const userPath = path.join(supervisorPath, userFolder);
@@ -32,7 +33,7 @@ async function buildFolderStructure(basePath, userId) {
     const structure = {};
 
     if (auth.canViewBranchFiles) {
-      structure[branch] = traverse(adminPath);
+      structure["Admin"] = traverse(adminFolderPath);
     } else if (auth.canViewDepartmentFiles) {
       structure[department] = traverse(supervisorPath);
     } else if (auth.canViewOwnFiles) {
