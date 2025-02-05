@@ -18,7 +18,6 @@ const updateUserPermissions = async (username, roles) => {
 
   // Construct permission updates based on roles
   const updates = {};
-
   if (personnel) {
     Object.assign(updates, {
       scanning: true,
@@ -32,7 +31,6 @@ const updateUserPermissions = async (username, roles) => {
       can_delete: false,
     });
   }
-
   if (supervisor) {
     Object.assign(updates, {
       scanning: true,
@@ -46,7 +44,6 @@ const updateUserPermissions = async (username, roles) => {
       can_delete: false,
     });
   }
-
   if (admin) {
     Object.assign(updates, {
       scanning: true,
@@ -61,8 +58,16 @@ const updateUserPermissions = async (username, roles) => {
     });
   }
 
-  // Update only the relevant columns
-  await Auths.update(updates, { where: { userId: user.id } });
+  // Check if an authorizations record exists for the user
+  const authRecord = await Auths.findOne({ where: { userId: user.id } });
+
+  if (authRecord) {
+    // Update the existing record
+    await authRecord.update(updates);
+  } else {
+    // Create a new record
+    await Auths.create({ userId: user.id, ...updates });
+  }
 
   return "Permissions updated successfully.";
 };

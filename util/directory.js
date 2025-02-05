@@ -83,23 +83,6 @@ const createUserFolder = (branch, group, user) => {
   }
 };
 
-// Old function to create folder with sub folders
-// const createUserFolder = (branch, group, user) => {
-//   const userPath = path.join(DEFAULT_PATH, branch, group, user);
-//   if (!fs.existsSync(userPath)) {
-//     fs.mkdirSync(userPath, { recursive: true });
-//     const subfolders = ["MailBox", "Archive", "Scanned_Files"];
-//     subfolders.forEach((subfolder) => {
-//       const subfolderPath = path.join(userPath, subfolder);
-//       if (!fs.existsSync(subfolderPath)) {
-//         fs.mkdirSync(subfolderPath);
-//       }
-//     });
-//   }
-// };
-
-// More utility functions**************************************
-
 function storeFile(file, branch, department, userName, targetPath) {
   let filePath;
 

@@ -10,6 +10,8 @@ const {
   ensureUniqueFileName,
 } = require("../../util/directory");
 
+const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
+
 const uploadFileLogic = async (file, fileName, userId, askQuestion) => {
   if (!file) {
     throw new Error("No file uploaded");
@@ -31,33 +33,27 @@ const uploadFileLogic = async (file, fileName, userId, askQuestion) => {
   let folderPath = user.folderPath;
 
   if (!folderPath) {
-    const userAnswer = await askQuestion(
-      "No suited folder for this file exists! Do you want to create one? Y/N"
+    // Create a new folder path
+    folderPath = Path.join(
+      DEFAULT_PATH,
+      user.branch.dataValues.name,
+      user.archive_category.dataValues.name,
+      user.username
     );
-
-    if (["y", "yes"].includes(userAnswer.toLowerCase())) {
-      // Create a new folder path
-      folderPath = Path.join(
-        DEFAULT_PATH,
-        user.branch.dataValues.name,
-        user.archive_category.dataValues.name,
-        user.username
-      );
-
-      // Update the user's folderPath in the database
-      await user.update({ folderPath: folderPath });
-
-      // Ensure the directory exists and save the file
-      saveFileLogic(file, folderPath, fileName, user);
-    } else if (["n", "no"].includes(userAnswer.toLowerCase())) {
-      throw new Error("Upload canceled by user");
-    } else {
-      throw new Error("Invalid input");
+  
+    // Ensure the directory exists
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
     }
-  } else {
-    // If folderPath already exists, save the file directly
-    saveFileLogic(file, folderPath, fileName, user);
+  
+    // Update the user's folderPath in the database
+    await user.update({ folderPath: folderPath });
+  
+    console.log("Folder created successfully:", folderPath);
   }
+  
+  // If folderPath already exists or has been created, save the file directly
+  saveFileLogic(file, folderPath, fileName, user);
 
   return {
     message: "File uploaded successfully",

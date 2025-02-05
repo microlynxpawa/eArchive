@@ -27,7 +27,7 @@
             <h6>Pinned</h6>
           </li>
           <hr />
-          <% if(permissions.includes('view-upload')) { %>
+          <% if(auths && auths.view_upload) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="dashboard">
@@ -36,8 +36,7 @@
             </a>
           </li>
           <% } %>
-
-          <% if(permissions.includes('view-upload')) { %>
+          <% if(auths && auths.view_upload) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="see-file">
@@ -46,8 +45,7 @@
             </a>
           </li>
           <% } %>
-
-          <% if(permissions.includes('view-upload')) { %>
+          <% if(auths && auths.view_upload) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="file-upload">
@@ -56,8 +54,7 @@
             </a>
           </li>
           <% } %>
-
-          <% if(permissions.includes('view-upload')) { %>
+          <% if(auths && auths.view_upload) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="audit-log">
@@ -66,8 +63,7 @@
             </a>
           </li>
           <% } %>
-
-          <% if(permissions.includes('supervision-right')) { %>
+          <% if(auths && auths.supervision_right) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" id="scan-button" href="scanFiles">
@@ -76,8 +72,7 @@
             </a>
           </li>
           <% } %>
-
-          <% if(permissions.includes('view-upload')) { %>
+          <% if(auths && auths.view_upload) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="pick-send">
@@ -86,8 +81,7 @@
             </a>
           </li>
           <% } %>
-
-          <% if(permissions.includes('supervision-right')) { %>
+          <% if(auths && auths.supervision_right) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" id="access-control-button" href="">
@@ -96,8 +90,7 @@
             </a>
           </li>
           <% } %>
-
-          <% if(permissions.includes('supervision-right')) { %>
+          <% if(auths && auths.supervision_right) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="user-management">
@@ -106,8 +99,7 @@
             </a>
           </li>
           <% } %>
-
-          <% if(permissions.includes('supervision-right')) { %>
+          <% if(auths && auths.supervision_right) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="user-group">
@@ -116,8 +108,7 @@
             </a>
           </li>
           <% } %>
-
-          <% if(permissions.includes('supervision-right')) { %>
+          <% if(auths && auths.supervision_right) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="branches">
@@ -126,7 +117,6 @@
             </a>
           </li>
           <% } %>
-
         </ul>
       </div>
       <div class="right-arrow" id="right-arrow">

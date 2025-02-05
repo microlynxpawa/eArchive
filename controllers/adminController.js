@@ -2,6 +2,7 @@ const ArchiveCategory = require("../model/archiveCategory");
 const branch = require("../model/branch");
 const User = require("../model/user");
 const AuditLog = require("../model/auditLogs")
+const Auths = require("../model/authorizations")
 
 const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
 
@@ -40,7 +41,6 @@ const DashboardLayout = "dashboard/master";
 const login = (req, res) => {
   res.render("auth/master", { layout: "auth/master" });
 };
-
 const dashboard = async (req, res) => {
   const userSession = req.session.user;
   const user = await User.findOne({
@@ -58,7 +58,8 @@ const dashboard = async (req, res) => {
       },
     ],
   });
-  res.render("dashboard/pages/index", { layout: DashboardLayout, user });
+// const auths = await Auths.findOne({ where: { userId: userSession } });
+res.render("dashboard/pages/index", { layout: DashboardLayout, user });
 };
 
 const client = (req, res) => {

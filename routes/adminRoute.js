@@ -37,8 +37,9 @@ const {
   deleteFile,
 } = require("../controllers/adminController");
 const routeDectector = require("../middleware/routeDectector");
-const authUser  = require('../middleware/authMiddleware')
-const uploading = require("../util/multer.Config")
+const authUser  = require('../middleware/authMiddleware');
+const passAuths = require("../middleware/passAuths");
+const uploading = require("../util/multer.Config");
 
 const app = express.Router();
 const upload = multer()
@@ -55,7 +56,8 @@ app.post('/sign-in', signIn)
 
 app.use(authUser)
 
-app.use(getUserPermissions)
+app.use(getUserPermissions);
+app.use(passAuths)
 
 app.get("/dashboard", dashboard);
 app.get("/client", client);
