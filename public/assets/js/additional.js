@@ -25,30 +25,4 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize date and time on page load
   updateDateTime();
 
-  // Access Control Modal Elements
-  const departmentPermission = document.getElementById("departmentPermission");
-  const editDepartmentModal = document.getElementById("edit-department-modal");
-  const accessControlModal = document.getElementById("access-control-modal");
-
-  // Check if elements exist
-  if (!departmentPermission) {
-    console.error("Element with ID 'departmentPermission' not found.");
-  }
-  if (!editDepartmentModal) {
-    console.error("Element with ID 'edit-department-modal' not found.");
-  }
-  if (!accessControlModal) {
-    console.error("Element with ID 'access-control-modal' not found.");
-  }
-
-  // Open department access control modal
-  if (departmentPermission) {
-    departmentPermission.addEventListener("click", (e) => {
-      e.preventDefault();
-      accessControlModal.style.display = "none";
-      editDepartmentModal.style.display = "flex";
-    });
-  } else {
-    console.error("departmentPermission element is not available to attach event listener.");
-  }
 });

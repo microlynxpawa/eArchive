@@ -27,6 +27,26 @@ const AuditLog = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true, // Nullable because the user may not have logged out yet
     },
+    uploaded: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    viewed: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    deleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    department: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    branch: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
   { timestamps: true }
 );

@@ -1,9 +1,10 @@
 const fs = require('fs');
 const Path = require('path');
 const File = require('../../model/file');
+const AuditLog = require('../../model/auditLogs')
 
 // Service Function to Delete Files
-const deleteFiles = async (files) => {
+const deleteFiles = async (files, userId) => {
   if (!files || !Array.isArray(files)) {
     throw new Error('Files (array) are required.');
   }
@@ -32,7 +33,14 @@ const deleteFiles = async (files) => {
       }
 
       // Delete the file from the filesystem
-      fs.unlinkSync(filePath);      
+      fs.unlinkSync(filePath);
+
+      // Update audit log  
+      const userLogs = await AuditLog.findOne({
+        where: { userId: userId },
+        order: [['createdAt', 'DESC']] // Ensures the latest record is selected
+      });
+      await userLogs.update({deleted : true});
 
       // Delete the file record from the database
       await File.destroy({ where: { fileName } });

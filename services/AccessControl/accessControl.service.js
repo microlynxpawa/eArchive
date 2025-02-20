@@ -3,17 +3,21 @@ const Auths = require("../../model/authorizations");
 
 /**
  * Updates user permissions based on roles.
- * @param {string} username - The username of the user to update.
+ * @param {string|string[]} usernames - The username(s) of the user(s) to update.
  * @param {object} roles - Object containing admin, supervisor, and personnel roles.
  * @returns {Promise<string>} - A success message upon successful update.
  */
-const updateUserPermissions = async (username, roles) => {
+const updateUserPermissions = async (usernames, roles) => {
   const { admin, supervisor, personnel } = roles;
 
-  // Fetch the user
-  const user = await User.findOne({ where: { username } });
-  if (!user) {
-    throw new Error("User not found.");
+  // Ensure usernames is an array
+  const usernameArray = Array.isArray(usernames) ? usernames : [usernames];
+
+  // Fetch all users matching the provided usernames
+  const users = await User.findAll({ where: { username: usernameArray } });
+
+  if (!users.length) {
+    throw new Error("No users found.");
   }
 
   // Construct permission updates based on roles
@@ -29,6 +33,7 @@ const updateUserPermissions = async (username, roles) => {
       canViewDepartmentFiles: false,
       canViewBranchFiles: false,
       can_delete: false,
+      is_admin: false,
     });
   }
   if (supervisor) {
@@ -42,6 +47,7 @@ const updateUserPermissions = async (username, roles) => {
       canViewDepartmentFiles: true,
       canViewBranchFiles: false,
       can_delete: false,
+      is_admin: false,
     });
   }
   if (admin) {
@@ -55,21 +61,24 @@ const updateUserPermissions = async (username, roles) => {
       canViewDepartmentFiles: true,
       canViewBranchFiles: true,
       can_delete: true,
+      is_admin: true,
     });
   }
 
-  // Check if an authorizations record exists for the user
-  const authRecord = await Auths.findOne({ where: { userId: user.id } });
+  // Loop through each user and update their permissions
+  for (const user of users) {
+    const authRecord = await Auths.findOne({ where: { userId: user.id } });
 
-  if (authRecord) {
-    // Update the existing record
-    await authRecord.update(updates);
-  } else {
-    // Create a new record
-    await Auths.create({ userId: user.id, ...updates });
+    if (authRecord) {
+      // Update the existing record
+      await authRecord.update(updates);
+    } else {
+      // Create a new record
+      await Auths.create({ userId: user.id, ...updates });
+    }
   }
 
-  return "Permissions updated successfully.";
+  return `${users.length} user(s) permissions updated successfully.`;
 };
 
 module.exports = updateUserPermissions;

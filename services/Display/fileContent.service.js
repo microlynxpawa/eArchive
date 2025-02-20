@@ -3,13 +3,14 @@ const fs = require("fs");
 const Path = require("path");
 const mime = require("mime");
 const File = require("../../model/file");
+const AuditLog = require("../../model/auditLogs");
 
 /**
  * Fetch file content logic.
  * @param {string} fileName - The name of the file to retrieve.
  * @returns {Promise<{ fullPath: string, mimeType: string }>} - Object containing the full path and MIME type of the file.
  */
-const getFileContentLogic = async (fileName) => {
+const getFileContentLogic = async (fileName, userId) => {
   if (!fileName) {
     throw new Error("File name is missing");
   }
@@ -29,6 +30,13 @@ const getFileContentLogic = async (fileName) => {
 
   // Get the MIME type of the file
   const mimeType = mime.getType(fullPath);
+
+  // Update audit log
+  const userLogs = await AuditLog.findOne({
+    where: { userId: userId },
+    order: [["createdAt", "DESC"]], // Ensures the latest record is selected
+  });
+  await userLogs.update({ viewed: true });
 
   return { fullPath, mimeType };
 };

@@ -27,7 +27,7 @@
             <h6>Pinned</h6>
           </li>
           <hr />
-          <% if(auths && auths.view_upload) { %>
+          <% if(auths && !auths.is_disabled) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="dashboard">
@@ -45,7 +45,7 @@
             </a>
           </li>
           <% } %>
-          <% if(auths && auths.view_upload) { %>
+          <% if(auths && auths.archiving) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="file-upload">
@@ -54,25 +54,26 @@
             </a>
           </li>
           <% } %>
-          <% if(auths && auths.view_upload) { %>
+          <% if(auths && auths.is_admin) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="audit-log">
               <i data-feather="activity"></i>
-              <span>Activity</span>
+              <span>Audit Trail</span>
             </a>
           </li>
           <% } %>
-          <% if(auths && auths.supervision_right) { %>
+          <% if(auths && auths.scanning) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
-            <a class="sidebar-link sidebar-title link-nav" id="scan-button" href="scanFiles">
+            <a class="sidebar-link sidebar-title link-nav" id="scan-button" href="">
+              <!-- <a class="sidebar-link sidebar-title link-nav" id="scan-button" href="scanFiles"> -->
               <i data-feather="printer"></i>
               <span>Scan Files</span>
             </a>
           </li>
           <% } %>
-          <% if(auths && auths.view_upload) { %>
+          <% if(auths && !auths.is_disabled) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="pick-send">
@@ -81,7 +82,7 @@
             </a>
           </li>
           <% } %>
-          <% if(auths && auths.supervision_right) { %>
+          <% if(auths && auths.supervision_right || auths.is_admin) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" id="access-control-button" href="">
@@ -90,25 +91,25 @@
             </a>
           </li>
           <% } %>
-          <% if(auths && auths.supervision_right) { %>
+          <% if(auths && auths.is_admin) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="user-management">
               <i data-feather="users"></i>
-              <span>User Mgmnt</span>
+              <span>User Mgmt</span>
             </a>
           </li>
           <% } %>
-          <% if(auths && auths.supervision_right) { %>
+          <% if(auths && auths.is_admin) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="user-group">
               <i data-feather="grid"></i>
-              <span>User Group</span>
+              <span>Departments</span>
             </a>
           </li>
           <% } %>
-          <% if(auths && auths.supervision_right) { %>
+          <% if(auths && auths.is_admin) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="branches">
@@ -124,4 +125,21 @@
       </div>
     </nav>
   </div>
+
+
 </div>
+
+<script>
+      $("#scan-button").click(function(event) {
+      event.preventDefault();
+
+      // Remove any existing backdrop
+      $(".modal-backdrop").remove();
+
+      // Show the modal
+      $("#upgradeModal").modal("show");
+
+      });
+
+
+</script>

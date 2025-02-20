@@ -5,7 +5,7 @@ const removeBranchLogic = async (deleteRecord) => {
   if (!deleteRecord) {
     throw new Error("Delete id not found");
   }
-
+  
   // Find the branch by ID
   const isFound = await branch.findOne({ where: { id: deleteRecord } });
   if (!isFound) {
@@ -13,7 +13,7 @@ const removeBranchLogic = async (deleteRecord) => {
   }
 
   // Remove the corresponding directory
-  const isRemoved = removeDirectory(isFound.dataValues.slug);
+  const isRemoved = removeDirectory(isFound.dataValues.name);
   if (!isRemoved) {
     throw new Error("Failed to remove directory");
   }

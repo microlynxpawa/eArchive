@@ -10,7 +10,7 @@ const { createDefaultDirectory } = require("./util/directory");
 const session = require("express-session");
 const { fileContent } = require("./controllers/adminController.js");
 const cron = require("node-cron");
-const cleanTempFolders = require("./util/tempFolderCleanUp.js");
+const runCleanupTasks = require("./util/tempFolderCleanUp.js");
 
 const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
 // Define the default static folder for uploads
@@ -42,14 +42,29 @@ app.use(ejsLayout);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Schedule cleanup every minute for testing purposes
+// Schedule cleanup every day at midnight
 cron.schedule("0 0 * * *", () => {
-  console.log("Running scheduled cleanup task...");
-  cleanTempFolders();
+  console.log("Running scheduled cleanup tasks...");
+  runCleanupTasks();
 });
 
 app.get("/", (req, res) => res.redirect("/admin"));
 app.get("/file-content",fileContent);
+
+// pawa test 
+app.post('/dev-api/auth/logtoconsole', async (req, res) => {
+  try {
+    const text = req.body; // Access the parsed JSON body
+    console.log('pawa hit successfully. Text:', text);
+
+    // Send a response back to the client
+    res.status(200).send('Success');
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 app.use("/admin", adminRoute);
 
 

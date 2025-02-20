@@ -26,15 +26,15 @@ const authorizations = sequelize.define(
     },
     scanning: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
     },
     archiving: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      defaultValue: true,
     },
     supervision_right: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
     },
     email_notification: {
       type: DataTypes.BOOLEAN,
@@ -42,13 +42,13 @@ const authorizations = sequelize.define(
     },
     view_upload: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      defaultValue: true,
     },
-    can_delete: {
+    is_disabled: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    is_disabled: {
+    is_admin: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
@@ -56,6 +56,34 @@ const authorizations = sequelize.define(
   { timestamps: true }
 );
 
-authorizations.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" }); // Defines the relationship with cascade delete
+authorizations.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
+
+// Hook to update columns when is_admin is set to true
+authorizations.addHook("beforeUpdate", (authorization, options) => {
+  if (authorization.is_admin === true) {
+    authorization.canViewOwnFiles = true;
+    authorization.canViewDepartmentFiles = true;
+    authorization.canViewBranchFiles = true;
+    authorization.scanning = true;
+    authorization.archiving = true;
+    authorization.supervision_right = true;
+    authorization.email_notification = true;
+    authorization.view_upload = true;
+  }
+});
+
+// Hook for beforeCreate, in case the is_admin value is set during creation
+authorizations.addHook("beforeCreate", (authorization, options) => {
+  if (authorization.is_admin === true) {
+    authorization.canViewOwnFiles = true;
+    authorization.canViewDepartmentFiles = true;
+    authorization.canViewBranchFiles = true;
+    authorization.scanning = true;
+    authorization.archiving = true;
+    authorization.supervision_right = true;
+    authorization.email_notification = true;
+    authorization.view_upload = true;
+  }
+});
 
 module.exports = authorizations;

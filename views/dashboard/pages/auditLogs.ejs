@@ -1,45 +1,115 @@
 <div class="container-fluid">
-    <div class="row">
-      <div class="col-sm-12">
-        <div class="card">
-          <div class="card-header pb-0">
-            <h3>User Login and Logout History</h3>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive theme-scrollbar">
-              <table class="display" id="audit-log-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Login Time</th>
-                    <th>Logout Time</th>
-                    <th>Created At</th>
-                    <th>Updated At</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% logs.forEach(log => { %>
-                    <tr>
-                      <td><%= log.name %></td>
-                      <td><%= log.loginTime ? log.loginTime.toLocaleString() : 'N/A' %></td>
-                      <td><%= log.logoutTime ? log.logoutTime.toLocaleString() : 'N/A' %></td>
-                      <td><%= log.createdAt.toLocaleString() %></td>
-                      <td><%= log.updatedAt.toLocaleString() %></td>
-                    </tr>
-                  <% }); %>
-                </tbody>
-              </table>
-            </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header pb-0">
+          <h3>User Audit Trail</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive theme-scrollbar">
+            <table class="display" id="audit-log-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Department</th>
+                  <th>Branch</th>
+                  <th>Login Time</th>
+                  <th>Logout Time</th>
+                  <th>Viewed</th>
+                  <th>Uploaded</th>
+                  <th>Deleted</th>
+                </tr>
+              </thead>
+              <tbody id="audit-log-tbody">
+                <!-- Audit logs will be dynamically inserted here -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
   </div>
-  
+</div>
   <%- contentFor("pageHeader") %> 
-  <%- include('../components/page-title.ejs', {title: 'See File' }) %> 
+  <%- include('../components/page-title.ejs', {title: 'Audit trail' }) %> 
   <%- contentFor("customJS") %>
-    <script>
-    $("#audit-log-table").DataTable();
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('search-input');
+      const searchButton = document.getElementById('searchButton');
+  
+      // Function to fetch and display audit logs for a user
+      const fetchAndDisplayAuditLogs = async (userId) => {
+  try {
+    const response = await fetch(`audit-log/${encodeURIComponent(userId)}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch audit logs.');
+    }
+
+    const logs = await response.json();
+    const tbody = document.getElementById('audit-log-tbody');
+
+    // Destroy existing DataTable instance before updating the table
+    if ($.fn.DataTable.isDataTable('#audit-log-table')) {
+      $('#audit-log-table').DataTable().clear().destroy();
+    }
+
+    // Clear existing table rows
+    tbody.innerHTML = '';
+
+    // Populate the table with new audit logs
+    logs.forEach(log => {
+      const row = `
+        <tr>
+          <td>${log.name || 'N/A'}</td>
+          <td>${log.department || 'N/A'}</td>
+          <td>${log.branch || 'N/A'}</td>
+          <td>${log.loginTime ? new Date(log.loginTime).toLocaleString() : 'N/A'}</td>
+          <td>${log.logoutTime ? new Date(log.logoutTime).toLocaleString() : 'N/A'}</td>
+          <td>${log.viewed ? "Viewed" : 'No activity'}</td>
+          <td>${log.uploaded ? "Uploaded" : 'No activity'}</td>
+          <td>${log.deleted ? "Deleted" : 'No activity'}</td>
+        </tr>
+      `;
+      tbody.insertAdjacentHTML('beforeend', row);
+    });
+
+    // Reinitialize DataTable
+    $('#audit-log-table').DataTable();
+    
+  } catch (error) {
+    console.error('Error fetching audit logs:', error);
+    alert('Failed to fetch audit logs.');
+  }
+};
+
+      // Handle search button click
+      searchButton.addEventListener('click', async () => {
+        const username = searchInput.value.trim();
+  
+        if (!username) {
+          alert('Please enter a username.');
+          return;
+        }
+  
+        try {
+          const response = await fetch(`/admin/getUser/${encodeURIComponent(username)}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch user.');
+          }
+  
+          const userData = await response.json();
+  
+          // Display user details
+          alert(`User found: ${userData.fullname} (${userData.username})`);
+  
+          // Fetch and display audit logs for the user
+          fetchAndDisplayAuditLogs(userData.id);
+        } catch (error) {
+          console.error('Error fetching user:', error);
+          alert('User not found or an error occurred.');
+        }
+      });
+    });
   </script>
   

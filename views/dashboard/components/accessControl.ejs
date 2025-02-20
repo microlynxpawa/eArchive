@@ -89,19 +89,15 @@
     <div id="permissions-container" style="display: none;">
       <p>Select or modify this user's permissions:</p>
       <label class="permission-item">
-        <input type="checkbox" id="admin-rights" /> Admin Rights
+        <input type="checkbox" id="admin-rights" /> Admin Roles
       </label>
       <label class="permission-item">
-        <input type="checkbox" id="supervisor-rights" /> Supervisor Rights
+        <input type="checkbox" id="supervisor-rights" /> Supervisor Roles
       </label>
       <label class="permission-item">
-        <input type="checkbox" id="personnel-rights" /> Personnel Rights
+        <input type="checkbox" id="personnel-rights" /> User Roles
       </label>
-      <button id="update-permissions-button" class="btn btn-success">Update Permissions</button>
-    </div>
-
-    <div class="">
-      <div id="departmentPermission" class="button btn btn-danger mt-2">Edit Department permission</div>
+      <button id="update-permissions-button" class="btn btn-success d-block mt-3">Update Permissions</button>
     </div>
   </div>
 </div>
@@ -137,20 +133,38 @@
 
     // Fetch User Info
     searchButton.addEventListener("click", async () => {
-      const username = usernameInput.value.trim();
-      if (!username) return alert("Please enter a username.");
+  const username = usernameInput.value.trim();
+  console.log(typeof(username) + " username: " + username);
+  
+  if (!username) return alert("Please enter a username.");
 
-      try {
-        const response = await fetch(`/admin/getUser/${username}`);
-        if (!response.ok) throw new Error("User not found.");
+  try {
+    const response = await fetch(`/admin/searchUsers?usernames=${username}`);
+    if (!response.ok) throw new Error("User not found.");
 
-        const user = await response.json();
-        userInfo.innerHTML = `<p>Username: <strong>${user.username}</strong></p>`;
-        permissionsContainer.style.display = "block";
-      } catch (error) {
-        alert("Error: " + error.message);
-      }
-    });
+    const data = await response.json();
+    
+    console.log("Received data:", data); // Debugging line
+
+    userInfo.innerHTML = ""; // Clear previous results
+
+    // Handle both cases: single user (object) or multiple users (array)
+    if (Array.isArray(data)) {
+      // Multiple users received
+      data.forEach(user => {
+        userInfo.innerHTML += `<p>Username: <strong>${user.username}</strong></p>`;
+      });
+    } else {
+      // Single user received (object)
+      userInfo.innerHTML = `<p>Username: <strong>${data.username}</strong></p>`;
+    }
+
+    permissionsContainer.style.display = "block";
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+});
+
 
     // Ensure Only One Checkbox Can Be Checked
     checkboxes.forEach((checkbox) => {
@@ -174,19 +188,19 @@
       }
       const username = usernameInput.value.trim();
       const permissions = {
-        admin: document.getElementById("admin-rights").checked,
-        supervisor: document.getElementById("supervisor-rights").checked,
-        personnel: document.getElementById("personnel-rights").checked,
+      admin: document.getElementById("admin-rights").checked,
+      supervisor: document.getElementById("supervisor-rights").checked,
+      personnel: document.getElementById("personnel-rights").checked,
       };
 
       try {
-        const response = await fetch(`/admin/getUser/${username}/permissions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(permissions),
-        });
+      const response = await fetch(`/admin/searchUsers/permissions?usernames=${username}`, {
+      method: "POST",
+      headers: {
+      "Content-Type": "application/json",
+      },
+      body: JSON.stringify(permissions),
+      });
 
         if (!response.ok) throw new Error("Failed to update permissions.");
         alert("Permissions updated successfully.");
@@ -196,6 +210,4 @@
       }
     });
   });
-
-
 </script>

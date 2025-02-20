@@ -24,17 +24,17 @@ const {
   uploadFile,
   seeFile,
   auditLog,
+  auditLogView,
   GetUser,
   accessControl,
   uploadProfilePicture,
   getPickSend,
   getUsers,
-  sendFiles,
   getUsersByEmail,
   sendFilesEmail,
   getDepartment,
-  departmentAccessControl,
   deleteFile,
+  removeDep,
 } = require("../controllers/adminController");
 const routeDectector = require("../middleware/routeDectector");
 const authUser  = require('../middleware/authMiddleware');
@@ -43,8 +43,7 @@ const uploading = require("../util/multer.Config");
 
 const app = express.Router();
 const upload = multer()
-const User = require('../model/user')
-const bcrypt = require("bcryptjs");
+const User = require('../model/user');
 
 
 app.get("/", login);
@@ -70,7 +69,8 @@ app.get('/retrieve-users', retrieveUsers);
 app.get('/edit-profile', editProfile);
 app.get('/file-upload', userFileUpload);
 app.get('/logout', destroyUserSession);
-app.get("/audit-log", auditLog);
+app.get("/audit-log", auditLogView);
+app.get("/audit-log/:userId", auditLog);
 app.get("/getUser/:username", GetUser);
 app.get("/pick-send", getPickSend);
 app.get("/see-file",seeFile);
@@ -88,12 +88,11 @@ app.post('/remove-user', removeUser);
 app.post('/update-password', updatePassword);
 // app.post('/file-upload', saveUserFileUpload);
 app.post("/uploadFile", uploading.single('file'), uploadFile);
-app.post("/getUser/:username/permissions", accessControl);
+app.post("/searchUsers/permissions", accessControl);
 app.post("/upload-profile-picture", uploading.single('profilePicture'), uploadProfilePicture);
-app.post('/sendFilesToUsers', sendFiles);
 app.post('/sendFilesToUsers-email', sendFilesEmail);
-app.post("/updateDepartmentPermissions/:departmentName", departmentAccessControl);
 app.delete('/delete-file', deleteFile);
+app.delete('/delete-dep', removeDep);
 
 async function getUserPermissions(req, res,next){
   const userSessionId = req.session.user;

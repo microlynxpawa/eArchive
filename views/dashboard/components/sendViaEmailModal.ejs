@@ -99,6 +99,7 @@
   <div class="modal-content-email">
     <button class="close-button-email" id="close-send-files-modal-email">&times;</button>
     <h2>Send Files Via Email</h2>
+    <p class="text-secondary">Enter the eArchive user email address</p>
 
     <div id="email-search-container">
       <input type="text" id="email-search-input" placeholder="Type email(s)" />
@@ -117,7 +118,7 @@
  document.addEventListener("DOMContentLoaded", () => {
   const sendFilesModalEmail = document.getElementById("send-files-modal-email");
   const closeSendFilesModalEmail = document.getElementById("close-send-files-modal-email");
-  const sendViaEmailButton = document.getElementById("send-via-email");
+  const sendViaEmailButton = document.getElementById("send-button");
   const emailSearchButton = document.getElementById("email-search-button");
   const emailSearchInput = document.getElementById("email-search-input");
   const emailUserListContainer = document.getElementById("email-user-list-container");

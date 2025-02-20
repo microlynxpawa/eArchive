@@ -1,4 +1,48 @@
 <style>
+
+#full-screen-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#preview-content {
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+#close-preview {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: red;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.preview-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.preview-text {
+  font-size: 16px;
+  color: black;
+}
+
   .folder-icon {
     margin-right: 5px;
   }
@@ -57,6 +101,7 @@
 <div class="container mt-5 mb-5">
   <div class="row">
     <!-- Folder Panel -->
+    <% if (auths && auths.view_upload) { %>
     <div class="bg-white box-shadow col-4 border p-3">
       <div id="folder-tree">
         <% 
@@ -82,7 +127,7 @@
         <div class="file-item">
           <input type="checkbox" class="file-checkbox" data-file="<%= file %>" style="display: none;" />
           <span class="file-icon"><i class="fas fa-file"></i></span>
-          <span class="file-name" data-file="<%= file %>"><%= file %></span>
+          <span id="fileName" class="file-name" data-file="<%= file %>"><%= file %></span>
         </div>
         <% }) %>
         <% } %>
@@ -108,8 +153,7 @@
         %>
       </div>
     </div>
-
-
+    <% } %>
 
     <!-- File Viewer Panel -->
     <div class="col-8">
@@ -121,16 +165,13 @@
       <div>
         <button id="pick-send-button" class="btn btn-primary mt-3">Pick & Send</button>
 
+        <% if (auths && auths.is_admin) { %>
         <button id="delete-button" class="btn btn-secondary mt-3">Delete</button>
+        <% } %>
         <button id="cancel-delete-button" style="display: none;" class="btn btn-secondary mt-3">Cancel Delete</button>
-        <button id="send-button" style="display: none;" class="btn btn-primary mt-3">Send</button>
+        <button id="send-button" style="display: none;" class="btn btn-success mt-3">Send via Email</button>
         <p id="select-file-message" style="display: none; color: green;">Please select a file.</p>
-
         <p id="delete-info" class="delete-info" style="display: none;">Select file(s) to delete.</p>
-        <div id="send-options" class="mt-5" style="display: none;">
-          <button class="btn btn-success" id="send-via-email">Send via Email</button>
-          <button class="btn btn-info" id="send-earchive">Send to eArchive</button>
-        </div>
       </div>
     </div>
   </div>
@@ -169,7 +210,6 @@
     checkbox.addEventListener("change", handleFileCheckboxChange);
   });
 
-  sendButton.addEventListener("click", handleSendButtonClick);
 
   deleteButton.addEventListener("click", toggleDeleteMode);
 
@@ -200,7 +240,7 @@
     pickSendButton.innerText = "Pick & Send";
     pickSendButton.classList.remove("btn-danger");
     pickSendButton.classList.add("btn-primary");
-    deleteButton.style.display = "block";
+    deleteButton.style.display = "inline-block";
     isPickSendModeActive = false;
   }
 
@@ -275,11 +315,11 @@
       if (anyFilesSelected) {
         selectFileMessage.style.display = "none";
         pickSendButton.style.display = "none";
-        sendButton.style.display = "block";
+        sendButton.style.display = "inline-block";
       } else {
         selectFileMessage.style.display = "block";
         sendButton.style.display = "none";
-        pickSendButton.style.display = "block";
+        pickSendButton.style.display = "inline-block";
         pickSendButton.innerText = "Cancel";
         pickSendButton.classList.remove("btn-primary");
         pickSendButton.classList.add("btn-danger");
@@ -289,17 +329,7 @@
     }
   }
 
-  /**
-   * Handles the click event for the send button.
-   */
-  function handleSendButtonClick() {
-    if (selectedFilesForSending.length > 0) {
-      sendOptions.style.display = "block";
-      console.log("Selected files for sending:", selectedFilesForSending);
-    } else {
-      alert("No files selected.");
-    }
-  }
+
 
   /**
    * Toggles between normal and delete modes.
@@ -363,7 +393,7 @@
    * Cancels the delete mode and resets the UI.
    */
   function cancelDeleteMode() {
-    pickSendButton.style.display = "block";
+    pickSendButton.style.display = "inline-block";
     deleteInfo.style.display = "none";
     cancelDeleteButton.style.display = "none";
     fileCheckboxes.forEach(checkbox => {
@@ -379,51 +409,108 @@
 });
 </script>
 
-
 <script>
   $(document).ready(function() {
-    // Toggle folders
-    $(".folder-button").on("click", function() {
-      const subItems = $(this).next(".sub-items");
-      subItems.toggle();
-    });
+  // Toggle folders
+  $(".folder-button").on("click", function() {
+    const subItems = $(this).next(".sub-items");
+    subItems.toggle();
+  });
 
-    // Display file content
-    $('.file-name').on('click', function() {
-      const fileName = $(this).data('file');
+  // Display file content
+  $('.file-name').on('click', function() {
+    const fileName = $(this).data('file');
 
-      $.ajax({
-        url: '/file-content',
-        method: 'GET',
-        xhrFields: {
-          responseType: 'blob' // Receive the response as a binary Blob
-        },
-        data: {
-          fileName
-        },
-        success: function(blob) {
-          const fileUrl = URL.createObjectURL(blob);
-          const mimeType = blob.type;
+    $.ajax({
+      url: '/file-content',
+      method: 'GET',
+      xhrFields: {
+        responseType: 'blob' // Receive the response as a binary Blob
+      },
+      data: { fileName },
+      success: function(blob) {
+        const fileUrl = URL.createObjectURL(blob);
+        const mimeType = blob.type;
 
-          if (mimeType.startsWith('image/')) {
-            // Display image
-            $('#file-viewer').html(`<img src="${fileUrl}" alt="${fileName}" class="img-fluid" />`);
-          } else if (mimeType.startsWith('text/')) {
-            // Display text
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              $('#file-viewer').html(`<pre>${e.target.result}</pre>`);
-            };
-            reader.readAsText(blob);
-          } else {
-            // Handle other file types (e.g., PDFs)
-            $('#file-viewer').html(`<a href="${fileUrl}" target="_blank">Download ${fileName}</a>`);
-          }
-        },
-        error: function() {
-          $('#file-viewer').html('<strong>Error:</strong> Could not load file content.');
+        if (mimeType.startsWith('image/')) {
+          $('#file-viewer').html(`<img src="${fileUrl}" alt="${fileName}" class="img-fluid preview-image" />`);
+        } else if (mimeType.startsWith('text/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            $('#file-viewer').html(`<pre class="preview-text">${e.target.result}</pre>`);
+          };
+          reader.readAsText(blob);
+        } else {
+          $('#file-viewer').html(`<a href="${fileUrl}" target="_blank">Download ${fileName}</a>`);
         }
-      });
+      },
+      error: function() {
+        $('#file-viewer').html('<strong>Error:</strong> Could not load file content.');
+      }
     });
   });
+
+  // Open Full-Screen Preview
+  $(document).on('click', '#file-viewer', function() {
+    const content = $(this).html(); // Get current file content
+    $('body').append(`
+      <div id="full-screen-preview">
+        <div id="preview-content">${content}</div>
+        <button id="close-preview">Close</button>
+      </div>
+    `);
+  });
+
+  // Close Full-Screen Preview
+  $(document).on('click', '#close-preview', function() {
+    $('#full-screen-preview').remove();
+  });
+});
+
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  // File Search
+  const searchInput = document.getElementById('search-input');
+  const searchButton = document.getElementById('searchButton');
+  const fileSearchInfo = document.getElementById('fileSearchInfo');
+  const fileItems = document.querySelectorAll('.file-item'); // All file elements
+
+  // Show search info when input is clicked
+  searchInput.addEventListener('click', () => {
+    fileSearchInfo.style.display = 'inline-block';
+  });
+
+  // Search function
+  searchButton.addEventListener('click', () => {
+    const searchDate = searchInput.value.trim(); // Get user input
+    if (!searchDate) {
+      alert("Please enter a valid date in the format (d-m-yyyy)");
+      return;
+    }
+
+    // Filter and display matching files
+    filterFileStructure(searchDate);
+  });
+
+  // Function to filter files by date
+  function filterFileStructure(searchDate) {
+    fileItems.forEach(fileItem => {
+      const fileName = fileItem.querySelector('.file-name').getAttribute('data-file');
+
+      // Extract the date from the file name (assuming format: `name_d-m-yyyy.ext`)
+      const match = fileName.match(/_(\d{1,2}-\d{1,2}-\d{4})\./);
+      const fileDate = match ? match[1] : null;
+
+      // Show only files that match the search date
+      if (fileDate === searchDate) {
+        fileItem.style.display = "block";
+      } else {
+        fileItem.style.display = "none";
+      }
+    });
+  }
+});
+
 </script>

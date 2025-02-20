@@ -1,10 +1,10 @@
 const path = require("path");
 const fs = require("fs");
-const readline = require('readline');
-const AuditLog = require('../model/auditLogs');
+const readline = require("readline");
+const AuditLog = require("../model/auditLogs");
 const ArchiveCategory = require("../model/archiveCategory");
-
-
+const User = require("../model/user");
+const Branch = require("../model/branch");
 
 // default path
 const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
@@ -26,15 +26,10 @@ const createDefaultDirectory = () => {
     fs.mkdirSync(DEFAULT_PATH, { recursive: true });
 };
 
-const createBranchDirectory = (directory, subFolders) => {
+const createBranchDirectory = (directory) => {
   const branchPath = getDirectoryStoragePath(directory);
   if (!fs.existsSync(branchPath)) {
     fs.mkdirSync(branchPath, { recursive: true });
-    subFolders.forEach((singleFolder) => {
-      const subFolderPath = path.join(branchPath, singleFolder);
-      if (!fs.existsSync(subFolderPath))
-        fs.mkdirSync(subFolderPath, { recursive: true });
-    });
   }
 };
 
@@ -47,8 +42,8 @@ const updateBranchDirectory = (oldName, newName) => {
 const removeDirectory = (directory) => {
   try {
     // Normalize the path for consistency
-    const normalizedPath = path.normalize(directory);
-
+    const normalizedPath = path.join(DEFAULT_PATH, directory);
+    
     // Check if the directory exists
     if (fs.existsSync(normalizedPath)) {
       // Use `rmSync` (Node.js 14.14+ recommended) for more reliable deletion
@@ -86,13 +81,13 @@ const createUserFolder = (branch, group, user) => {
 function storeFile(file, branch, department, userName, targetPath) {
   let filePath;
 
-  if (targetPath && targetPath.trim() !== '') {
+  if (targetPath && targetPath.trim() !== "") {
     filePath = path.resolve(targetPath);
   } else {
-    const baseDir = path.resolve('uploads');
-    const branchFolder = branch.replace(/\s+/g, '_').toLowerCase();
-    const departmentFolder = department.replace(/\s+/g, '_').toLowerCase();
-    const userFolder = userName.replace(/\s+/g, '_').toLowerCase();
+    const baseDir = path.resolve("uploads");
+    const branchFolder = branch.replace(/\s+/g, "_").toLowerCase();
+    const departmentFolder = department.replace(/\s+/g, "_").toLowerCase();
+    const userFolder = userName.replace(/\s+/g, "_").toLowerCase();
 
     filePath = path.join(baseDir, branchFolder, departmentFolder, userFolder);
   }
@@ -106,7 +101,7 @@ function storeFile(file, branch, department, userName, targetPath) {
   fs.renameSync(file.path, savedFilePath);
 
   return savedFilePath;
-};
+}
 
 function askQuestion(query) {
   const rl = readline.createInterface({
@@ -120,7 +115,7 @@ function askQuestion(query) {
       resolve(answer);
     });
   });
-};
+}
 
 function transformPermissions(permissions) {
   // Define all possible permissions
@@ -134,6 +129,7 @@ function transformPermissions(permissions) {
     { key: "canViewDepartmentFiles", dbKey: "canViewDepartmentFiles" },
     { key: "canViewBranchFiles", dbKey: "canViewBranchFiles" },
     { key: "can_delete", dbKey: "can_delete" },
+    { key: "is_admin", dbKey: "is_admin" },
   ];
 
   // Transform the permissions array into an object with true/false values
@@ -141,12 +137,17 @@ function transformPermissions(permissions) {
     acc[dbKey] = permissions.includes(key);
     return acc;
   }, {});
-};
+}
 
 const ensureUniqueFileName = (fileName) => {
   const fileExtension = path.extname(fileName); // Get the file extension
   const baseName = path.basename(fileName, fileExtension); // Get the base name without the extension
-  const timestamp = Date.now(); // Get the current timestamp
+  let d = new Date();
+  const crrntDate = `${d.getUTCDate()}-${
+    d.getUTCMonth() + 1
+  }-${d.getUTCFullYear()}`;
+  //const timestamp = Date.now(); // Get the current timestamp
+  const timestamp = crrntDate;
   return `${baseName}_${timestamp}${fileExtension}`; // Return the modified file name
 };
 
@@ -154,9 +155,22 @@ const ensureUniqueFileName = (fileName) => {
 
 const createOrUpdateLoginRecord = async (userId, name) => {
   try {
+    // Find log record to update
     const unfinishedSession = await AuditLog.findOne({
       where: { userId, logoutTime: null },
     });
+
+    // Fetch user records
+    const user = await User.findOne({
+      where: { id: userId },
+      include: [
+        { model: Branch, attributes: ["name"] },
+        { model: ArchiveCategory, attributes: ["name"] },
+      ],
+    });
+
+    const branch = user.branch.dataValues.name;
+    const department = user.archive_category.dataValues.name;
 
     if (!unfinishedSession) {
       // Create a new record for this login
@@ -164,9 +178,13 @@ const createOrUpdateLoginRecord = async (userId, name) => {
         userId,
         name,
         loginTime: new Date(),
+        branch,
+        department,
       });
     } else {
-      console.warn("Unfinished session detected; skipping login record creation.");
+      console.warn(
+        "Unfinished session detected; skipping login record creation."
+      );
     }
   } catch (error) {
     console.error("Error creating or updating login record:", error);
@@ -191,7 +209,6 @@ const updateLogoutTime = async (userId) => {
   }
 };
 
-
 const getDefaultFolders = async () => {
   let folders = [];
   let categories = await ArchiveCategory.findAll();
@@ -203,7 +220,42 @@ const getDefaultFolders = async () => {
 
 const slugify = (text) => {
   return text.trim().toLocaleLowerCase().replaceAll(" ", "-");
-}
+};
+
+const moveFilesAndDeleteOldDirectory = (oldDirectoryPath, newDirectoryPath) => {
+  // Extract the last folder name from the old and new directory paths
+  const oldLastFolder = path.basename(oldDirectoryPath);
+  const newLastFolder = path.basename(newDirectoryPath);
+
+  // Construct the full paths for the last folders
+  const oldLastFolderPath = path.dirname(oldDirectoryPath);
+  const newLastFolderPath = path.dirname(newDirectoryPath);
+
+  // Check if the old directory exists
+  if (fs.existsSync(oldDirectoryPath)) {
+    // Ensure the new directory exists
+    if (!fs.existsSync(newDirectoryPath)) {
+      fs.mkdirSync(newDirectoryPath, { recursive: true });
+    }
+
+    // Read the contents of the old directory
+    const files = fs.readdirSync(oldDirectoryPath);
+
+    // Move each file to the new directory
+    files.forEach((file) => {
+      const oldFilePath = path.join(oldDirectoryPath, file);
+      const newFilePath = path.join(newDirectoryPath, file);
+      fs.renameSync(oldFilePath, newFilePath);
+    });
+
+    // Delete the old directory after moving the files
+    fs.rmdirSync(oldDirectoryPath);
+
+    console.log(`Files moved from ${oldDirectoryPath} to ${newDirectoryPath}`);
+  } else {
+    console.error(`Old directory does not exist: ${oldDirectoryPath}`);
+  }
+};
 
 
 module.exports = {
@@ -221,5 +273,6 @@ module.exports = {
   updateLogoutTime,
   ensureUniqueFileName,
   getDefaultFolders,
-  slugify
+  slugify,
+  moveFilesAndDeleteOldDirectory
 };

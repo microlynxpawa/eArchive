@@ -4,7 +4,7 @@ const ArchiveCategory = require("../../model/archiveCategory");
 const branch = require("../../model/branch");
 const User = require("../../model/user");
 const Auths = require("../../model/authorizations");
-const { createUserFolder, transformPermissions } = require("../../util/directory"); // Utility function for creating folders
+const { createUserFolder, transformPermissions, moveFilesAndDeleteOldDirectory } = require("../../util/directory"); // Utility function for creating folders
 
 const DEFAULT_PATH = "C:/e-archiveUploads"; // Default path for folders
 
@@ -66,6 +66,8 @@ async function createOrUpdateUser({
         throw new Error("Record not found");
       }
 
+      const oldUserFolderPath = isFound.folderPath
+      
       await User.update(
         {
           username,
@@ -81,9 +83,9 @@ async function createOrUpdateUser({
         { where: { id: updateRecord } }
       );
 
-      // Create user folder
-      createUserFolder(userBranch.dataValues.slug, group.dataValues.name, username);
-
+      const updatingUserFolderPath = folderPath
+      
+      moveFilesAndDeleteOldDirectory(oldUserFolderPath, updatingUserFolderPath)
       userId = updateRecord;
       console.log("User updated successfully.");
     }

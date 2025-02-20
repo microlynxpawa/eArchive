@@ -8,6 +8,9 @@ INSERT INTO `archive_categories` (`id`, `name`, `description`, `created_by`, `cr
 INSERT INTO `branches` (`id`, `slug`, `name`, `contact_person`, `address`, `email`, `phone_number`, `reg_number`, `created_by`, `createdAt`, `updatedAt`) VALUES
 (4, 'asokwa-branch', 'Asokwa Branch', 'Acquah Osei Joel', 'CQ84 Algiers ST, AK-196-2248', 'oseijoel6111@gmail.com', '0206036178', 'R00002', ' ', '2024-08-28 16:05:50', '2024-10-18 15:01:59');
 
+INSERT INTO `branch_departments` (`id`, `branchId`,`departmentId`, `branchName`, `departmentName`,`departmentFolderPath`, `createdAt`, `updatedAt`) VALUES
+(1, 4, 3, 'Asokwa Branch', 'IT', 'C:\\e-archiveUploads\\Asokwa Branch\\IT', NOW(), NOW() );
+
 INSERT INTO `users` (
   `username`, `fullname`, `email`, `private_email`, `password`, `permissions`, `branchId`, `userGroupId`, `createdAt`, `updatedAt`
 ) VALUES (

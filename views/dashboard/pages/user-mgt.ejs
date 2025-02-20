@@ -39,7 +39,7 @@
             aria-hidden="true"
           >
             <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
+              <div class="modal-content" style="width:90%;">
                 <div class="modal-header">
                   <h5 class="modal-title" id="userGroupModalLabel">
                     Create User
@@ -86,7 +86,7 @@
                       </div>
                       <div class="col-md-6">
                         <label for="user-group" class="form-label"
-                          >User group</label
+                          >Department</label
                         >
                       
                         <select
@@ -96,7 +96,7 @@
                           aria-label="Default select example"
                         >
                           <option selected disabled>
-                            --- Select group ----
+                            --- Select department ----
                           </option>
                         </select>
                       </div>
@@ -192,7 +192,7 @@
                         </div>
                         <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
                           <input class="form-check-input" id="view-upload" type="checkbox" />
-                          <label class="form-check-label" for="view-upload">View/Upload</label>
+                          <label class="form-check-label" for="view-upload">View Uploads</label>
                         </div>
                         <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
                           <input class="form-check-input" id="supervision-right" type="checkbox" />
@@ -201,8 +201,7 @@
                         <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
                           <input class="form-check-input" id="email-notification" type="checkbox" />
                           <label class="form-check-label" for="email-notification">Email Notification</label>
-                        </div>
-                  
+                        </div>                  
                         <!-- New permissions -->
                         <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
                           <input class="form-check-input" id="canViewOwnFiles" type="checkbox" />
@@ -217,8 +216,8 @@
                           <label class="form-check-label" for="canViewDepartmentFiles">Can View Department Files</label>
                         </div>
                         <div class="form-check form-check-inline checkbox checkbox-dark mb-0">
-                          <input class="form-check-input" id="can_delete" type="checkbox" />
-                          <label class="form-check-label" for="can_delete">Can Delate</label>
+                          <input class="form-check-input" id="is_admin" type="checkbox" />
+                          <label class="form-check-label" for="is_admin">Is Admin</label>
                         </div>
                       </div>
                     </div>
@@ -503,7 +502,7 @@
     $("#canViewOwnFiles").prop("checked", false);
     $("#canViewDepartmentFiles").prop("checked", false);
     $("#canViewBranchFiles").prop("checked", false);
-    $("#can_delete").prop("checked", false);
+    $("#is_admin").prop("checked", false);
     $("#fullname").val(null);
     $("#branchSelect").val(null);
     $("#selectUserGroup").val(null);
@@ -547,8 +546,8 @@
           $("#canViewDepartmentFiles").prop("checked", true);
         if (permissions.includes("canViewBranchFiles"))
           $("#canViewBranchFiles").prop("checked", true);
-        if (permissions.includes("can_delete"))
-          $("#can_delete").prop("checked", true)
+        if (permissions.includes("is_admin"))
+          $("#is_admin").prop("checked", true);
 
         updateRecord = record.id;
       }

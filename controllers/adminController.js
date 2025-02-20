@@ -1,9 +1,8 @@
 const ArchiveCategory = require("../model/archiveCategory");
 const branch = require("../model/branch");
 const User = require("../model/user");
-const AuditLog = require("../model/auditLogs")
-const Auths = require("../model/authorizations")
-
+const AuditLog = require("../model/auditLogs");
+const BranchDepartment = require("../model/branch-department")
 const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
 
 const {
@@ -28,11 +27,10 @@ const getUserByUsername = require("../services/AccessControl/getUser.service");
 const updateUserPermissions = require("../services/AccessControl/accessControl.service");
 const fetchUsersByQuery = require("../services/Share/getMultipleUsers.service");
 const fetchUsersByEmail = require("../services/Share/fetchUsersViaEmails.service");
-const sendFilesToUsers = require("../services/Share/sendFiles.service");
 const sendFilesViaEmail = require("../services/Share/sendViaEmal.service");
 const getDepartmentByName = require("../services/AccessControl/getDepartment");
-const updateDepartmentPermissions = require("../services/AccessControl/departmentAccessControl");
 const deleteFiles = require("../services/Delete/deleteFile.service");
+const handleDeleteDepartment = require("../services/Branch/removeDepartment.service")
 
 const DashboardLayout = "dashboard/master";
 
@@ -41,6 +39,7 @@ const DashboardLayout = "dashboard/master";
 const login = (req, res) => {
   res.render("auth/master", { layout: "auth/master" });
 };
+
 const dashboard = async (req, res) => {
   const userSession = req.session.user;
   const user = await User.findOne({
@@ -123,16 +122,29 @@ const retrieveUsers = async (req, res) => {
   }
 };
 
-const auditLog = async (req, res) => {
+const auditLogView = async (req, res) => {
   try {
-    const userId = req.session.user;
-
-    const logs = await fetchAuditLogsForUser(userId);
-
-    res.render("dashboard/pages/auditLogs", { logs, layout: DashboardLayout });
+    res.render("dashboard/pages/auditLogs", { layout: DashboardLayout });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+const auditLog = async (req, res) => {
+  
+   try {
+    const { userId } = req.params; // Extract userId from URL parameters
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required.' });
+    }
+
+    const logs = await fetchAuditLogsForUser(userId); // Call the service function
+    
+    res.json(logs); // Return the audit logs as JSON
+  } catch (error) {
+    next(error); // Pass errors to the global error handler
   }
 };
 
@@ -154,20 +166,45 @@ const getPickSend = async (req,res)=>{
 
 const getUsers = async (req, res) => {
   try {
-    const query = req.query.q;
-    const users = await fetchUsersByQuery(query);
+    const usernamesString = req.query.usernames; // Expecting a single string
+    
+    const users = await fetchUsersByQuery(usernamesString);
     res.json(users);
   } catch (error) {
-    console.error("Error fetching users:", error.message);
-    res.status(500).json({ error: error.message || "Internal server error." });
+    res.status(400).json({ error: error.message });
   }
 };
 
 const retrieveBranches = async (req, res) => {
-  // retrieve records
-  const records = await branch.findAll();
-  res.json({ message: "records", statusCode: 200, records });
+  try {
+    // Retrieve all branches with their associated department names
+    const records = await branch.findAll({
+      include: [
+        {
+          model: BranchDepartment,
+          attributes: ["departmentName"],
+        },
+      ],
+    });
+
+    // Format the data to include concatenated department names
+    const formattedRecords = records.map((branchRecord) => {
+      const departments = branchRecord.branch_departments.map(
+        (bd) => bd.departmentName
+      );
+      return {
+        ...branchRecord.toJSON(),
+        departmentNames: departments.join(", "), // Concatenate department names
+      };
+    });
+
+    res.json({ message: "records", statusCode: 200, records: formattedRecords });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error retrieving records", statusCode: 500 });
+  }
 };
+
 
 const getDepartment = async (req, res) => {
   
@@ -354,9 +391,9 @@ const seeFile = async (req, res) => {
 
 const fileContent = async (req, res) => {
   const { fileName } = req.query;
-
+  const userId = req.session.user;
   try {
-    const { fullPath, mimeType } = await getFileContentLogic(fileName);
+    const { fullPath, mimeType } = await getFileContentLogic(fileName, userId);
 
     // Serve the file as binary data
     res.contentType(mimeType);
@@ -368,11 +405,19 @@ const fileContent = async (req, res) => {
 };
 
 const accessControl = async (req, res) => {
-  const { username } = req.params;
+  const { usernames } = req.query; // Extract usernames from query parameters
+  
   const roles = req.body;
 
+  if (!usernames) {
+    return res.status(400).json({ message: "Usernames are required." });
+  }
+
   try {
-    const message = await updateUserPermissions(username, roles);
+    // Split usernames by comma or space and trim extra spaces
+    const usernameArray = usernames.split(/[\s,]+/).map(name => name.trim());
+
+    const message = await updateUserPermissions(usernameArray, roles);
     res.json({ message });
   } catch (error) {
     console.error("Error in access control:", error);
@@ -416,27 +461,6 @@ const uploadProfilePicture = async (req, res) => {
   }
 };
 
-const sendFiles = async (req, res) => {
-  try {
-    const { users, files } = req.body;
-
-    // Call the service function
-    const { missingFiles } = await sendFilesToUsers(users, files);
-
-    if (missingFiles.length > 0) {
-      return res.status(404).json({
-        message: 'Some files could not be sent.',
-        missingFiles,
-      });
-    }
-
-    res.json({ message: 'Files sent successfully to specified users.' });
-  } catch (error) {
-    console.error('Error sending files:', error.message);
-    res.status(500).json({ error: error.message || 'Internal server error.' });
-  }
-};
-
 const sendFilesEmail = async (req, res) => {
   try {
     const { users, files } = req.body;
@@ -456,19 +480,6 @@ const sendFilesEmail = async (req, res) => {
   }
 };
 
-const departmentAccessControl = async (req, res) => {
-  const { departmentName } = req.params;
-  const roles = req.body; // Admin, supervisor, or personnel roles sent from frontend
-
-  try {
-    const message = await updateDepartmentPermissions(departmentName, roles);
-    res.json({ message });
-  } catch (error) {
-    console.error("Error in department access control:", error);
-    res.status(500).json({ message: error.message });
-  }
-};
-
 const deleteFile = async (req, res) => {
   try {
     const { files } = req.body; // Expect an array of file names
@@ -476,8 +487,8 @@ const deleteFile = async (req, res) => {
     if (!files || !Array.isArray(files) || files.length === 0) {
       return res.status(400).json({ error: 'Files array is required and must not be empty.' });
     }
-
-    const { deletedFiles, missingFiles, errors } = await deleteFiles(files);
+    const userId = req.session.user
+    const { deletedFiles, missingFiles, errors } = await deleteFiles(files, userId);
 
     if (errors.length > 0) {
       return res.status(500).json({ error: 'Failed to delete some files.', details: errors });
@@ -491,6 +502,16 @@ const deleteFile = async (req, res) => {
   } catch (err) {
     console.error('Error in /delete-file:', err);
     res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
+const removeDep = async (req, res) => {
+  const {branchName, departmentName} = req.body
+  try{
+    const result = handleDeleteDepartment({branchName, departmentName});
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({success: false, error: error.message})
   }
 };
 
@@ -520,15 +541,15 @@ module.exports = {
   seeFile,
   fileContent,
   auditLog,
+  auditLogView,
   GetUser,
   accessControl,
   uploadProfilePicture,
   getPickSend,
   getUsers,
-  sendFiles,
   getUsersByEmail,
   sendFilesEmail,
   getDepartment,
-  departmentAccessControl,
-  deleteFile
+  deleteFile,
+  removeDep
 };

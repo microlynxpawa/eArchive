@@ -5,6 +5,7 @@ const ArchiveCategory = require("../../model/archiveCategory");
 const branch = require("../../model/branch");
 const User = require("../../model/user");
 const File = require("../../model/file");
+const AuditLog = require("../../model/auditLogs")
 const {
   ensureDirectoryExists,
   ensureUniqueFileName,
@@ -48,12 +49,17 @@ const uploadFileLogic = async (file, fileName, userId, askQuestion) => {
   
     // Update the user's folderPath in the database
     await user.update({ folderPath: folderPath });
-  
     console.log("Folder created successfully:", folderPath);
   }
   
   // If folderPath already exists or has been created, save the file directly
   saveFileLogic(file, folderPath, fileName, user);
+  
+  const userLogs = await AuditLog.findOne({
+    where: { userId: userId },
+    order: [['createdAt', 'DESC']] // Ensures the latest record is selected
+  });
+  await userLogs.update({uploaded : true});
 
   return {
     message: "File uploaded successfully",
