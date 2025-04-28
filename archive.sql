@@ -20,6 +20,8 @@ INSERT INTO `users` (
   5, 3, NOW(), NOW()
 );
 
+/* The password here is probably 123 or 1234 */
+
 INSERT INTO `authorizations` (
   `userId`, `scanning`, `archiving`, `view_upload`, `supervision_right`, `email_notification`, 
   `canViewOwnFiles`, `canViewDepartmentFiles`, `canViewBranchFiles`, `can_delete`

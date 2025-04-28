@@ -230,6 +230,9 @@ const getUsersByEmail = async (req, res) => {
   }
 };
 
+const dwt = async (req, res) => {
+  res.render("dashboard/pages/dwtScan", { layout: DashboardLayout });
+};
 
 // Post Routes
 
@@ -551,5 +554,6 @@ module.exports = {
   sendFilesEmail,
   getDepartment,
   deleteFile,
-  removeDep
+  removeDep,
+  dwt
 };

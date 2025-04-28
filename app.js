@@ -12,10 +12,11 @@ const { fileContent } = require("./controllers/adminController.js");
 const cron = require("node-cron");
 const runCleanupTasks = require("./util/tempFolderCleanUp.js");
 
-const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
-// Define the default static folder for uploads
+const DEFAULT_PATH = process.env.FOLDER ;
+
+// Define the default static folder for uploads during upload process
 const CleanUp_PATH = path.resolve(
-  "C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\util\\eArchiiveUploads"
+  process.env.Temp_Upload_Folder_Path
 );
 
 const { PORT, SECRECT } = process.env;
@@ -32,8 +33,8 @@ app.use(
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
-app.use('/profile-pictures', express.static('C:/e-archiveUploads/profile-pictures'));
-app.use(express.static(DEFAULT_PATH || "C:\\e-archiveUploads"));
+app.use('/profile-pictures', express.static(process.env.Profile_Pictures));
+app.use(express.static(DEFAULT_PATH));
 app.use(express.static(CleanUp_PATH));
 
 
@@ -51,20 +52,6 @@ cron.schedule("0 0 * * *", () => {
 app.get("/", (req, res) => res.redirect("/admin"));
 app.get("/file-content",fileContent);
 
-// pawa test 
-app.post('/dev-api/auth/logtoconsole', async (req, res) => {
-  try {
-    const text = req.body; // Access the parsed JSON body
-    console.log('pawa hit successfully. Text:', text);
-
-    // Send a response back to the client
-    res.status(200).send('Success');
-  } catch (error) {
-    console.error('Error processing request:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
 app.use("/admin", adminRoute);
 
 
@@ -74,6 +61,8 @@ const startServer = async () => {
   createDefaultDirectory();
   app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
+    // console.log(envPaths);
+    
   });
 };
 

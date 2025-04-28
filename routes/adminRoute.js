@@ -35,6 +35,7 @@ const {
   getDepartment,
   deleteFile,
   removeDep,
+  dwt
 } = require("../controllers/adminController");
 const routeDectector = require("../middleware/routeDectector");
 const authUser  = require('../middleware/authMiddleware');
@@ -76,8 +77,9 @@ app.get("/pick-send", getPickSend);
 app.get("/see-file",seeFile);
 app.get("/searchUsers", getUsers);
 app.get("/searchUsersByEmail", getUsersByEmail);
-app.get("/scanFiles", (req, res)=>{ res.redirect("file-upload") })
-app.get("/getDepartment/:departmentName", getDepartment)
+app.get("/scanFiles", (req, res)=>{ res.redirect("file-upload") });
+app.get("/getDepartment/:departmentName", getDepartment);
+app.get("/dwt-scan", dwt);
 
 app.post("/user-group", createUserGroup);
 app.post("/remove-user-group", removeUserGroup);

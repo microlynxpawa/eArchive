@@ -1,12 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 const { exec } = require("child_process");
+require("dotenv").config();
 
-// Define the folders to clean
-const TEMP_FOLDERS = [
-  "C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\util\\eArchiiveUploads\\temporary",
-  "C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads",
-];
+// Define the folders to clean from .env variables
+const TEMP_FOLDERS = process.env.TEMP_FOLDERS
+  ? process.env.TEMP_FOLDERS.split(",")
+  : [];
 
 /**
  * Deletes all files in a folder.
@@ -37,8 +37,9 @@ const cleanTempFolders = () => {
 /**
  * Cleans the server's trash (recycle bin) on Windows.
  */
+if (process.platform === "win32") {
 const cleanRecycleBin = () => {
-  const command = 'rd /s /q %SystemDrive%\\$Recycle.Bin';
+  const command = 'powershell -command "Clear-RecycleBin -Force"';
 
   exec(command, (error, stdout, stderr) => {
     if (error) {
@@ -47,6 +48,11 @@ const cleanRecycleBin = () => {
     }
     console.log("Recycle bin cleaned successfully.");
   });
+};
+}
+else {
+  // For Linux or macOS, you can use a different command or library
+    console.log("Recycle bin cleaning is not implemented for this OS.");
 };
 
 /**

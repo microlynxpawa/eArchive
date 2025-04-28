@@ -4,6 +4,7 @@
       <div class="card">
         <div class="card-header pb-0">
           <h3>User Audit Trail</h3>
+          <p class="text-green">Search User to view their history.</p>
         </div>
         <div class="card-body">
           <div class="table-responsive theme-scrollbar">
@@ -48,6 +49,8 @@
 
     const logs = await response.json();
     const tbody = document.getElementById('audit-log-tbody');
+    console.log("Here are the logs", JSON.stringify(logs));
+    
 
     // Destroy existing DataTable instance before updating the table
     if ($.fn.DataTable.isDataTable('#audit-log-table')) {

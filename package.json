@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app"
+    "start": "nodemon app",
+    "test": "jest"
   },
   "keywords": [],
   "author": "JOEL OSEI",
@@ -24,5 +25,8 @@
     "node-cron": "^3.0.3",
     "nodemon": "^3.1.7",
     "sequelize": "^6.37.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
