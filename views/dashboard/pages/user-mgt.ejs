@@ -56,7 +56,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <label for="fullname" class="form-label"
-                          >Full name</label
+                          >Full name<span class="text-danger">*</span></label
                         >
                         <input
                           required
@@ -72,7 +72,7 @@
                   <div class="mb-3">
                     <div class="row">
                       <div class="col-md-6">
-                        <label for="branch" class="form-label">Branch</label>
+                        <label for="branch" class="form-label">Branch<span class="text-danger">*</span></label>
                         <select
                           required
                           id="branchSelect"
@@ -86,7 +86,7 @@
                       </div>
                       <div class="col-md-6">
                         <label for="user-group" class="form-label"
-                          >Department</label
+                          >Department<span class="text-danger">*</span></label
                         >
                       
                         <select
@@ -106,7 +106,7 @@
                   <div class="mb-3">
                     <div class="row">
                       <div class="col-md-6">
-                        <label for="email" class="form-label">Email</label>
+                        <label for="email" class="form-label">Email Id<span class="text-danger">*</span></label>
                         <input
                           required
                           type="email"
@@ -117,10 +117,9 @@
                       </div>
                       <div class="col-md-6">
                         <label for="pEmail" class="form-label"
-                          >Private email</label
+                          >Private email<span class="text-danger">*</span></label
                         >
                         <input
-                          required
                           type="email"
                           class="form-control"
                           id="pEmail"
@@ -134,26 +133,26 @@
                     <div class="row">
                       <div class="col-md-6">
                         <label for="password" class="form-label"
-                          >Password</label
+                          >Password<span class="text-danger">*</span></label
                         >
                         <input
                           required
                           type="password"
                           class="form-control"
                           id="password"
-                          placeholder="e.g 1234"
+                          placeholder="4 characters or more"
                         />
                       </div>
                       <div class="col-md-6">
                         <label for="confirm_pass" class="form-label"
-                          >Confirm Password</label
+                          >Confirm Password<span class="text-danger">*</span></label
                         >
                         <input
                           required
                           type="password"
                           class="form-control"
                           id="confirm_pass"
-                          placeholder="e.g 1234"
+                          placeholder="4 characters or more"
                         />
                       </div>
                     </div>
@@ -163,7 +162,7 @@
                     <div class="row">
                       <div class="col-md-12">
                         <label for="username" class="form-label"
-                          >Username</label
+                          >Username<span class="text-danger">*</span></label
                         >
                         <input
                           required
@@ -172,12 +171,14 @@
                           id="username"
                           placeholder="e.g john615"
                         />
+                        <!-- Error message for username -->
+                        <small id="username-error" class="text-danger" style="display: none;"></small>
                       </div>
                     </div>
                   </div>
 
                   <div class="mb-4">
-                    <h5>Permissions</h5>
+                    <h5>Permissions<span class="text-danger">*</span></h5>
                   
                     <div class="col">
                       <div class="m-t-15 m-checkbox-inline">
@@ -314,7 +315,7 @@
     });
   }
 
-  // save user group
+  // Save user group
   $("#btnSave").click(() => {
     let fullname = $("#fullname").val();
     let branchSelect = $("#branchSelect").val();
@@ -369,33 +370,50 @@
     userFormData.append("permissions", JSON.stringify(checkedPermissions));
     userFormData.append("btnAction", btnAction);
     userFormData.append("updateRecord", updateRecord);
-  
-    //  send user request
+
+    // Send user request
     $.ajax({
       url: "/admin/user-management",
       type: "POST",
       data: userFormData,
       processData: false,
       contentType: false,
-
-      
       success: async function (data) {
-        if (data.statusCode == 500) {
-          errorAlert(data.message?.errors[0]?.message);
-          return;
-        }
+        console.log("Response:", data);
+        if (data.message == "Username not available.") {
+          // Check if the error is related to the username
+          if (data.message === "Username not available.") {
+            // Display the error message below the username field
+            $("#username-error").text("Username is already in use").show();
 
+            // Display a toast notification as an error
+            errorAlert(data.message);
+            return; // Prevent modal from closing
+          }
+
+          errorAlert(data.message?.errors[0]?.message);
+          return; // Prevent modal from closing
+        }
+        else {
+          // Success case
         successAlert(data.message);
         $("#userGroupModal").modal("hide");
         clearForm();
         getUsers();
+        }
+        return
+        
       },
       error: function (error) {
-        console.log(userFormData)
         console.error("Error saving user:", error);
         errorAlert("An error occurred while saving the user");
       },
     });
+  });
+
+  // Clear the username error message on input
+  $("#username").on("input", function () {
+    $("#username-error").hide();
   });
 
   //   delete user group

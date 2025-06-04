@@ -5,6 +5,7 @@ const AuditLog = require("../model/auditLogs");
 const ArchiveCategory = require("../model/archiveCategory");
 const User = require("../model/user");
 const Branch = require("../model/branch");
+const Authorization = require("../model/authorizations");
 
 // default path
 const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
@@ -257,6 +258,122 @@ const moveFilesAndDeleteOldDirectory = (oldDirectoryPath, newDirectoryPath) => {
   }
 };
 
+async function importUsers() {
+  const filePath = path.join("transformedUsersHashed.json");
+  const rawData = fs.readFileSync(filePath);
+  const users = JSON.parse(rawData);
+
+  for (const user of users) {
+    try {
+      const branch = await Branch.findOne({ where: { name: user.branchId } });
+      const department = await ArchiveCategory.findOne({ where: { name: user.userGroupId } });
+
+      if (!branch || !department) {
+        console.warn(`Skipping ${user.username} — Branch or Department not found.`);
+        continue;
+      }
+
+      const [userRecord, created] = await User.findOrCreate({
+        where: { username: user.username },
+        defaults: {
+          fullname: user.fullname,
+          email: user.email,
+          private_email: user.private_email,
+          password: user.password,
+          permissions: JSON.stringify(user.permissions),
+          branchId: branch.id,
+          userGroupId: department.id,
+          folderPath: user.folderPath,
+          profilePicturePath: user.profilePicturePath,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+      });
+
+      if (!created) {
+        await userRecord.update({
+          fullname: user.fullname,
+          email: user.email,
+          private_email: user.private_email,
+          password: user.password,
+          permissions: JSON.stringify(user.permissions),
+          branchId: branch.id,
+          userGroupId: department.id,
+          folderPath: user.folderPath,
+          profilePicturePath: user.profilePicturePath,
+          updatedAt: user.updatedAt,
+        });
+        console.log(`✅ Updated existing user: ${user.username}`);
+      } else {
+        console.log(`🆕 Created user: ${user.username}`);
+      }
+    } catch (err) {
+      console.error(`❌ Failed to process ${user.username}:`, err.message);
+    }
+  }
+};
+
+
+async function importAuthorizations() {
+  const filePath = path.join("transformedAuths.json");
+  const rawData = fs.readFileSync(filePath);
+  const auths = JSON.parse(rawData);
+
+  for (const auth of auths) {
+    try {
+      const user = await User.findOne({ where: { email: auth.email } });
+
+      if (!user) {
+        console.warn(`⚠️ User not found for email: ${auth.email}. Skipping.`);
+        continue;
+      }
+
+      const [record, created] = await Authorization.findOrCreate({
+        where: { userId: user.id },
+        defaults: {
+          userId: user.id,
+          canViewOwnFiles: auth.canViewOwnFiles,
+          canViewDepartmentFiles: auth.canViewDepartmentFiles,
+          canViewBranchFiles: auth.canViewBranchFiles,
+          scanning: auth.scanning,
+          archiving: auth.archiving,
+          supervision_right: auth.supervision_right,
+          email_notification: auth.email_notification,
+          view_upload: auth.view_upload,
+          is_disabled: auth.is_disabled,
+          is_admin: auth.is_admin,
+          createdAt: auth.createdAt,
+          updatedAt: auth.updatedAt,
+        },
+      });
+
+      if (!created) {
+        await record.update({
+          canViewOwnFiles: auth.canViewOwnFiles,
+          canViewDepartmentFiles: auth.canViewDepartmentFiles,
+          canViewBranchFiles: auth.canViewBranchFiles,
+          scanning: auth.scanning,
+          archiving: auth.archiving,
+          supervision_right: auth.supervision_right,
+          email_notification: auth.email_notification,
+          view_upload: auth.view_upload,
+          is_disabled: auth.is_disabled,
+          is_admin: auth.is_admin,
+          updatedAt: auth.updatedAt,
+        });
+
+        console.log(`✅ Updated authorization for ${auth.email}`);
+      } else {
+        console.log(`🆕 Created authorization for ${auth.email}`);
+      }
+    } catch (err) {
+      console.error(`❌ Error processing ${auth.email}:`, err.message);
+    }
+  }
+};
+
+
+
 
 module.exports = {
   createDefaultDirectory,
@@ -274,5 +391,7 @@ module.exports = {
   ensureUniqueFileName,
   getDefaultFolders,
   slugify,
-  moveFilesAndDeleteOldDirectory
+  moveFilesAndDeleteOldDirectory,
+  importUsers,
+  importAuthorizations
 };

@@ -51,7 +51,7 @@ const AuditLog = sequelize.define(
   { timestamps: true }
 );
 
-AuditLog.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
-User.hasMany(AuditLog, { foreignKey: "userId" });
+// AuditLog.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
+// User.hasMany(AuditLog, { foreignKey: "userId" });
 
 module.exports = AuditLog;

@@ -6,11 +6,12 @@ const path = require("path");
 const ejsLayout = require("express-ejs-layouts");
 const adminRoute = require("./routes/adminRoute.js");
 const dbConnect = require("./dbConnect");
-const { createDefaultDirectory } = require("./util/directory");
+const { createDefaultDirectory, importUsers, importAuthorizations } = require("./util/directory");
 const session = require("express-session");
 const { fileContent } = require("./controllers/adminController.js");
 const cron = require("node-cron");
 const runCleanupTasks = require("./util/tempFolderCleanUp.js");
+const defineAssociations = require("./model/associations.js");
 
 const DEFAULT_PATH = process.env.FOLDER ;
 
@@ -20,6 +21,17 @@ const CleanUp_PATH = path.resolve(
 );
 
 const { PORT, SECRECT } = process.env;
+
+// Import all models
+require("./model/user");
+require("./model/branch");
+require("./model/archiveCategory");
+require("./model/auditLogs");
+require("./model/authorizations");
+require("./model/branch-department");
+require("./model/file");
+defineAssociations();
+
 // create express app
 const app = express();
 app.use(
@@ -59,6 +71,8 @@ const startServer = async () => {
   await dbConnect.authenticate();
   dbConnect.sync({ alter: true });
   createDefaultDirectory();
+  // importUsers();
+  // importAuthorizations();
   app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
     // console.log(envPaths);

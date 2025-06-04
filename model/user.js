@@ -33,10 +33,4 @@ const User = sequelize.define(
   { timestamps: true }
 );
 
-User.belongsTo(Branch, { foreignKey: "branchId" });
-Branch.hasMany(User, { foreignKey: "branchId" });
-
-User.belongsTo(ArchiveCategory, { foreignKey: "userGroupId" });
-ArchiveCategory.hasMany(User, { foreignKey: "userGroupId" });
-
 module.exports = User;

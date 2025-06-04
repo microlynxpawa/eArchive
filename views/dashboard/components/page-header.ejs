@@ -22,9 +22,9 @@
       </div>
       <div class="nav-right col-6 pull-right right-header p-0">
         <ul class="nav-menus">
-          <li> 
+          <!-- <li>
             <div class="right-header ps-0">
-            <em id="fileSearchInfo" style="color: rgb(5, 196, 5); display: none;">Enter a search date in this format (d-m-yyy)</em>
+              <em id="fileSearchInfo" style="color: rgb(5, 196, 5); display: none;">Enter a search date in this format (d-m-yyy)</em>
               <div class="input-group">
                 <div class="input-group-prepend " id="searchButton">
                   <span class="input-group-text mobile-search"><i class="fa fa-search"></i></span>
@@ -37,13 +37,8 @@
                 >
               </div>
             </div>
-          </li>
-          <li class="serchinput">
-            <div class="serchbox"><i data-feather="search"></i></div>
-            <div class="form-group search-form">
-              <input type="text" placeholder="Search here...">
-            </div>
-          </li>
+          </li> -->
+          <li><p></p></li>
           <li>
             <div class="mode"><i class="fa fa-moon-o"></i></div>
           </li>
@@ -71,34 +66,3 @@
       <script class="empty-template" type="text/x-handlebars-template"><div class="EmptyMessage">Your search turned up 0 results. This most likely means the backend is down, yikes!</div></script>
     </div>
   </div>
-
-
-  <!-- <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchInput = document.getElementById('search-input');
-      const searchButton = document.getElementById('searchButton');
-  
-      searchButton.addEventListener('click', async () => {
-        const username = searchInput.value.trim();
-  
-        if (!username) {
-          alert('Please enter a username.');
-          return;
-        }
-  
-        try {
-          const response = await fetch(`/admin/getUser/${encodeURIComponent(username)}`);
-          if (!response.ok) {
-            throw new Error('Failed to fetch user.');
-          }
-  
-          const userData = await response.json();
-          console.log('User found:', userData);
-          alert(`User found: ${userData.username}`);
-        } catch (error) {
-          console.error('Error fetching user:', error);
-          alert('User not found or an error occurred.');
-        }
-      });
-    });
-  </script> -->

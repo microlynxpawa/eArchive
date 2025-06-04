@@ -19,7 +19,7 @@ const File = sequelize.define(
   { timestamps: true }
 );
 
-File.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE"  });
-User.hasMany(File, { foreignKey: "userId" });
+// File.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE"  });
+// User.hasMany(File, { foreignKey: "userId" });
 
 module.exports = File;

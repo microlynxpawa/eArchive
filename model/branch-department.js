@@ -25,10 +25,10 @@ const BranchDepartment = sequelize.define(
 );
 
 // Define associations
-Branch.hasMany(BranchDepartment, { foreignKey: "branchId" });
-BranchDepartment.belongsTo(Branch, { foreignKey: "branchId" });
+// Branch.hasMany(BranchDepartment, { foreignKey: "branchId" });
+// BranchDepartment.belongsTo(Branch, { foreignKey: "branchId" });
 
-ArchiveCategory.hasMany(BranchDepartment, { foreignKey: "departmentId" });
-BranchDepartment.belongsTo(ArchiveCategory, { foreignKey: "departmentId" });
+// ArchiveCategory.hasMany(BranchDepartment, { foreignKey: "departmentId" });
+// BranchDepartment.belongsTo(ArchiveCategory, { foreignKey: "departmentId" });
 
 module.exports = BranchDepartment;

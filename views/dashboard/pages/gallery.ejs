@@ -97,8 +97,52 @@
     background-color: #ffffff;
   }
 </style>
+<style>
+  /* Simple modal styling */
+  #searchResultsModal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  #filesModalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 80%;
+    overflow-y: auto;
+  }
+
+  #matchedFilesList {
+    list-style: none;
+    padding: 0;
+  }
+
+  #matchedFilesList li {
+    margin: 5px 0;
+  }
+</style>
 
 <div class="container mt-5 mb-5">
+  <div class="mb-3">
+    <em id="fileSearchInfo" style="color: rgb(5, 196, 5); display: none;">Enter a search date in this format (d-m-yyy)</em>
+    <div class="input-group">
+      <div class="input-group-prepend " id="searchButton">
+        <span class="input-group-text mobile-search"><i class="fa fa-search"></i></span>
+      </div>
+      <input 
+        id="search-input" 
+        class="form-control" 
+        type="text" 
+        placeholder="Search Here........"
+      >
+    </div>
+  </div>
   <div class="row">
     <!-- Folder Panel -->
     <% if (auths && auths.view_upload) { %>
@@ -172,6 +216,14 @@
         <button id="send-button" style="display: none;" class="btn btn-success mt-3">Send via Email</button>
         <p id="select-file-message" style="display: none; color: green;">Please select a file.</p>
         <p id="delete-info" class="delete-info" style="display: none;">Select file(s) to delete.</p>
+      </div>
+    </div>
+
+    <div id="searchResultsModal" style="display: none;">
+      <div id="filesModalContent" style="width: 30%;">
+        <h2>Matched Files</h2>
+        <ul id="matchedFilesList"></ul>
+        <button class="btn btn-primary" id="closeFilesModalButton">Close</button>
       </div>
     </div>
   </div>
@@ -470,47 +522,121 @@
 </script>
 
 <script>
+
+  function loadFilePreview(fileName) {
+  $.ajax({
+    url: '/file-content',
+    method: 'GET',
+    xhrFields: {
+      responseType: 'blob' // Receive the response as a binary Blob
+    },
+    data: { fileName },
+    success: function(blob) {
+      const fileUrl = URL.createObjectURL(blob);
+      const mimeType = blob.type;
+
+      if (mimeType.startsWith('image/')) {
+        $('#file-viewer').html(`<img src="${fileUrl}" alt="${fileName}" class="img-fluid preview-image" />`);
+      } else if (mimeType.startsWith('text/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          $('#file-viewer').html(`<pre class="preview-text">${e.target.result}</pre>`);
+        };
+        reader.readAsText(blob);
+      } else {
+        $('#file-viewer').html(`<a href="${fileUrl}" target="_blank">Download ${fileName}</a>`);
+      }
+    },
+    error: function() {
+      $('#file-viewer').html('<strong>Error:</strong> Could not load file content.');
+    }
+  });
+}
+
+
   document.addEventListener("DOMContentLoaded", () => {
-  // File Search
   const searchInput = document.getElementById('search-input');
   const searchButton = document.getElementById('searchButton');
   const fileSearchInfo = document.getElementById('fileSearchInfo');
-  const fileItems = document.querySelectorAll('.file-item'); // All file elements
+  const fileItems = document.querySelectorAll('.file-item');
 
-  // Show search info when input is clicked
+  const searchResultModal = document.getElementById('searchResultsModal');
+  const modalList = document.getElementById('matchedFilesList');
+  const closeFilesModalButton = document.getElementById('closeFilesModalButton');
+
   searchInput.addEventListener('click', () => {
     fileSearchInfo.style.display = 'inline-block';
   });
 
-  // Search function
   searchButton.addEventListener('click', () => {
-    const searchDate = searchInput.value.trim(); // Get user input
+    const searchDate = searchInput.value.trim();
+    const validDateRegex = /^\d{1,2}-\d{1,2}-\d{4}$/; // d-m-yyyy pattern
+
     if (!searchDate) {
       alert("Please enter a valid date in the format (d-m-yyyy)");
       return;
     }
 
-    // Filter and display matching files
-    filterFileStructure(searchDate);
+    if (!validDateRegex.test(searchDate)) {
+      alert("Invalid format. Please enter date as (day-month-year) like 12-4-2024.");
+      return;
+    }
+
+    const matchedFiles = filterFileStructure(searchDate); // Get matched files
+
+    if (matchedFiles.length === 0) {
+      alert("No files found for the given date.");
+    } else {
+      showModal(matchedFiles); // Show the modal with results
+    }
   });
 
-  // Function to filter files by date
   function filterFileStructure(searchDate) {
+    const matchedFiles = [];
+
     fileItems.forEach(fileItem => {
       const fileName = fileItem.querySelector('.file-name').getAttribute('data-file');
-
-      // Extract the date from the file name (assuming format: `name_d-m-yyyy.ext`)
       const match = fileName.match(/_(\d{1,2}-\d{1,2}-\d{4})\./);
       const fileDate = match ? match[1] : null;
 
-      // Show only files that match the search date
       if (fileDate === searchDate) {
         fileItem.style.display = "block";
+        matchedFiles.push(fileName);
       } else {
         fileItem.style.display = "none";
       }
     });
+
+    console.log("Matched Files:", matchedFiles);
+    return matchedFiles;
   }
+
+  function showModal(matchedFiles) {
+  modalList.innerHTML = ""; // Clear old results
+
+  matchedFiles.forEach((fileName, index) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="modal-file-name" data-file="${fileName}">${index + 1}. ${fileName}</span>`;
+    modalList.appendChild(li);
+  });
+
+  searchResultModal.style.display = "flex";
+
+  // Add click event to modal file names
+  document.querySelectorAll('.modal-file-name').forEach(fileEl => {
+    fileEl.addEventListener('click', function() {
+      const fileName = this.getAttribute('data-file');
+      loadFilePreview(fileName); // Call file preview
+      searchResultModal.style.display = "none";
+    });
+  });
+}
+
+
+  closeFilesModalButton.addEventListener('click', () => {
+    searchResultModal.style.display = "none";
+  });
 });
 
 </script>
+

@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const Path = require("path");
+const { Sequelize } = require("sequelize"); // Import Sequelize to handle specific errors
 const ArchiveCategory = require("../../model/archiveCategory");
 const branch = require("../../model/branch");
 const User = require("../../model/user");
@@ -66,8 +67,8 @@ async function createOrUpdateUser({
         throw new Error("Record not found");
       }
 
-      const oldUserFolderPath = isFound.folderPath
-      
+      const oldUserFolderPath = isFound.folderPath;
+
       await User.update(
         {
           username,
@@ -83,9 +84,9 @@ async function createOrUpdateUser({
         { where: { id: updateRecord } }
       );
 
-      const updatingUserFolderPath = folderPath
-      
-      moveFilesAndDeleteOldDirectory(oldUserFolderPath, updatingUserFolderPath)
+      const updatingUserFolderPath = folderPath;
+
+      moveFilesAndDeleteOldDirectory(oldUserFolderPath, updatingUserFolderPath);
       userId = updateRecord;
       console.log("User updated successfully.");
     }
@@ -108,6 +109,12 @@ async function createOrUpdateUser({
       ? { message: "User created successfully." }
       : { message: "User updated successfully." };
   } catch (error) {
+    // Handle unique constraint error for username
+    if (error instanceof Sequelize.UniqueConstraintError) {
+      console.error("Error: Username already exists.");
+      return { message: "Username not available." }; // Send response to the client
+    }
+
     console.error("Error creating/updating user:", error.message);
     throw error;
   }

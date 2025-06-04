@@ -56,7 +56,7 @@ const authorizations = sequelize.define(
   { timestamps: true }
 );
 
-authorizations.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
+// authorizations.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
 
 // Hook to update columns when is_admin is set to true
 authorizations.addHook("beforeUpdate", (authorization, options) => {

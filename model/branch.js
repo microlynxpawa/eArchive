@@ -9,7 +9,7 @@ const Branch = sequelize.define(
     name: { type: DataTypes.STRING, unique: 'name' },
     contact_person: { type: DataTypes.STRING },
     address: { type: DataTypes.STRING },
-    email: { type: DataTypes.STRING, unique: 'email' },
+    email: { type: DataTypes.STRING},
     phone_number: { type: DataTypes.STRING },
     reg_number: { type: DataTypes.STRING },
     created_by: { type: DataTypes.STRING },

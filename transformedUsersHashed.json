@@ -1,0 +1,2398 @@
+[
+  {
+    "username": "EDWARD ADU ABANKORO",
+    "email": "eabankoro@yahoo.com",
+    "private_email": "edward.abankoro@bosomtweruralbank.com",
+    "password": "$2a$10$tgnmF.S9vKtG.UpGKiJyjuArmZ091Hjb4tsRdYHkZDKO97.aJO/qO",
+    "folderPath": "C:\\eArchive-Backup\\kuntanase\\Credit and marketing\\AABANKR",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "EDWARD ADU ABANKORO",
+    "branchId": "kuntanase",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "ALFRED AMISSAH",
+    "email": "alfredamissah@brbplc.com",
+    "private_email": "alfredamissah@brbplc.com",
+    "password": "$2a$10$sKnSz4p5TxXNNsEmXAtdwuROgrIiPpBE531LAN.XY1mfGoxFAKFyq",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Operations\\aalfred@atonsuagogo",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "ALFRED AMISSAH",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Augustine Appiah",
+    "email": "augustine.appiah@gmail.com",
+    "private_email": "augustine.appiah@bosomtweruralbank.com",
+    "password": "$2a$10$qzHHPViRG4UnfH5R7kSHOOTkdm./UieLi/M2UHO7Wub3dEbRdT5I2",
+    "folderPath": "C:\\eArchive-Backup\\headoffice\\Operations\\aappia",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Augustine Appiah",
+    "branchId": "headoffice",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Andrew Boakye Agyare  ",
+    "email": "agyareboakye@brbplc.com",
+    "private_email": "agyareboakye@brbplc.com",
+    "password": "$2a$10$BCWyz08l9Xz7Y9XUW2clH.wy/xqR8ffoP/7nqVlrZ2XWd/8S9rVhO",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Credit and marketing\\abagyare@trede",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Andrew Boakye Agyare  ",
+    "branchId": "Edwinase",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Douglas Gyasi",
+    "email": "gyasi.douglas@bosomtweruralbank.com",
+    "private_email": "gyasi.douglas@gmail.com",
+    "password": "$2a$10$.4Rm7Z5KeldOgwQQT5wdfuARBlqYOFfCZfrEfU/1m/EKQBGYAhknG",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\IT\\admi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Douglas Gyasi",
+    "branchId": "Edwinase",
+    "userGroupId": "IT",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Sheila",
+    "email": "sheila@microlynxe.com",
+    "private_email": "sheila@microlynxe.com",
+    "password": "$2a$10$1O3Z/Fx7D30eSIDt2LcvDuVXrQkheIJldsHKAXJXKBWDbkNzGyw.a",
+    "folderPath": "C:\\eArchive-Backup\\global\\Finance\\admi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "view_upload"
+    ],
+    "fullname": "Sheila",
+    "branchId": "global",
+    "userGroupId": "Finance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "ANGELA KYEI BAFFOUR",
+    "email": "angelakyeibaffour@brbplc.com",
+    "private_email": "angelakyeibaffour@brbplc.com",
+    "password": "$2a$10$xCCizzWsbVcISv2MnpEfQOe8lZCnO0xO0EPW7VidL8bju3jSKdEwO",
+    "folderPath": "C:\\eArchive-Backup\\afiakobi\\Teller\\akbaffour@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "ANGELA KYEI BAFFOUR",
+    "branchId": "afiakobi",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Angela Kyei Baffour",
+    "email": "angela.baffour@brbplc.com",
+    "private_email": "angela.baffour@brbplc.com",
+    "password": "$2a$10$j8se2kjLNlfXFIaxmzfvQeUWybD5ebbRiFIoLL3tsQMz9FrSLYEP6",
+    "folderPath": "C:\\eArchive-Backup\\kokofu\\Operations\\akbaffour",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Angela Kyei Baffour",
+    "branchId": "kokofu",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "KELVIN APPIAGYEI",
+    "email": "kelvinappiagyei@brbplc.com",
+    "private_email": "kelvinappiagyei@brbplc.com",
+    "password": "$2a$10$/rJQQFKGkr/4y00GWqwSTey0BvMjpnbiLYdW7jASo.zJ1JLRDkHyC",
+    "folderPath": "C:\\eArchive-Backup\\atonsubokro\\Credit and marketing\\akelvin",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "KELVIN APPIAGYEI",
+    "branchId": "atonsubokro",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Appiah Kusi",
+    "email": "appiah.kusi@gmail.com",
+    "private_email": "appiah.kusi@bosomtweruralbank.com",
+    "password": "$2a$10$jUz8WIwYOnhcjKlxokXmqeoYMtdUfjo9D/U2qMWLtLANaBzt5o6Jm",
+    "folderPath": "C:\\eArchive-Backup\\headoffice\\Finance\\akus",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Appiah Kusi",
+    "branchId": "headoffice",
+    "userGroupId": "Finance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "alex mensah",
+    "email": "alex@gmail.com",
+    "private_email": "alex@gmail.com",
+    "password": "$2a$10$rdQ6cwzEC/rIUlWfxmVWT.w.tmF9bvOHB/VnjaoTCKug25MQFWz5q",
+    "folderPath": "C:\\eArchive-Backup\\Bantama\\Finance\\ale",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "view_upload"
+    ],
+    "fullname": "alex mensah",
+    "branchId": "Bantama",
+    "userGroupId": "Finance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Alexander Osman",
+    "email": "alex@gmail.com",
+    "private_email": "alex@gmail.com",
+    "password": "$2a$10$W8t74bF9/zrAfvpWOdUUhedsXPLMpUgkqAHILXysa8czaM7.63gjO",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\IT\\alexande",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "view_upload"
+    ],
+    "fullname": "Alexander Osman",
+    "branchId": "Edwinase",
+    "userGroupId": "IT",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Atta Mensah",
+    "email": "atta.ahenasa@gmail.com",
+    "private_email": "atta.ahenasa@bosomtweruralbank.com",
+    "password": "$2a$10$D96PWBX/4YJuoS6jcPmxIuX7HhB//kSlZ3KcTq0pu6IUB6oAue64u",
+    "folderPath": "C:\\eArchive-Backup\\magazine\\Credit and marketing\\amensah",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Atta Mensah",
+    "branchId": "magazine",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "AUGUSTINE OWUSU SARFO",
+    "email": "augustineowususarfo@brbplc.com",
+    "private_email": "augustineowususarfo@brbplc.com",
+    "password": "$2a$10$A7XVrt5oSvsvwA285.UZBOR3pmeZBlrMl1gvUi1yYpBcDYZhr6WNe",
+    "folderPath": "C:\\eArchive-Backup\\kuntanase\\Microfinance\\aosarfo",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "AUGUSTINE OWUSU SARFO",
+    "branchId": "kuntanase",
+    "userGroupId": "Microfinance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Abraham Oppong-Tawiah",
+    "email": "abraham.tawiah@gmail.com",
+    "private_email": "abraham.tawiah@bosomtweruralbank.com",
+    "password": "$2a$10$Y6jLDMuwrAsZhFBzdxsfVOLpQqX36j7iPFfiV82TgelwZI52bTARW",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Operations\\aotawiah@atonsuagogo",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Abraham Oppong-Tawiah",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Abraham Oppong-Tawiah",
+    "email": "t.oppong@gmail.com",
+    "private_email": "abraham.tawiah@bosomtweruralbank.com",
+    "password": "$2a$10$Y7d9PEQd8tedx0eK75w3ZuTnakhSZYN6amnxVOPVq2LZI/kj7QaTe",
+    "folderPath": "C:\\eArchive-Backup\\atonsubokro\\Operations\\aotawia",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Abraham Oppong-Tawiah",
+    "branchId": "atonsubokro",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Abigail Sarkodie",
+    "email": "abigail.sarkodie@gmail.com",
+    "private_email": "abigail.sarkodie@brbplc.com",
+    "password": "$2a$10$xfTSZdVThzzBEQrusCLdkOSq5IjLhBYUGbR1mGigD/8NnZsjWM78i",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Teller\\asarkodie@atonsuagogo",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Abigail Sarkodie",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Abigail Adu Sarkodie",
+    "email": "abigail.asakordie@gmail.com",
+    "private_email": "abigail.asakordie@bosomtweruralbank.com",
+    "password": "$2a$10$dDbRYzhzANDjRs0CU6HnkudDk3R6iNRL1prd7CQqgZJjZUd9NbkJC",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Teller\\asarkodie@atonsubokro",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "Abigail Adu Sarkodie",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "SYLVIA SARPONG",
+    "email": "s.sarpong@bosomtweruralbank.com",
+    "private_email": "sar.sarpong@bosomtweruralbank.com",
+    "password": "$2a$10$LAQ6JCODEdr.ynIWINxjheOL05aZ0YXc0Ni0UL7hnhmHsLpQJQhuu",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Teller\\asre",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "SYLVIA SARPONG",
+    "branchId": "Edwinase",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Andrews Boakye Agyare",
+    "email": "majexti@gmail.com",
+    "private_email": "andrews.bagyare@bosomtweruralbank.com",
+    "password": "$2a$10$yuEV/FvJxrgOo/eSChLCQ.6i82ay1z2bKqz0Nd0LbqRRmKXxCTbiS",
+    "folderPath": "C:\\eArchive-Backup\\trede\\Operations\\bagyar",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Andrews Boakye Agyare",
+    "branchId": "trede",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Bismark Owusu-Banahene",
+    "email": "bismark.obanahene@gmail.com",
+    "private_email": "bismark.obanahene@bosomtweruralbank.com",
+    "password": "$2a$10$t.aRxOvQyzx.RlHXGy1v2ukGm.3rjNakC0ppj97VwQFThYth5gXsa",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Credit and marketing\\bobanahen",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Bismark Owusu-Banahene",
+    "branchId": "Edwinase",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "CALEB AGYEMANG",
+    "email": "calebagyemang@brbplc.com",
+    "private_email": "calebagyemang@brbplc.com",
+    "password": "$2a$10$WRWqsUeKtXBYpZl3CWW5SuGioIq3h7hHPYYA.J5.GvjNrCrjnNJ2q",
+    "folderPath": "C:\\eArchive-Backup\\afiakobi\\Credit and marketing\\cagyemang@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "CALEB AGYEMANG",
+    "branchId": "afiakobi",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Clinton Akwasi Boateng",
+    "email": "clintonboateng07@gmail.com",
+    "private_email": "clinton.aboateng@bosomtweruralbank.com",
+    "password": "$2a$10$2bilrWZdX3ONblNP4D47X.AzABIoBDZMdG54qP8Wnx8d.2sbJGwoC",
+    "folderPath": "C:\\eArchive-Backup\\atonsubokro\\Operations\\cboaten",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Clinton Akwasi Boateng",
+    "branchId": "atonsubokro",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "christopher obeng-mensah",
+    "email": "chrismo.256@gmail.com",
+    "private_email": "chrismo.256@gmail.com",
+    "password": "$2a$10$/g.7X2KdsE6km5QJdS0cquGXRBqs4wdqV8Uzr.SNzf9B3V4qFLtGe",
+    "folderPath": "C:\\eArchive-Backup\\headoffice\\IT\\chrismensa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "christopher obeng-mensah",
+    "branchId": "headoffice",
+    "userGroupId": "IT",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "CLEMENT OSEI SARFO",
+    "email": "clementoseisarfo@brbplc.com",
+    "private_email": "clementoseisarfo@brbplc.com",
+    "password": "$2a$10$VLprXU06yRSc/TzggwKVh.XeRV3a5MgIYxu3B0pc.w8o5ugwq312C",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Credit and marketing\\cosarfo@atonsuagogo",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "CLEMENT OSEI SARFO",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "DANIEL ADABOR",
+    "email": "danieladabor@brbplc.com",
+    "private_email": "danieladabor@brbplc.com",
+    "password": "$2a$10$pUidFiavB9T9Qn6UkSZ8TOPbDppKzTK8FH7QYdon5JrwettJPZWeu",
+    "folderPath": "C:\\eArchive-Backup\\afiakobi\\Operations\\dadabor@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "DANIEL ADABOR",
+    "branchId": "afiakobi",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "DENNIS AGYEMAN-DUAH",
+    "email": "dennisagyemang-duah@brbplc.com",
+    "private_email": "dennisagyemang-duah@brbplc.com",
+    "password": "$2a$10$n59PcrzqXZvQJjAHTx32Wev88yDxBWHInT4CsubWYTWOxP1rdcnES",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Microfinance\\daduah",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "DENNIS AGYEMAN-DUAH",
+    "branchId": "Edwinase",
+    "userGroupId": "Microfinance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "DEYOUNGSTER AMOAKO",
+    "email": "deyoungster.amoako@brbplc.com",
+    "private_email": "deyoungster.amoako@brbplc.com",
+    "password": "$2a$10$2.lahdmWrdv3LcAW8DlLfOIKifIafFmwUh/TSWy09eO8YYl0fMpQ2",
+    "folderPath": "C:\\eArchive-Backup\\abuakwa\\Operations\\damoako@abuakwa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "DEYOUNGSTER AMOAKO",
+    "branchId": "abuakwa",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "DORCAS APPIAH",
+    "email": "dorcasappiah@brbplc.com",
+    "private_email": "dorcasappiah@brbplc.com",
+    "password": "$2a$10$A/jvUG1/cj.ZC7vkfNSUi.LdeorTv2mu8KOP6Id741cEdyYAtmR1.",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Teller\\dappiah",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "DORCAS APPIAH",
+    "branchId": "Edwinase",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Daniel Attah Kutin",
+    "email": "daniel.afkutin@gmail.com",
+    "private_email": "daniel.afkutin@bosomtweruralbank.com",
+    "password": "$2a$10$0PVhbqLOHOQsEyFfDlgPC.OyG5uPWJpwPFrRuYoDaa0rEb3MvVZzW",
+    "folderPath": "C:\\eArchive-Backup\\afiakobi\\Operations\\dattah@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Daniel Attah Kutin",
+    "branchId": "afiakobi",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Daniel Attah Kutin Fosu",
+    "email": "dattakutinfosu@gmail.com",
+    "private_email": "daniel.afkutin@bosomtweruralbank.com",
+    "password": "$2a$10$JqKY7IhRSzHoSQyLtVUobORDYgzOFtB/1VlNiBMpcomRR0agOGYhm",
+    "folderPath": "C:\\eArchive-Backup\\kuntanase\\Operations\\datta",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Daniel Attah Kutin Fosu",
+    "branchId": "kuntanase",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Daniel Attah Kutin Fosu",
+    "email": "dattahkutinfosu@gmail.com",
+    "private_email": "daniel.afkutin@bosomtweruralbank.com",
+    "password": "$2a$10$gnIP4Xlr0am0PaH75U8nFeDsvGEptUmjCjMNI6cy.y9XzTgQ7V4BG",
+    "folderPath": "C:\\eArchive-Backup\\trede\\Operations\\dattah@trede",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "Daniel Attah Kutin Fosu",
+    "branchId": "trede",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Daniel Donkor",
+    "email": "dannydok1@gmail.com",
+    "private_email": "daniel.donkor@bosomtweruralbank.com",
+    "password": "$2a$10$JnVoivcAgEKdk0Ht38fjaOqZ5HgylkIVoPF6Q6HpWxT6oSWSHwOSS",
+    "folderPath": "C:\\eArchive-Backup\\trede\\Credit and marketing\\ddonko",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "view_upload"
+    ],
+    "fullname": "Daniel Donkor",
+    "branchId": "trede",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "DANIEL FOSU ATTAH KUTIN",
+    "email": "dattakutinfosu@brbplc.com",
+    "private_email": "dattakutinfosu@brbplc.com",
+    "password": "$2a$10$dd3QsLKGSSya4mYyG9W/UOUyeNxy1A.3F5ahiEy1HIBfamDURYiS.",
+    "folderPath": "C:\\eArchive-Backup\\afiakobi\\Operations\\dfakutin@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "DANIEL FOSU ATTAH KUTIN",
+    "branchId": "afiakobi",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "DANIEL FEI",
+    "email": "danielfei@brbplc.com",
+    "private_email": "danielfei@brbplc.com",
+    "password": "$2a$10$hBDmId5aGt/FJ3xtbFcp9e3QBwcQ20BDCoeuVKF.XTm067q32ueCS",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Credit and marketing\\dfei",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "DANIEL FEI",
+    "branchId": "Aputuogya",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Doris Baffour Awuah",
+    "email": "dorisbaffour.awuah@brbplc.com",
+    "private_email": "dorisbaffour.awuah@brbplc.com",
+    "password": "$2a$10$rgYEOU5pg5Y9YTPCVFRNgOXVZJJZwoZ6FxTjB2kP.FbCqR4QpgeNS",
+    "folderPath": "C:\\eArchive-Backup\\kokofu\\Operations\\doris@kokofu",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Doris Baffour Awuah",
+    "branchId": "kokofu",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Doris Baffour Awuah",
+    "email": "doris.baffour@gmail.com",
+    "private_email": "doris.baffour@gmail.com",
+    "password": "$2a$10$Wpie.iK6zcViCN6t936iAOcr/mLsahEsh8cZ9wUxFqIkGs2Gfdq3C",
+    "folderPath": "C:\\eArchive-Backup\\kokofu\\Operations\\dorisbaffour",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Doris Baffour Awuah",
+    "branchId": "kokofu",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Douglas Gyasi",
+    "email": "gyasi.douglas@bosomtweruralbank.com",
+    "private_email": "gyasi.douglas@gmail.com",
+    "password": "$2a$10$iKjWW2CvfEedE6LZfCXj9e1i5oR5ezwrsIUgucP9KhGMAdSOTmopO",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\IT\\dougla",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Douglas Gyasi",
+    "branchId": "Edwinase",
+    "userGroupId": "IT",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "DINAM SULEMAN",
+    "email": "dinamsuleman@brbplc.com",
+    "private_email": "dinamsuleman@brbplc.com",
+    "password": "$2a$10$mo2IJR5GXiYy9eEXCpi89OxCU3UjZaeH0iV.BTYR8/61xpWp88PSW",
+    "folderPath": "C:\\eArchive-Backup\\kuntanase\\Credit and marketing\\dsuleman",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "DINAM SULEMAN",
+    "branchId": "kuntanase",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Edward Appau Berko",
+    "email": "edwardappauberko@brbplc.com",
+    "private_email": "edwardappauberko@brbplc.com",
+    "password": "$2a$10$Lu7DD2Wir2DLO8Hd16J0T.vwIvtmofuMdBcs19QXTQC.4IzRAKhEK",
+    "folderPath": "C:\\eArchive-Backup\\magazine\\Credit and marketing\\eaberko@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Edward Appau Berko",
+    "branchId": "magazine",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Eva Opoku Anomah",
+    "email": "evaopoku.anomah@brbplc.com",
+    "private_email": "evaopoku.anomah@brbplc.com",
+    "password": "$2a$10$LuDUVhriHkDio4z3EVvczuLL7g0nUWItm7ulHmwDSqTvuYUv8Qmjq",
+    "folderPath": "C:\\eArchive-Backup\\trede\\Teller\\eanomah@magazine",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Eva Opoku Anomah",
+    "branchId": "trede",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "EBENEZER BOATENG",
+    "email": "ebenezerboateng@brbplc.com",
+    "private_email": "ebenezerboateng@brbplc.com",
+    "password": "$2a$10$5RBsQN50ppgXiAl.A7puHuUKEmT53csnP/rvQjrjq8JKXEbXH4kIG",
+    "folderPath": "C:\\eArchive-Backup\\abuakwa\\Credit and marketing\\eboateng@abuakwa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "EBENEZER BOATENG",
+    "branchId": "abuakwa",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Ebenezer Boateng",
+    "email": "ebenezerboateng543@yahoo.com",
+    "private_email": "ebenezer.boateng@bosomtweruralbank.com",
+    "password": "$2a$10$0FTJ1hKKzVZEgE2ymH43nOCKX7HC7TV3Uk4hx0xCYja4Eh9DT8o1y",
+    "folderPath": "C:\\eArchive-Backup\\abuakwa\\Credit and marketing\\eboateng",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Ebenezer Boateng",
+    "branchId": "abuakwa",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Edward Henaku",
+    "email": "edward.henaku@gmail.com",
+    "private_email": "edward.henaku@bosomtweruralbank.com",
+    "password": "$2a$10$qEQPIS/rcjG5kdjS6ctcguxE4Wdv54EaiW5HAC0.7BDkN5/sRpRJa",
+    "folderPath": "C:\\eArchive-Backup\\magazine\\Operations\\edhenak",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Edward Henaku",
+    "branchId": "magazine",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Emmanuel Gyimah",
+    "email": "emmanuelgyimah@brbplc.com",
+    "private_email": "emmanuelgyimah@brbplc.com",
+    "password": "$2a$10$.Yx7nWrrYH9CbqCWvaAxvOfodPeAhAoDe0B9vYIbVGN.KIZMnZ8w6",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Operations\\egyimah@jachie",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Emmanuel Gyimah",
+    "branchId": "Edwinase",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "EDWARD HENAKU ",
+    "email": "edwardhenaku@brbplc.com",
+    "private_email": "edwardhenaku@brbplc.com",
+    "password": "$2a$10$YsH6XLUHS05hU/V/bdmMtekmd3wu9rmt9Cj631yJfSzDnVKSgfZOW",
+    "folderPath": "C:\\eArchive-Backup\\magazine\\Operations\\ehenaku",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "EDWARD HENAKU ",
+    "branchId": "magazine",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Emmanuel Yuoriyoung",
+    "email": "emmanuel.yuoriyoung@gmail.com",
+    "private_email": "emmanuel.yuoriyoung@bosomtweruralbank.com",
+    "password": "$2a$10$w4lcHCwbO0XA43ZzzJsXjuySOsqz3/UmMHFYbeGq4tBSdt3cjBD0q",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Credit and marketing\\ekourik",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Emmanuel Yuoriyoung",
+    "branchId": "Aputuogya",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "EMMANUEL AMOAKO",
+    "email": "amoakoemmanuel@brbplc.com",
+    "private_email": "amoakoemmanuel@brbplc.com",
+    "password": "$2a$10$S/7EYZLFs/Xky2OGSPvPjOUfkUQl1qWpXm7UWv.RWsVBPIKTYMAvi",
+    "folderPath": "C:\\eArchive-Backup\\kuntanase\\Operations\\emmaamok@kuntanase",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "EMMANUEL AMOAKO",
+    "branchId": "kuntanase",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "EMMANUEL OWUSU",
+    "email": "nanayaw.agyapong424@gmail.com",
+    "private_email": "emmanuel.owusu@bosomtweruralbank.com",
+    "password": "$2a$10$qEhdgZz70GBGnOUqM23nCuuPTBpylABxma6uKN6Ldhg4uVquCnoGy",
+    "folderPath": "C:\\eArchive-Backup\\kuntanase\\Teller\\eowusu",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "EMMANUEL OWUSU",
+    "branchId": "kuntanase",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Erica",
+    "email": "SIRPREMO1@GMAIL.COM",
+    "private_email": "SIRPREMO1@GMAIL.COM",
+    "password": "$2a$10$I7zTzpKN94Bi6NeujjqVWOGaQzNRZnqA.AgXO7NIfd7oKOKjWIUZK",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Operations\\Eric",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Erica",
+    "branchId": "Edwinase",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "ERIC SAALE",
+    "email": "ericsaale@brbplc.com",
+    "private_email": "ericsaale@brbplc.com",
+    "password": "$2a$10$WtKTb7yaaN4iHBQAbFCe.ucDL3lpo5ARR5/h1UVSfyHk8mUYgrVXO",
+    "folderPath": "C:\\eArchive-Backup\\ahenemakokoben\\Operations\\esaale",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "ERIC SAALE",
+    "branchId": "ahenemakokoben",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Eva Animah Baffour",
+    "email": "evabaffouranimah.boateng@brbplc.com",
+    "private_email": "evabaffouranimah.boateng@brbplc.com",
+    "password": "$2a$10$3V4C8EherRwo3YPqP9rij.42fv.C1itCWyCjv9NHKjkX1X0BWwd3O",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Teller\\evaboateng@Edwinase",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Eva Animah Baffour",
+    "branchId": "Edwinase",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Emmanuel Yamoah Mensah",
+    "email": "emmanuel.yamoah@gmail.com",
+    "private_email": "emmanuel.yamoah@bosomtweruralbank.com",
+    "password": "$2a$10$GkfOGxFgYRV4/jIRXa2Cqe9ygZ26ycK5rhnJyWSd3oOk2WCIBoXNq",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\IT\\eyamoah@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Emmanuel Yamoah Mensah",
+    "branchId": "Edwinase",
+    "userGroupId": "IT",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Emmanuel Yankee",
+    "email": "emmanuel.yankee@brbplc.com",
+    "private_email": "emmanuel.yankee@brbplc.com",
+    "password": "$2a$10$1q80ruQEeIWKzMRqrZlTA.Du4rsjf1xB7QgZfJTW6vIIWpzhwBNr2",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\eyankee",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Emmanuel Yankee",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Fredrick Kwarteng",
+    "email": "fred.kwarteng@gmail.com",
+    "private_email": "fred.kwarteng@bosomtweruralbank.com",
+    "password": "$2a$10$nRlPMghQSDufS/lNZpiyLemRPXg5yJ2L15hlDJpqtybbYu.zypiEy",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\fakwarten",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Fredrick Kwarteng",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "FAUSTINA AFRIYIE SARPONG",
+    "email": "faustinaafriyie.sarpong@brbplc.com",
+    "private_email": "faustinaafriyie.sarpong@brbplc.com",
+    "password": "$2a$10$hbtMp9JG9JAWEogBqgg2QuGaXzISODeLiqKAB46cvzYnE1aWkGIni",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Teller\\fasarpong",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "FAUSTINA AFRIYIE SARPONG",
+    "branchId": "Edwinase",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Francis Otu",
+    "email": "otufrancis30@gmail.com",
+    "private_email": "francis.otu@bosomtweruralbank.com",
+    "password": "$2a$10$88GK2nEDQaI2v.at1BFjsuRgLtG4HClXzyeIVD5ETwmctMFv/aisG",
+    "folderPath": "C:\\eArchive-Backup\\jachie\\Credit and marketing\\francisotu@jachie",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "view_upload"
+    ],
+    "fullname": "Francis Otu",
+    "branchId": "jachie",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Gifty Agyei Mensah",
+    "email": "giftymensah@brbplc.com",
+    "private_email": "giftymensah@brbplc.com",
+    "password": "$2a$10$HITBqtaGe.Lb8hH0a60bKuQgau.rSNecfe4.ukrX9eXAryK5yaWWy",
+    "folderPath": "C:\\eArchive-Backup\\atonsubokro\\Operations\\gagyei@jachie",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Gifty Agyei Mensah",
+    "branchId": "atonsubokro",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "GYEKYE AMPEM",
+    "email": "gyekyeampem@brbplc.com",
+    "private_email": "gyekyeampem@brbplc.com",
+    "password": "$2a$10$/5QkHcj5FS.ULlAyS8tgCeskJ9sIUhhfaaRvjPVfvFyY4CeAGo8Lq",
+    "folderPath": "C:\\eArchive-Backup\\abuakwa\\Operations\\gampem@abuakwa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "GYEKYE AMPEM",
+    "branchId": "abuakwa",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Grace Arthur",
+    "email": "grace.arthur@brbplc.com",
+    "private_email": "grace.arthur@brbplc.com",
+    "password": "$2a$10$Jx6osfCnJ1CnpZFhWV0FZeZrzyDPNGce0FJkTrhHryHfizPf50fOa",
+    "folderPath": "C:\\eArchive-Backup\\abuakwa\\Teller\\garthur2@abuakwa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Grace Arthur",
+    "branchId": "abuakwa",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "George Doe",
+    "email": "georgedoe@gmail.com",
+    "private_email": "georgedoe@brbplc.com",
+    "password": "$2a$10$0lF8EkgpHG7dncrBMIMcPO2l7jLM5VdLNy2x6ZxsZEDenMHenSKqy",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\georgedoe",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "George Doe",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "George Doe",
+    "email": "goergedoejunior@brbplc.com",
+    "private_email": "goergedoejunior@brbplc.com",
+    "password": "$2a$10$Rw3cR9uN44rm/jYtsGaiw.IhMRgZVOjKjxgc4WC0dnqJSc4xNGnAS",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\georgedoe@trede",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "George Doe",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Gideon Agyei Mensah",
+    "email": "gideon.amensah@gmail.com",
+    "private_email": "gideon.amensah@bosomtweruralbank.com",
+    "password": "$2a$10$UsK/h9hgjp.lJNPJtBMFp.uOHjV0GxDhsD1plGHaTJ9eP6XJBqm3e",
+    "folderPath": "C:\\eArchive-Backup\\headoffice\\HR\\gmensa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Gideon Agyei Mensah",
+    "branchId": "headoffice",
+    "userGroupId": "HR",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "HELINA FRIMPONG",
+    "email": "helinafrimpong@brbplc.com",
+    "private_email": "helinafrimpong@brbplc.com",
+    "password": "$2a$10$1uajEEgXUx9Xd4lkJSbbVenjFg/j3z0UOTttxa8uWnhThUFYa5vKe",
+    "folderPath": "C:\\eArchive-Backup\\atonsubokro\\Operations\\hfrimpong",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "HELINA FRIMPONG",
+    "branchId": "atonsubokro",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "HAMDIYA MUNIRU",
+    "email": "hamdiya.muniru@brbplc.com",
+    "private_email": "hamdiya.muniru@brbplc.com",
+    "password": "$2a$10$HJ0B3ZU1pUAVz2soYNUC/.nmDODaxCuqxXPtYpYbtN9pIHaKcX60K",
+    "folderPath": "C:\\eArchive-Backup\\magazine\\Teller\\hmuniru",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "HAMDIYA MUNIRU",
+    "branchId": "magazine",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "IMMACULATE ACKAH-MIEZAH",
+    "email": "immaculate.ackah-miezah@brbplc.com",
+    "private_email": "immaculate.ackah-miezah@brbplc.com",
+    "password": "$2a$10$Z7AervlJ/KNysVUwdensXewDRNv0ePrhvp8Jzuo6.WqxOsEBeEKzm",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Teller\\iamiezah",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "IMMACULATE ACKAH-MIEZAH",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Irene Atta",
+    "email": "irene.attah@brbplc.com",
+    "private_email": "irene.attah@brbplc.com",
+    "password": "$2a$10$pqDw87XAeikKIu4KdmBZHuGy5f10Xh8TEu6TRGnIQRhNxvQ2Lyjcu",
+    "folderPath": "C:\\eArchive-Backup\\ahenemakokoben\\Teller\\iatta@ahenemakokoben",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Irene Atta",
+    "branchId": "ahenemakokoben",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Isaac Mensah Bonsu",
+    "email": "isaac.mbonsu@gmail.com",
+    "private_email": "isaac.mbonsu@bosomtweruralbank.com",
+    "password": "$2a$10$YM/3KyWi2yecTcmyIUDoruzUlb1eodZVfexiMUncPjL.TjagjHkT2",
+    "folderPath": "C:\\eArchive-Backup\\atonsubokro\\Credit and marketing\\ibons",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Isaac Mensah Bonsu",
+    "branchId": "atonsubokro",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Isaac Insaidoo",
+    "email": "isaac.insaidoo@brbplc.com",
+    "private_email": "isaac.insaidoo@brbplc.com",
+    "password": "$2a$10$dthSTx.By7rkoxWWLiVfj.SdEYlUm4uBdV9vyU6U9goF.l3MhSc7W",
+    "folderPath": "C:\\eArchive-Backup\\headoffice\\Finance\\insaidoo@headoffice",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Isaac Insaidoo",
+    "branchId": "headoffice",
+    "userGroupId": "Finance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "ISSAC OPPONG",
+    "email": "isaacoppong@brbplc.com",
+    "private_email": "isaacoppong@brbplc.com",
+    "password": "$2a$10$uFiKKSKkZmmNLy9CUEmEt.qv1nQzo67pZH59uWRsOeyoiuUThMW1e",
+    "folderPath": "C:\\eArchive-Backup\\kuntanase\\Operations\\ioppong@kuntanase",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "ISSAC OPPONG",
+    "branchId": "kuntanase",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Isaac Asamoah",
+    "email": "isaac.asamoah@gmail.com",
+    "private_email": "isaac.asamoah@bosomtweruralbank.com",
+    "password": "$2a$10$7Z.0okabcefTI.okaTyUXevSRar4o5iCXQSH21lyOPkbAS/CvnZLG",
+    "folderPath": "C:\\eArchive-Backup\\afiakobi\\Operations\\isamoah@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Isaac Asamoah",
+    "branchId": "afiakobi",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "JOSEPH ADARKWA KWABENA",
+    "email": "joseph.adarkwah.kwabena@brbplc.com",
+    "private_email": "joseph.adarkwah.kwabena@brbplc.com",
+    "password": "$2a$10$Q4TG/tstC6Zv3zhfilxvcuqUIIvBcT3eEi57bOKG6qhFM4uu2ldoC",
+    "folderPath": "C:\\eArchive-Backup\\kokofu\\Operations\\jakwabena@kokofu",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "JOSEPH ADARKWA KWABENA",
+    "branchId": "kokofu",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Joseph Kwabena Adarkwah\t",
+    "email": "joseph.kadarkwa@gmail.com",
+    "private_email": "joseph.kadarkwa@bosomtweruralbank.com",
+    "password": "$2a$10$iJHZ1FvymXdhKI06S9s/MOyVuADVZ5xhVKHPMpgzRGgqhetqiAf5S",
+    "folderPath": "C:\\eArchive-Backup\\ahenemakokoben\\Operations\\jkadarkwa@ahenemakokoben",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Joseph Kwabena Adarkwah\t",
+    "branchId": "ahenemakokoben",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Justice Kwabena Okyere",
+    "email": "papajustice72@gmail.com",
+    "private_email": "justice.kokyere@bosomtweruralbank.com",
+    "password": "$2a$10$W7akjyOtNkmhTAetmePzPuvAHytC3qHp/8FPFWT520vnGLG1meegC",
+    "folderPath": "C:\\eArchive-Backup\\abuakwa\\Operations\\jkokyere@abuakwa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Justice Kwabena Okyere",
+    "branchId": "abuakwa",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "JANET NIAMA ANTWI",
+    "email": "janetniamaantwi@brbplc.com",
+    "private_email": "janetniamaantwi@brbplc.com",
+    "password": "$2a$10$kbPgqIOwkxnyRLEuNNjRfO7c67cjjo65XnmGR.hWyoY03PT2MnsZ2",
+    "folderPath": "C:\\eArchive-Backup\\magazine\\Microfinance\\jnantwi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "JANET NIAMA ANTWI",
+    "branchId": "magazine",
+    "userGroupId": "Microfinance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Evans Kofi Affisah",
+    "email": "evans.kaffisah@gmail.com",
+    "private_email": "evans.kaffisah@bosomtweruralbank.com",
+    "password": "$2a$10$RgWr3L/ve4BiVqHwngg9sOL6fNzINHiRRWdOnxuDttQsvdKkHLyMO",
+    "folderPath": "C:\\eArchive-Backup\\headoffice\\Credit and marketing\\kaffisa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Evans Kofi Affisah",
+    "branchId": "headoffice",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Kofi Ampofo Manu",
+    "email": "kofi.ampofo@brbplc.com",
+    "private_email": "kofi.ampofo@brbplc.com",
+    "password": "$2a$10$MozJYfMsXU6WuOetc6/X7OBTDiR1HVK/jqcri/Wa53P9e50JbKiya",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Operations\\kamanu@Edwinase",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Kofi Ampofo Manu",
+    "branchId": "Edwinase",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Kwaku Amoateng",
+    "email": "kwaku.amoateng@gmail.com",
+    "private_email": "kwaku.amoateng@bosomtweruralbank.com",
+    "password": "$2a$10$Gx0oRGwFe6SHLuPLW4u35ODU8Eos5.PssuU26.C0.8UpERH7ef43u",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Credit and marketing\\kamoateng",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Kwaku Amoateng",
+    "branchId": "Aputuogya",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Kingsley Boadu",
+    "email": "kingsleyboadu@brbplc.com",
+    "private_email": "kingsleyboadu@brbplc.com",
+    "password": "$2a$10$i02utqk.1ONsibEN64d.F.zh7fELzX0FEu3AA8HtD.yTATvuNYU2K",
+    "folderPath": "C:\\eArchive-Backup\\atonsubokro\\Teller\\kboadu@trede",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "view_upload"
+    ],
+    "fullname": "Kingsley Boadu",
+    "branchId": "atonsubokro",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Kwadwo Gyekye Sarpong",
+    "email": "kwadwo.sgyekye@gmail.com",
+    "private_email": "kwadwo.sgyekye@bosomtweruralbank.com",
+    "password": "$2a$10$uOc04OawbrxxMxjEr6TU/u89OK3gxLW9JzkG5FTZ/yZz7CJaZpDnq",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Operations\\kgyeky",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Kwadwo Gyekye Sarpong",
+    "branchId": "Edwinase",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "LILY ADU GYAMFI",
+    "email": "lilyadugyamfi81@gmail.com",
+    "private_email": "lily.agyamfi@bosomtweruralbank.com",
+    "password": "$2a$10$NvziWQT.HcCPE3tders/GOYIDm/Lc7SjMaiIbak0AKuiQPAoDvWB6",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Operations\\lgyamfi2@kuntanase",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "LILY ADU GYAMFI",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Mercy Adu Abankoro",
+    "email": "mercyadu.abankoro@brbplc.com",
+    "private_email": "mercyadu.abankoro@brbplc.com",
+    "password": "$2a$10$8eYSc75TuMZxgCseu2Q9xeiZrAIAduAe5ZfGcqmiK6pSvmw7yt3rC",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Teller\\maabankoro",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Mercy Adu Abankoro",
+    "branchId": "Aputuogya",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Mercy Adu Abankoro",
+    "email": "mercyadu.abankoro@brbplc.com",
+    "private_email": "mercyadu.abankoro@brbplc.com",
+    "password": "$2a$10$pMVO62uDQEtD2cI9xv0Ouua1Rta/ktkCNTIt9rwtY/cJZn50kfqSG",
+    "folderPath": "C:\\eArchive-Backup\\kokofu\\Teller\\maabankoro@kokofu",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Mercy Adu Abankoro",
+    "branchId": "kokofu",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "PIOUS AGYEMANG ADUSEI",
+    "email": "piousagyemangadusei@brbplc.com",
+    "private_email": "piousagyemangadusei@brbplc.com",
+    "password": "$2a$10$bV1CUKRgBYK17T3IOwMqX.2QA8mE0ILQaC.NnBJyTBbvRYvfOCIBi",
+    "folderPath": "C:\\eArchive-Backup\\kokofu\\Credit and marketing\\maadusei",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "PIOUS AGYEMANG ADUSEI",
+    "branchId": "kokofu",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Michael Okyere Adusei",
+    "email": "michealasiedu@brbplc.com",
+    "private_email": "michealasiedu@brbplc.com",
+    "password": "$2a$10$R76UJgvP.HONXyuytJaN4.v.dkTBnOjGI8kea3SwaOZCcBG8anTLu",
+    "folderPath": "C:\\eArchive-Backup\\ahenemakokoben\\Operations\\madusei@ahenemakokoben",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Michael Okyere Adusei",
+    "branchId": "ahenemakokoben",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Maxwell Owusu",
+    "email": "goolyburyinc@gmail.com",
+    "private_email": "goolyburyinc@gmail.com",
+    "password": "$2a$10$FOoqGWYnjDi0XQvStavuEeycWaQ4mEu73CHQu1cbLbj34z5w6fCwO",
+    "folderPath": "C:\\eArchive-Backup\\Global\\Credit and marketing\\ma",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Maxwell Owusu",
+    "branchId": "Global-2",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "MABEL DAMOAH OSEI ASAMOAH",
+    "email": "mabeldamoahoseiasamoah@brbplc.com",
+    "private_email": "mabeldamoahoseiasamoah@brbplc.com",
+    "password": "$2a$10$y9uF61QyGeB/ZuW8alQk7uywP827AFsr.p7uf7HDmHkoOBe8.l5Jy",
+    "folderPath": "C:\\eArchive-Backup\\afiakobi\\Teller\\mdoasamoah@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "MABEL DAMOAH OSEI ASAMOAH",
+    "branchId": "afiakobi",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Mercy Adu Abankro",
+    "email": "mercyadu.abankoro@brbplc.com",
+    "private_email": "mercyadu.abankoro@brbplc.com",
+    "password": "$2a$10$ENTlG5bwZFJAijImi5Tl..0MYO5B79gZxmp0NApBSq6lMOABLocBO",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Teller\\mercyabankro",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Mercy Adu Abankro",
+    "branchId": "Aputuogya",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Mercy Mensah",
+    "email": "mercymensah@brbplc.com",
+    "private_email": "mercymensah@brbplc.com",
+    "password": "$2a$10$gdYS1CTiwoSAmUdAezBUJOuXuDBTTQcM9rPG7GLBb2LSqksLbcBKm",
+    "folderPath": "C:\\eArchive-Backup\\atonsubokro\\Teller\\mercymensah@Aputuogya",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Mercy Mensah",
+    "branchId": "atonsubokro",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Mabel Damoah Osei Asamoah",
+    "email": "mabel.damoah@gmail.com",
+    "private_email": "mabeldamoahoseiasamoah@brbplc.com",
+    "password": "$2a$10$xuqXRtyfu7Ns1sJ81yGyy..ZkMdWczHApvwVIMYyyq.qFy5JGafGG",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\moasamoah",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Mabel Damoah Osei Asamoah",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Mary Okyere",
+    "email": "mary.okyere@gmail.com",
+    "private_email": "mary.okyere@bosomtweruralbank.com",
+    "password": "$2a$10$tJelJMPXHua9oODPzERef.Qf286OPHc8YA5TmWpT5kAi0zX/uHfGG",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Teller\\mokyer",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Mary Okyere",
+    "branchId": "Edwinase",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "OLIVER MORRISION ",
+    "email": "olivermorrison@brbplc.com",
+    "private_email": "olivermorrison@brbplc.com",
+    "password": "$2a$10$RVUpnGzunv6qTGevxOkbeuGuZQzkwOx114cEBXskRLIi2jaP86ZtK",
+    "folderPath": "C:\\eArchive-Backup\\trede\\Credit and marketing\\moliver",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "OLIVER MORRISION ",
+    "branchId": "trede",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Michelle Opoku",
+    "email": "michelle.opoku@gmail.com",
+    "private_email": "michelle.opoku@bosomtweruralbank.com",
+    "password": "$2a$10$HnrTLole6B544jVaX/r0ce1pGHY3iObvqlMmQXxlk/bwFWQeH4VdC",
+    "folderPath": "C:\\eArchive-Backup\\headoffice\\HR\\mopok",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Michelle Opoku",
+    "branchId": "headoffice",
+    "userGroupId": "HR",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Muhayadeen Adam Kaleem",
+    "email": "muhay.adamk@gmail.com",
+    "private_email": "muhay.adamk@bosomtweruralbank.com",
+    "password": "$2a$10$KMIEMr.wtApA1zY86.dD2u2logcX3Mn0GljR9t9ACFjUsGKSxgKQy",
+    "folderPath": "C:\\eArchive-Backup\\headoffice\\Credit and marketing\\muha",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Muhayadeen Adam Kaleem",
+    "branchId": "headoffice",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "MARTIN YEBOAH",
+    "email": "martin.yeboah@brbplc.com",
+    "private_email": "martin.yeboah@brbplc.com",
+    "password": "$2a$10$DXmJkOeEMHRBDI0q1U087.H1/aKA/JRI8OxojzvRarV7bqpwFtePO",
+    "folderPath": "C:\\eArchive-Backup\\trede\\Teller\\myeboah",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "MARTIN YEBOAH",
+    "branchId": "trede",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Nana Yaa Asantewaah",
+    "email": "nanayaaasantewaa@brbplc.com",
+    "private_email": "nanayaaasantewaa@brbplc.com",
+    "password": "$2a$10$1DFgmfEU.Hxyh7so3LqjNuEl8s9KczsU24sAednGTISf/9YRC/KPO",
+    "folderPath": "C:\\eArchive-Backup\\afiakobi\\Teller\\nanayaa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Nana Yaa Asantewaah",
+    "branchId": "afiakobi",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Nana Yaa Asantewaa",
+    "email": "nana.yasantewaa@gmail.com",
+    "private_email": "nana.yasantewaa@bosomtweruralbank.com",
+    "password": "$2a$10$VGNGy.8LcpQlYeaSvjkeFePscmo.gmxbyjF3BLKhG.YoDxEJ9HPrG",
+    "folderPath": "C:\\eArchive-Backup\\headoffice\\HR\\nasantewa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Nana Yaa Asantewaa",
+    "branchId": "headoffice",
+    "userGroupId": "HR",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Bernard Nsiah Abrefa",
+    "email": "bernardnsiahabrefa@brbplc.com",
+    "private_email": "bernardnsiahabrefa@brbplc.com",
+    "password": "$2a$10$RvrHeEK3e77ep4culaN8k.QYKSyXHRwQZjlYg/BwnZ364FyjJLABW",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Credit and marketing\\nsiahabrefa@atonsuagogo",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Bernard Nsiah Abrefa",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Ophelia Mensah",
+    "email": "ophelia.mensah@brbplc.com",
+    "private_email": "ophelia.mensah@brbplc.com",
+    "password": "$2a$10$i./WAxu7U0j9HfrGnoBo/uUfCOWjKPuePiEmLp9PVstSit5PpdLYW",
+    "folderPath": "C:\\eArchive-Backup\\kuntanase\\Teller\\omensah@atonsuagogo",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "Ophelia Mensah",
+    "branchId": "kuntanase",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Ophelia Agyemang Ababio",
+    "email": "Ophelia.Agyemang@brbplc.com",
+    "private_email": "Ophelia.Agyemang@brbplc.com",
+    "password": "$2a$10$w0LUHcdmD.Qr5IiT1lJMLuSdAzLHc64/zLHxnQFzW32zVRpe287Ai",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\ophiababio",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Ophelia Agyemang Ababio",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Ophelia Agyemang Ababio",
+    "email": "opheliaababio.agyemang@brbplc.com",
+    "private_email": "opheliaababio.agyemang@brbplc.com",
+    "password": "$2a$10$TYeDWfZNXCRQliHaP0eIZ.AEds3leakW4SYROJ/LPdCBow5V8y.pW",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Teller\\ophiababio@atonsuagogo",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "Ophelia Agyemang Ababio",
+    "branchId": "Aputuogya",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "OPPONG TAWIAH ABRAHAM",
+    "email": "abrahamoppong.tawiah@brbplc.com",
+    "private_email": "abrahamoppong.tawiah@brbplc.com",
+    "password": "$2a$10$.hJJH6wAJFSScjkQBWmhHeol045WmT8R//0fL6CBpPDIbfcayXIdy",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Operations\\otabraham@atonsuagogo",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "OPPONG TAWIAH ABRAHAM",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Priscilla Amonoo Aquah",
+    "email": "priscillaababio.agyemang@brbplc.com",
+    "private_email": "priscillaababio.agyemang@brbplc.com",
+    "password": "$2a$10$H.r2rFhosc7Y1J/XW2PLiuGqAkY4fTXkyg4Rsr2is2Q7Ixe7PE7Aa",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Teller\\paaquah@Aputuogya",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Priscilla Amonoo Aquah",
+    "branchId": "Aputuogya",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Pious Adusei Agyemang",
+    "email": "pious.adusei-agyemang@brbplc.com",
+    "private_email": "pious.adusei-agyemang@brbplc.com",
+    "password": "$2a$10$VC7YlQHechNOGJW2NAwbd.vFgwu1FChUvJsH1U74npFjKiIvDiiai",
+    "folderPath": "C:\\eArchive-Backup\\kokofu\\Credit and marketing\\piousadusei",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Pious Adusei Agyemang",
+    "branchId": "kokofu",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Raphael Agbagli",
+    "email": "raphealkwame.agbagli@brbplc.com",
+    "private_email": "raphealkwame.agbagli@brbplc.com",
+    "password": "$2a$10$CiJZn4JqLh3/ZvLGDn5YCeLy0waNnuszk0S6eyjAm6gV7NvW5cBWu",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\ragbagli@kokofu",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Raphael Agbagli",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Richard Amoabeng",
+    "email": "richard.amoabeng@gmail.com",
+    "private_email": "richard.amoabeng@bosomtweruralbank.com",
+    "password": "$2a$10$FrgaCPSgiOHc0zugJIe6Mue1GuC1b9nB6y0z.VJaljy7RVeXmFrYS",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\ramoaben",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Richard Amoabeng",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "RICHARD AMOABENG",
+    "email": "richardamoabeng@brbplc.com",
+    "private_email": "richardamoabeng@brbplc.com",
+    "password": "$2a$10$2Lt8aWcFBuXEmm/cO.DJNOs4qWcSU9GTYcPRQk2Iv90nmT4kFX76G",
+    "folderPath": "C:\\eArchive-Backup\\jachie\\Operations\\ramoabeng",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "RICHARD AMOABENG",
+    "branchId": "jachie",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "ROBERT ADUSEI POKU",
+    "email": "robertaduseipoku@brbplc.com",
+    "private_email": "robertaduseipoku@brbplc.com",
+    "password": "$2a$10$R1EaK9xA224VIAptRdCJA.S3HCwAUIZDXEsqUwcblzSizyhIseiaq",
+    "folderPath": "C:\\eArchive-Backup\\afiakobi\\Microfinance\\rapoku",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "ROBERT ADUSEI POKU",
+    "branchId": "afiakobi",
+    "userGroupId": "Microfinance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Rebecca Biney",
+    "email": "rebecca.biney@gmail.com",
+    "private_email": "rebecca.biney@bosomtweruralbank.com",
+    "password": "$2a$10$h9J5pQVbAH05W4a0P1a4R.BAbc0gJzJR6QZhijTTY3XlqSEBWqiPu",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Operations\\rbiney@afiakobi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Rebecca Biney",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "REBECCA BINEY",
+    "email": "rebecca.biney@gmail.com",
+    "private_email": "rebecca.biney@bosomtweruralbank.com",
+    "password": "$2a$10$/YsUaBopAMjxO8U93MPII.F05cVY8tq13u/3gDNimsKHepShloDXy",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Operations\\rbiney",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "REBECCA BINEY",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "RAUF IDDRISU ",
+    "email": "raufiddrisu@brbplc.com",
+    "private_email": "raufiddrisu@brbplc.com",
+    "password": "$2a$10$rsnuPp4NvEY0tAtpDZl/ie8tU.CnjicVhpM4WQJPmyNGLWVHPCT9G",
+    "folderPath": "C:\\eArchive-Backup\\abuakwa\\Microfinance\\riddrisu@abuakwa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "RAUF IDDRISU ",
+    "branchId": "abuakwa",
+    "userGroupId": "Microfinance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Ransford Osei Mpere",
+    "email": "ampareransford@brbplc.com",
+    "private_email": "ampareransford@brbplc.com",
+    "password": "$2a$10$7o2/47H2NWmHZt4UBmZAWues14Q6Szcp1Temtyr./PH1K.MxAG0Ja",
+    "folderPath": "C:\\eArchive-Backup\\ahenemakokoben\\Credit and marketing\\rmpere@ahenemakokoben",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Ransford Osei Mpere",
+    "branchId": "ahenemakokoben",
+    "userGroupId": "Credit and marketing",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Ruth Tawiah Baidoo",
+    "email": "ruth.tawiah@brbplc.com",
+    "private_email": "ruth.tawiah@brbplc.com",
+    "password": "$2a$10$QdAlSqr5R018z2ntK.6GoeydiwIgPwJirqhrtY5JzZVbQkjO9pV92",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\rtbaidoo",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Ruth Tawiah Baidoo",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Samuel Owusu Manu",
+    "email": "samuelowusumanu@brbplc.com",
+    "private_email": "samuelowusumanu@brbplc.com",
+    "password": "$2a$10$LeMHPsAn1RQDI8zW2jaMqu1ilouVFAMA6N.QSpd3oVBYwTuVKk4Pq",
+    "folderPath": "C:\\eArchive-Backup\\trede\\Operations\\somanu@kokofu",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Samuel Owusu Manu",
+    "branchId": "trede",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Stephen Osei Nyamekye",
+    "email": "stephenosei.nyamekye@brbplc.com",
+    "private_email": "stephenosei.nyamekye@brbplc.com",
+    "password": "$2a$10$7/txPuqATxwqGxl4mRa2r.DZNB8BqND1TUF8yo.wRc2SkdoxvkqhC",
+    "folderPath": "C:\\eArchive-Backup\\trede\\Operations\\sonyamekye@trede",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Stephen Osei Nyamekye",
+    "branchId": "trede",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Stephen Osei",
+    "email": "stephen.osei@gmail.com",
+    "private_email": "stephen.osei@bosomtweruralbank.com",
+    "password": "$2a$10$O7MNdosyLp6GPsBr9Wfx2uQv2sImx5zYQDN0/dKoObuOPzXM7LiTq",
+    "folderPath": "C:\\eArchive-Backup\\atonsubokro\\Operations\\stephe",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Stephen Osei",
+    "branchId": "atonsubokro",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Sylvia Sarpong",
+    "email": "sylvia.sarpong@gmail.com",
+    "private_email": "sylvia.sarpong@bosomtweruralbank.com",
+    "password": "$2a$10$GksVIYFVdyeXCxdXPYSjgeotQ2trUXYsCCYAjjdgEd4MdFqIEF6LK",
+    "folderPath": "C:\\eArchive-Backup\\ahenemakokoben\\Teller\\sylvi",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Sylvia Sarpong",
+    "branchId": "ahenemakokoben",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Timothy Appiah",
+    "email": "timothy.kappiah@gmail.com",
+    "private_email": "timothy.kappiah@bosomtweruralbank.com",
+    "password": "$2a$10$JgeolgH3/2LheatUtPM5Oe/v4GlClXow3i6UIAqhV3z.yg9HgcAs2",
+    "folderPath": "C:\\eArchive-Backup\\magazine\\Operations\\tappia",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Timothy Appiah",
+    "branchId": "magazine",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Theresah Boakye Yiadom",
+    "email": "theresahboakyeowusu@brbplc.com",
+    "private_email": "theresahboakyeowusu@brbplc.com",
+    "password": "$2a$10$zzuKO/tWkl1sa305l1qCQ.V.8BNaa8RgupKxmGPdX8grVmuaIsb/O",
+    "folderPath": "C:\\eArchive-Backup\\jachie\\Operations\\tbyiadom@jachie",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Theresah Boakye Yiadom",
+    "branchId": "jachie",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Douglas Gyasi",
+    "email": "info@bosomtweruralbank.com",
+    "private_email": "gyasi.douglas@gmail.com",
+    "password": "$2a$10$ALVeaiUcxMzefXpMxOeX1OFi7gTu.s8zGiU1UN4OREikBZX.fo0Di",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Operations\\tes",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Douglas Gyasi",
+    "branchId": "Aputuogya",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Faustina Adjei",
+    "email": "Adjeifaustina103@gmail.com",
+    "private_email": "faustina.agyei@bosomtweruralbank.com",
+    "password": "$2a$10$mhK3lg/AfRf0AUtDk2T4z.cx7J8N.NgqNYfU7YapFEjsDt7kiAK4m",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Operations\\tinaadjei@atonsuagogo",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "Faustina Adjei",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Teddy Kankam",
+    "email": "teddy.kankam@gmail.com",
+    "private_email": "teddy.kankam@bosomtweruralbank.com",
+    "password": "$2a$10$v2DOJHgM9IHB0..kXKhgmuZ1MdopIq3DSWZX6obrZE24NhAteahzO",
+    "folderPath": "C:\\eArchive-Backup\\atonsuagogo\\Operations\\tkankam@atonsuagogo",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "Teddy Kankam",
+    "branchId": "atonsuagogo",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Vera Adu Acheampong",
+    "email": "veraadua@brbplc.com",
+    "private_email": "veraadua@brbplc.com",
+    "password": "$2a$10$aInSnkN13ziJB0Xo.ytZZeAcJcH06667E9Aoym/4iOjmmYW5WGl32",
+    "folderPath": "C:\\eArchive-Backup\\abuakwa\\Operations\\vachempong@abuakwa",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Vera Adu Acheampong",
+    "branchId": "abuakwa",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Vincent Yaw Boateng",
+    "email": "vincentyaw.boateng@brbplc.com",
+    "private_email": "vincentyaw.boateng@brbplc.com",
+    "password": "$2a$10$TFpkBs.dCHgHCtFzqaURGOKVqpCHYTepEZtqcl37jvINg/GhSmSLm",
+    "folderPath": "C:\\eArchive-Backup\\magazine\\Operations\\vboateng@atonsuagogo",
+    "permissions": [
+      "view_upload"
+    ],
+    "fullname": "Vincent Yaw Boateng",
+    "branchId": "magazine",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "VALENTIA WIREKO AGYEMANG",
+    "email": "valentinawireko.agyemang@brbplc.com",
+    "private_email": "valentinawireko.agyemang@brbplc.com",
+    "password": "$2a$10$GRsrADae1e21pmGZYQRBL.GzeGTVuGT2pTHB7oM5SmhiMtZ88mUJS",
+    "folderPath": "C:\\eArchive-Backup\\jachie\\Teller\\vwagyemang",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "VALENTIA WIREKO AGYEMANG",
+    "branchId": "jachie",
+    "userGroupId": "Teller",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "Wilson Owusu Agyemang",
+    "email": "wilsonagyemang111@gmail.com",
+    "private_email": "wilsonagyemang111@gmail.com",
+    "password": "$2a$10$LuTJsKLZ6a8pXQ2Vv3hTBOyZglazHv9jRaQMN3OxFt6g5qSixLxOu",
+    "folderPath": "C:\\eArchive-Backup\\Edwinase\\Operations\\wilson",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "Wilson Owusu Agyemang",
+    "branchId": "Edwinase",
+    "userGroupId": "Operations",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "xcore sample account",
+    "email": "dltkulio@gmail.com",
+    "private_email": "dltkulio@gmail.com",
+    "password": "$2a$10$dpOy8OF6zQ29q5C5L/5QjuPp7tCm4zjpWQnwYEUz9acFppUadsTry",
+    "folderPath": "C:\\eArchive-Backup\\BMAS\\Finance\\xcor",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "xcore sample account",
+    "branchId": "BMAS",
+    "userGroupId": "Finance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  },
+  {
+    "username": "YANKEY EMMANUEL",
+    "email": "yankeyemmanuel@brbplc.com",
+    "private_email": "yankeyemmanuel@brbplc.com",
+    "password": "$2a$10$a83criyDJ1kVOn0qFv.dbegw9gBH4NGNWWE0gy6zATtF3JEUoBmcy",
+    "folderPath": "C:\\eArchive-Backup\\Aputuogya\\Microfinance\\yemmanuel",
+    "permissions": [
+      "scanning",
+      "archiving",
+      "supervision_right",
+      "view_upload"
+    ],
+    "fullname": "YANKEY EMMANUEL",
+    "branchId": "Aputuogya",
+    "userGroupId": "Microfinance",
+    "profilePicturePath": null,
+    "createdAt": "2025-04-29T14:43:50.808Z",
+    "updatedAt": "2025-04-29T14:43:50.808Z"
+  }
+]
