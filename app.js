@@ -6,12 +6,13 @@ const path = require("path");
 const ejsLayout = require("express-ejs-layouts");
 const adminRoute = require("./routes/adminRoute.js");
 const dbConnect = require("./dbConnect");
-const { createDefaultDirectory, importUsers, importAuthorizations } = require("./util/directory");
+const { createDefaultDirectory, importUsers, importAuthorizations, cleanTransformedUsers, hashTransformedUserPasswords, exportUserCredentials } = require("./util/directory");
 const session = require("express-session");
 const { fileContent } = require("./controllers/adminController.js");
 const cron = require("node-cron");
 const runCleanupTasks = require("./util/tempFolderCleanUp.js");
 const defineAssociations = require("./model/associations.js");
+const fs = require("fs");
 
 const DEFAULT_PATH = process.env.FOLDER ;
 
@@ -68,11 +69,14 @@ app.use("/admin", adminRoute);
 
 
 const startServer = async () => {
-  await dbConnect.authenticate();
-  dbConnect.sync({ alter: true });
+   await dbConnect.authenticate();
+   dbConnect.sync({ alter: true });
   createDefaultDirectory();
+  // cleanTransformedUsers();
+  // await hashTransformedUserPasswords();
   // importUsers();
-  // importAuthorizations();
+  //  importAuthorizations();
+  // exportUserCredentials();
   app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
     // console.log(envPaths);

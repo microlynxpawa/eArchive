@@ -4,42 +4,121 @@
       <div class="card">
         <div class="card-header pb-0"></div>
         <div class="card-body">
-          <div class="row">
-            <div class="col-md-12">
-              <!-- Updated action to match the backend route -->
+          <!-- Tab navigation -->
+          <ul class="nav nav-tabs mb-3" id="uploadTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="single-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#single"
+                type="button"
+                role="tab"
+                aria-controls="single"
+                aria-selected="true"
+              >
+                Single Upload
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="multiple-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#multiple"
+                type="button"
+                role="tab"
+                aria-controls="multiple"
+                aria-selected="false"
+              >
+                Multiple Upload
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="uploadTabContent">
+            <!-- Single Upload Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="single"
+              role="tabpanel"
+              aria-labelledby="single-tab"
+            >
+              <div class="row">
+                <div class="col-md-12">
+                  <!-- Updated action to match the backend route -->
+                  <form
+                    id="fileUploadForm"
+                    class="dropzone needsclick"
+                    action="/admin/uploadFile"
+                    method="post"
+                    style="border: 2px dashed #dbdade"
+                    enctype="multipart/form-data"
+                  >
+                    <div class="dz-message needsclick">
+                      Drop file here or click to upload
+                      <span class="note needsclick"
+                        >(Select Only one file at a time please.)</span
+                      >
+                    </div>
+                    <div class="fallback">
+                      <input name="file" id="file" required type="file" />
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Input for file name and submit button -->
+              <div class="row mt-4">
+                <div class="col-md-10">
+                  <label for="fullname" class="form-label">File name</label>
+                  <input
+                    required
+                    type="text"
+                    class="form-control"
+                    id="fullname"
+                    placeholder="e.g. new-file"
+                  />
+                </div>
+                <div class="col-md-2 mt-4">
+                  <button id="submitBtn" class="btn btn-primary">Store</button>
+                </div>
+              </div>
+            </div>
+            <!-- Multiple Upload Tab -->
+            <div
+              class="tab-pane fade"
+              id="multiple"
+              role="tabpanel"
+              aria-labelledby="multiple-tab"
+            >
               <form
-                id="fileUploadForm"
-                class="dropzone needsclick"
-                action="/admin/uploadFile"
+                id="multiUploadForm"
+                action="/admin/uploadMultipleFiles"
                 method="post"
-                style="border: 2px dashed #dbdade"
                 enctype="multipart/form-data"
               >
-                <div class="dz-message needsclick">
-                  Drop file here or click to upload
-                  <span class="note needsclick">(Select Only one file at a time please.)</span>
+                <div class="mb-3">
+                  <label for="multiFiles" class="form-label">Select files</label>
+                  <div class="input-group">
+                    <input
+                      class="form-control visually-hidden"
+                      type="file"
+                      id="multiFiles"
+                      name="files"
+                      multiple
+                      accept=".jpg,.jpeg,.png,.pdf"
+                    />
+                    <button type="button" class="btn btn-outline-primary" id="customFileBtn">
+                      <i class="bi bi-upload"></i> Choose Files
+                    </button>
+                  </div>
+                  <div id="fileCountDisplay" class="form-text mt-2 text-primary"></div>
                 </div>
-                <div class="fallback">
-                  <input name="file" id="file" required type="file" />
+                <div id="multiPreview" class="row g-3"></div>
+                <div class="mt-3">
+                  <button type="submit" class="btn btn-success">Upload All</button>
                 </div>
               </form>
-            </div>
-          </div>
-
-          <!-- Input for file name and submit button -->
-          <div class="row mt-4">
-            <div class="col-md-10">
-              <label for="fullname" class="form-label">File name</label>
-              <input
-                required
-                type="text"
-                class="form-control"
-                id="fullname"
-                placeholder="e.g. new-file"
-              />
-            </div>
-            <div class="col-md-2 mt-4">
-              <button id="submitBtn" class="btn btn-primary">Store</button>
             </div>
           </div>
         </div>
@@ -50,6 +129,10 @@
 
 <%- contentFor("customCSS") %>
 <link rel="stylesheet" href="/assets/js/drop-zone/dropzone.min.css" />
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+/>
 <%- contentFor("pageHeader") %> <%- include('../components/page-title.ejs', {title: 'File upload' }) %>
 
 <%- contentFor("customJS") %>
@@ -75,7 +158,9 @@
 
   Dropzone.autoDiscover = false;
 
-  // Initialize Dropzone
+  let singleUploadFileName = null;
+
+  // Initialize Dropzone for single upload
   const myDropzone = new Dropzone("#fileUploadForm", {
     maxFilesize: 1, // Max size in MB
     previewTemplate,
@@ -85,57 +170,205 @@
     acceptedFiles: ".jpg,.jpeg,.png,.pdf",
     init: function () {
       const dropzoneInstance = this;
-
-      // Attach the submit button handler
+      // Attach sending handler ONCE
+      this.on("sending", function (file, xhr, formData) {
+        formData.append("fileName", singleUploadFileName);
+      });
       document.getElementById("submitBtn").addEventListener("click", function (e) {
         e.preventDefault();
-        const confirmation = confirm("Are you sure you want to upload?");
-        if (!confirmation) {
-          // User clicked "Cancel," so stop the execution
-          return;
-        }
-
-        // Get the file name from the input field
         const fileNameInput = document.getElementById("fullname").value;
-
-        if (!fileNameInput) {
-          alert("Please enter a file name.");
-          return;
-        }
-
         if (dropzoneInstance.getQueuedFiles().length === 0) {
-          alert("Please select a file to upload.");
+          showToast('Please select a file to upload.', 'danger');
           return;
         }
-
-        // Get the first file in the queue
         const uploadedFile = dropzoneInstance.getQueuedFiles()[0];
         const originalFileName = uploadedFile.name;
         const fileExtension = originalFileName.substring(originalFileName.lastIndexOf('.'));
-
-        // Combine the new name with the file extension
-        const finalFileName = `${fileNameInput}${fileExtension}`;
-
-        // Append the file name to the form data
-        dropzoneInstance.on("sending", function (file, xhr, formData) {
-          formData.append("fileName", finalFileName);
-        });
-
-        // Process the queue
+        singleUploadFileName = fileNameInput ? `${fileNameInput}${fileExtension}` : originalFileName;
         dropzoneInstance.processQueue();
       });
-
       // Success handler
       this.on("success", function (file, response) {
-        console.log(response);
-        alert("File uploaded successfully!");
+        showToast('File uploaded successfully!', 'success');
+        setTimeout(function () {
+          document.getElementById('fullname').value = '';
+          myDropzone.removeAllFiles();
+        }, 1000);
       });
-
       // Error handler
       this.on("error", function (file, errorMessage) {
-        console.error("Upload failed:", errorMessage);
-        alert("Failed to upload the file. Please try again.");
+        showToast('Failed to upload the file. Please try again.', 'danger');
       });
     },
   });
+
+  // Modern file input for multiple upload
+  const multiFilesInput = document.getElementById('multiFiles');
+  const customFileBtn = document.getElementById('customFileBtn');
+  const fileCountDisplay = document.getElementById('fileCountDisplay');
+  customFileBtn.addEventListener('click', function() {
+    multiFilesInput.click();
+  });
+  multiFilesInput.addEventListener('change', function (e) {
+    const files = Array.from(e.target.files);
+    fileCountDisplay.textContent = files.length > 0 ? `${files.length} file(s) selected` : '';
+    // Multiple file upload preview and per-file naming
+    const previewContainer = document.getElementById('multiPreview');
+    previewContainer.innerHTML = '';
+    files.forEach((file, idx) => {
+      const col = document.createElement('div');
+      col.className = 'col-md-4';
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.minHeight = '180px';
+      const cardBody = document.createElement('div');
+      cardBody.className = 'card-body text-center';
+      // File preview
+      let previewHtml = '';
+      if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.style.maxWidth = '80px';
+        img.style.maxHeight = '80px';
+        img.className = 'mb-2';
+        cardBody.appendChild(img);
+      } else if (file.type === 'application/pdf') {
+        previewHtml = '<i class="bi bi-file-earmark-pdf" style="font-size: 3rem; color: #d9534f;"></i>';
+        cardBody.innerHTML += previewHtml;
+      } else {
+        previewHtml = '<i class="bi bi-file-earmark" style="font-size: 3rem; color: #6c757d;"></i>';
+        cardBody.innerHTML += previewHtml;
+      }
+      // File name input (optional)
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.className = 'form-control mt-2';
+      nameInput.placeholder = 'Custom name (optional, no extension)';
+      nameInput.name = `customNames[${idx}]`;
+      cardBody.appendChild(nameInput);
+      // Original file name (hidden)
+      const origInput = document.createElement('input');
+      origInput.type = 'hidden';
+      origInput.name = `originalNames[${idx}]`;
+      origInput.value = file.name;
+      cardBody.appendChild(origInput);
+      card.appendChild(cardBody);
+      col.appendChild(card);
+      previewContainer.appendChild(col);
+    });
+  });
+
+  // Multiple upload form validation and AJAX submit with toast
+  const multiUploadForm = document.getElementById('multiUploadForm');
+  multiUploadForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const previewContainer = document.getElementById('multiPreview');
+    const nameInputs = previewContainer.querySelectorAll('input[type="text"]');
+    const files = multiFilesInput.files;
+    if (!files.length) {
+      showToast('Please select at least one file.', 'danger');
+      return;
+    }
+    // Prepare FormData
+    const formData = new FormData();
+    Array.from(files).forEach((file, idx) => {
+      formData.append('files', file);
+      const nameInput = nameInputs[idx];
+      let nameToSend = '';
+      if (nameInput && nameInput.value.trim()) {
+        nameToSend = nameInput.value.trim();
+      } else {
+        nameToSend = file.name;
+      }
+      formData.append(`customNames[${idx}]`, nameToSend);
+      formData.append(`originalNames[${idx}]`, file.name);
+    });
+    fetch('/admin/uploadMultipleFiles', {
+      method: 'POST',
+      body: formData,
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.message && !data.error) {
+          showToast('Files uploaded successfully!', 'success');
+          multiUploadForm.reset();
+          fileCountDisplay.textContent = '';
+          document.getElementById('multiPreview').innerHTML = '';
+        } else {
+          showToast('Error uploading files.', 'danger');
+        }
+      })
+      .catch(() => showToast('Error uploading files.', 'danger'));
+  });
+
+  // Multiple upload form validation
+  document.getElementById('multiUploadForm').addEventListener('submit', function (e) {
+    const previewContainer = document.getElementById('multiPreview');
+    const nameInputs = previewContainer.querySelectorAll('input[type="text"]');
+    let valid = true;
+    nameInputs.forEach(input => {
+      if (!input.value.trim()) valid = false;
+    });
+    if (!valid) {
+      e.preventDefault();
+      // alert('Please enter a custom name for each file.');
+    }
+  });
+
+  // Modernize single upload: make file name optional and use toast
+  const fileUploadForm = document.getElementById('fileUploadForm');
+  const singleFileInput = document.getElementById('file');
+  const singleSubmitBtn = document.getElementById('submitBtn');
+  singleSubmitBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    const fileNameInput = document.getElementById('fullname').value;
+    if (myDropzone.getQueuedFiles().length === 0) {
+      showToast('Please select a file to upload.', 'danger');
+      return;
+    }
+    const uploadedFile = myDropzone.getQueuedFiles()[0];
+    const originalFileName = uploadedFile.name;
+    const fileExtension = originalFileName.substring(originalFileName.lastIndexOf('.'));
+    const finalFileName = fileNameInput ? `${fileNameInput}${fileExtension}` : originalFileName;
+    myDropzone.on('sending', function (file, xhr, formData) {
+      formData.append('fileName', finalFileName);
+    });
+    myDropzone.processQueue();
+  });
+  myDropzone.on('success', function (file, response) {
+    showToast('File uploaded successfully!', 'success');
+    setTimeout(function () {
+      document.getElementById('fullname').value = '';
+      myDropzone.removeAllFiles();
+    }, 1000);
+  });
+  myDropzone.on('error', function (file, errorMessage) {
+    showToast('Failed to upload the file. Please try again.', 'danger');
+  });
+  // Toast notification function
+  function showToast(message, type = 'success') {
+    let toast = document.getElementById('customToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'customToast';
+      toast.style.position = 'fixed';
+      toast.style.top = '30px';
+      toast.style.right = '30px';
+      toast.style.zIndex = 9999;
+      toast.style.minWidth = '200px';
+      toast.innerHTML = `<div class="toast align-items-center text-white bg-${type} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>`;
+      document.body.appendChild(toast);
+    } else {
+      toast.querySelector('.toast-body').textContent = message;
+      toast.querySelector('.toast').className = `toast align-items-center text-white bg-${type} border-0 show`;
+    }
+    setTimeout(() => {
+      if (toast) toast.remove();
+    }, 3500);
+  }
 </script>

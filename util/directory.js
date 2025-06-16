@@ -1,11 +1,13 @@
 const path = require("path");
 const fs = require("fs");
 const readline = require("readline");
+const bcrypt = require("bcryptjs");
 const AuditLog = require("../model/auditLogs");
 const ArchiveCategory = require("../model/archiveCategory");
 const User = require("../model/user");
 const Branch = require("../model/branch");
 const Authorization = require("../model/authorizations");
+const fetch = require('node-fetch');
 
 // default path
 const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
@@ -156,7 +158,6 @@ const ensureUniqueFileName = (fileName) => {
 
 const createOrUpdateLoginRecord = async (userId, name) => {
   try {
-    // Find log record to update
     const unfinishedSession = await AuditLog.findOne({
       where: { userId, logoutTime: null },
     });
@@ -175,10 +176,12 @@ const createOrUpdateLoginRecord = async (userId, name) => {
 
     if (!unfinishedSession) {
       // Create a new record for this login
+      const loginTime = await getReliableTime();
+      // const loginTime = new Date()
       await AuditLog.create({
         userId,
         name,
-        loginTime: new Date(),
+        loginTime,
         branch,
         department,
       });
@@ -200,7 +203,8 @@ const updateLogoutTime = async (userId) => {
     });
 
     if (unfinishedSession) {
-      unfinishedSession.logoutTime = new Date();
+      const logoutTime = await getReliableTime();
+      unfinishedSession.logoutTime = logoutTime;
       await unfinishedSession.save();
     } else {
       console.warn("No unfinished session found for logout.");
@@ -209,6 +213,20 @@ const updateLogoutTime = async (userId) => {
     console.error("Error updating logout time:", error);
   }
 };
+
+async function getReliableTime() {
+  try {
+    // Use worldtimeapi.org for a reliable UTC time
+    const response = await fetch('http://worldtimeapi.org/api/timezone/Etc/UTC');
+    if (!response.ok) throw new Error('Failed to fetch time');
+    const data = await response.json();
+    // data.utc_datetime is ISO string, e.g. "2025-06-04T12:34:56.789Z"
+    return new Date(data.utc_datetime);
+  } catch (err) {
+    console.error('Failed to fetch reliable time, falling back to system time:', err.message);
+    return new Date();
+  }
+}
 
 const getDefaultFolders = async () => {
   let folders = [];
@@ -373,7 +391,85 @@ async function importAuthorizations() {
 };
 
 
+function cleanTransformedUsers() {
+  const filePath = path.join(__dirname, "transformedUsersHashed.json");
+  if (!fs.existsSync(filePath)) return;
+  let users;
+  try {
+    users = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch (e) {
+    console.error("Could not parse transformedUsers.json", e);
+    return;
+  }
+  if (!Array.isArray(users)) return;
+  const cleaned = users.map((user) => {
+    if (!user || typeof user !== "object") return user;
+    // Clean username: last word of fullname + @ + branchId, all trimmed and lowercased
+    let username = user.fullname ? user.fullname.trim().split(/\s+/).pop() : "";
+    let branch = user.branchId ? user.branchId.toString().replace(/\s+/g, '').toLowerCase() : "";
+    const newUsername = `${username}@${branch}`.trim();
+    // Clean emails
+    let email = user.email ? user.email.trim() : user.email;
+    let private_email = user.private_email ? user.private_email.trim() : user.private_email;
+    // Clean folderPath: C:\e-archiveUploads\<branchId>\<userGroupId>\<username>
+    let folderPath = `C:\\e-archiveUploads\\${user.branchId || ''}\\${user.userGroupId || ''}\\${newUsername}`;
+    return {
+      ...user,
+      username: newUsername,
+      email,
+      private_email,
+      folderPath,
+    };
+  });
+  fs.writeFileSync(filePath, JSON.stringify(cleaned, null, 2), "utf8");
+  console.log("transformedUsers.json cleaned and updated.");
+}
 
+async function hashTransformedUserPasswords() {
+  const fs = require("fs");
+  const path = require("path");
+  const srcPath = path.join(__dirname, "../transformedUsers.json");
+  const destPath = path.join(__dirname, "../transformedUsersHashed.json");
+  if (!fs.existsSync(srcPath)) return;
+  let users;
+  try {
+    users = JSON.parse(fs.readFileSync(srcPath, "utf8"));
+  } catch (e) {
+    console.error("Could not parse transformedUsers.json", e);
+    return;
+  }
+  if (!Array.isArray(users)) return;
+  const hashedUsers = await Promise.all(users.map(async (user) => {
+    if (!user || typeof user !== "object" || !user.password) return user;
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+    return {
+      ...user,
+      password: hashedPassword,
+    };
+  }));
+  fs.writeFileSync(destPath, JSON.stringify(hashedUsers, null, 2), "utf8");
+  console.log("transformedUsersHashed.json created with hashed passwords.");
+}
+
+// Utility to export usernames, passwords, and full names to userCredentials.txt
+function exportUserCredentials() {
+  const usersPath = path.join(__dirname, '../transformedUsers.json');
+  const outputPath = path.join(__dirname, '../userCredentials.txt');
+  if (!fs.existsSync(usersPath)) return;
+  let users;
+  try {
+    users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+  } catch (e) {
+    console.error('Could not parse transformedUsers.json', e);
+    return;
+  }
+  if (!Array.isArray(users)) return;
+  const lines = users
+    .filter(u => u && u.username && u.password && u.fullname)
+    .map(u => `Username: ${u.username} | Password: ${u.password} | Full Name: ${u.fullname}`);
+  fs.writeFileSync(outputPath, lines.join('\n'), 'utf8');
+  console.log('User credentials exported to userCredentials.txt');
+}
 
 module.exports = {
   createDefaultDirectory,
@@ -393,5 +489,8 @@ module.exports = {
   slugify,
   moveFilesAndDeleteOldDirectory,
   importUsers,
-  importAuthorizations
+  importAuthorizations,
+  cleanTransformedUsers,
+  hashTransformedUserPasswords,
+  exportUserCredentials,
 };

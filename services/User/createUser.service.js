@@ -17,7 +17,7 @@ async function createOrUpdateUser({
   pEmail,
   password,
   permissions,
-  username,
+  username, // will be ignored for creation
   btnAction,
   updateRecord,
 }) {
@@ -31,23 +31,30 @@ async function createOrUpdateUser({
       throw new Error("Invalid branch or user group");
     }
 
+    // Generate username: last word in fullname + @ + branch name (no spaces, lowercase), trim spaces
+    const lastName = fullname.trim().split(/\s+/).pop();
+    const branchName = userBranch.dataValues.name.replace(/\s+/g, '').toLowerCase();
+    const generatedUsername = `${lastName}@${branchName}`.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPEmail = pEmail.trim();
+
     // Construct folder path
     const folderPath = Path.join(
       DEFAULT_PATH,
       userBranch.dataValues.slug,
       group.dataValues.name,
-      username
+      generatedUsername
     );
 
     let userId;
 
     if (btnAction === "Create") {
-      // Create the user
+      // Create the user (ignore username from frontend, use generatedUsername)
       const newUser = await User.create({
-        username,
-        fullname,
-        email,
-        private_email: pEmail,
+        username: generatedUsername,
+        fullname: fullname.trim(),
+        email: trimmedEmail,
+        private_email: trimmedPEmail,
         password: hashPassword,
         branchId: branchId,
         userGroupId: userGroup,
@@ -56,12 +63,12 @@ async function createOrUpdateUser({
       });
 
       // Create user folder
-      createUserFolder(userBranch.dataValues.slug, group.dataValues.name, username);
+      createUserFolder(userBranch.dataValues.slug, group.dataValues.name, generatedUsername);
 
       userId = newUser.id;
       console.log("User created successfully.");
     } else {
-      // Update the user
+      // Update the user (keep username as is, or update if needed)
       const isFound = await User.findOne({ where: { id: updateRecord } });
       if (!isFound) {
         throw new Error("Record not found");
@@ -71,10 +78,10 @@ async function createOrUpdateUser({
 
       await User.update(
         {
-          username,
-          fullname,
-          email,
-          private_email: pEmail,
+          username: isFound.username, // do not change username on update
+          fullname: fullname.trim(),
+          email: trimmedEmail,
+          private_email: trimmedPEmail,
           password: hashPassword,
           branchId: branchId,
           userGroupId: userGroup,

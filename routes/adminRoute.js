@@ -1,5 +1,5 @@
 const express = require("express");
-const multer = require('multer')
+const multer = require('multer');
 const {
   login,
   dashboard,
@@ -35,7 +35,8 @@ const {
   getDepartment,
   deleteFile,
   removeDep,
-  dwt
+  dwt,
+  multipleFilesUpload
 } = require("../controllers/adminController");
 const routeDectector = require("../middleware/routeDectector");
 const authUser  = require('../middleware/authMiddleware');
@@ -43,7 +44,7 @@ const passAuths = require("../middleware/passAuths");
 const uploading = require("../util/multer.Config");
 
 const app = express.Router();
-const upload = multer()
+const upload = multer({ storage: multer.memoryStorage() });
 const User = require('../model/user');
 
 
@@ -95,6 +96,9 @@ app.post("/upload-profile-picture", uploading.single('profilePicture'), uploadPr
 app.post('/sendFilesToUsers-email', sendFilesEmail);
 app.delete('/delete-file', deleteFile);
 app.delete('/delete-dep', removeDep);
+
+// Route for multiple file uploads
+app.post('/uploadMultipleFiles', upload.array('files'), multipleFilesUpload);
 
 async function getUserPermissions(req, res,next){
   const userSessionId = req.session.user;

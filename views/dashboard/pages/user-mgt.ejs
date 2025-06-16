@@ -158,24 +158,24 @@
                     </div>
                   </div>
 
-                  <div class="mb-3">
-                    <div class="row">
-                      <div class="col-md-12">
-                        <label for="username" class="form-label"
+                  <!-- <div class="mb-3"> -->
+                    <!-- <div class="row"> -->
+                      <!-- <div class="col-md-12"> -->
+                        <!-- <label for="username" class="form-label"
                           >Username<span class="text-danger">*</span></label
-                        >
-                        <input
+                        > -->
+                        <!-- <input
                           required
                           type="text"
                           class="form-control"
                           id="username"
                           placeholder="e.g john615"
-                        />
+                        /> -->
                         <!-- Error message for username -->
-                        <small id="username-error" class="text-danger" style="display: none;"></small>
-                      </div>
-                    </div>
-                  </div>
+                        <!-- <small id="username-error" class="text-danger" style="display: none;"></small> -->
+                      <!-- </div> -->
+                    <!-- </div> -->
+                  <!-- </div> -->
 
                   <div class="mb-4">
                     <h5>Permissions<span class="text-danger">*</span></h5>
@@ -324,7 +324,7 @@
     let pEmail = $("#pEmail").val();
     let password = $("#password").val();
     let confirm_pass = $("#confirm_pass").val();
-    let username = $("#username").val();
+    let username = $("#username").val() || "";
 
     // Email validation regex
     let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -337,8 +337,6 @@
       return errorAlert("Private Email is required");
     else if (!emailRegex.test(email) || !emailRegex.test(pEmail))
       return errorAlert("Email invalid");
-    else if (username.trim().length < 1)
-      return errorAlert("Username is required");
     else if (password.trim().length < 1)
       return errorAlert("Password is required");
     else if (confirm_pass.trim().length < 1)
@@ -361,7 +359,7 @@
 
     const userFormData = new FormData();
     userFormData.append("fullname", fullname);
-    userFormData.append("username", username);
+    userFormData.append("username", username.trim());
     userFormData.append("branchId", branchSelect);
     userFormData.append("userGroup", selectUserGroup);
     userFormData.append("email", email);

@@ -21,6 +21,7 @@ const updateUserPassword = require("../services/Auth/updatePassword.service");
 const buildFolderStructure = require("../services/Display/fileDisplay.service");
 const storeProfilePicture = require("../services/Profile/profilePicture.service");
 const uploadFileLogic = require("../services/Upload/fileUpload.service");
+const { uploadMultipleFiles } = require('../services/Upload/fileUploadMultiple.service');
 const getFileContentLogic = require("../services/Display/fileContent.service");
 const fetchAuditLogsForUser = require("../services/AuditLog/auditLog.service");
 const getUserByUsername = require("../services/AccessControl/getUser.service");
@@ -518,6 +519,21 @@ const removeDep = async (req, res) => {
   }
 };
 
+/**
+ * Controller for handling multiple file uploads (refactored to use new logic)
+ */
+const multipleFilesUpload = async (req, res) => {
+  try {
+    const files = req.files;
+    const customNames = req.body.customNames;
+    const userId = req.session.user; // Always get userId from session
+    const result = await uploadMultipleFiles(files, customNames, userId);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error('Multiple upload error:', err);
+    res.status(500).json({ error: 'Failed to upload files.' });
+  }
+};
 
 module.exports = {
   login,
@@ -555,5 +571,6 @@ module.exports = {
   getDepartment,
   deleteFile,
   removeDep,
-  dwt
+  dwt,
+  multipleFilesUpload
 };
