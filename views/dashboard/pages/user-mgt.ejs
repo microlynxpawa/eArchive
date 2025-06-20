@@ -292,10 +292,30 @@
 {title: 'User Management'}) %> <%- contentFor("customJS") %>
 <script>
   $(document).ready(function () {
-    $("#basic-1").DataTable();
+    const dt = $("#basic-1").DataTable();
     getBranches();
     getUserGroup();
     getUsers();
+
+    // Remove custom search input if present
+    $("#userSearchInput").closest('.row').remove();
+
+    // Attach custom search logic to DataTables default search input
+    $(document).on("input", '#basic-1_filter input[type="search"]', function() {
+      const search = $(this).val().toLowerCase();
+      if (!records) return;
+      const filtered = records.filter(group => {
+        return (
+          group.username?.toLowerCase().includes(search) ||
+          group.email?.toLowerCase().includes(search) ||
+          group.fullname?.toLowerCase().includes(search) ||
+          group.private_email?.toLowerCase().includes(search) ||
+          group.branch?.name?.toLowerCase().includes(search) ||
+          group.archive_category?.name?.toLowerCase().includes(search)
+        );
+      });
+      renderUsersTable(filtered);
+    });
   });
   let records = null;
   let updateRecord = null;
@@ -329,6 +349,8 @@
     // Email validation regex
     let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    const isUpdate = $("#btnSave").text().toLowerCase().includes("update");
+
     if (fullname.trim().length < 1) return errorAlert("Full name is required");
     else if (!branchSelect) return errorAlert("Branch is required");
     else if (!selectUserGroup) return errorAlert("User group is required");
@@ -337,12 +359,24 @@
       return errorAlert("Private Email is required");
     else if (!emailRegex.test(email) || !emailRegex.test(pEmail))
       return errorAlert("Email invalid");
-    else if (password.trim().length < 1)
-      return errorAlert("Password is required");
-    else if (confirm_pass.trim().length < 1)
-      return errorAlert("Confirm password is required");
 
-    if (password != confirm_pass) return errorAlert("Password do not match");
+    if (!isUpdate) {
+      // Only require password fields for creation
+      if (password.trim().length < 1)
+        return errorAlert("Password is required");
+      else if (confirm_pass.trim().length < 1)
+        return errorAlert("Confirm password is required");
+      if (password != confirm_pass) return errorAlert("Password do not match");
+    } else {
+      // If updating, only check password fields if one is filled
+      if (password.trim().length > 0 || confirm_pass.trim().length > 0) {
+        if (password.trim().length < 1)
+          return errorAlert("Password is required if changing password");
+        else if (confirm_pass.trim().length < 1)
+          return errorAlert("Confirm password is required if changing password");
+        if (password != confirm_pass) return errorAlert("Password do not match");
+      }
+    }
 
     let checkedPermissions = [];
     $(".form-check-input:checked").each(function () {
@@ -364,7 +398,7 @@
     userFormData.append("userGroup", selectUserGroup);
     userFormData.append("email", email);
     userFormData.append("pEmail", pEmail);
-    userFormData.append("password", password);
+    userFormData.append("password", password); // Will be empty if not changing
     userFormData.append("permissions", JSON.stringify(checkedPermissions));
     userFormData.append("btnAction", btnAction);
     userFormData.append("updateRecord", updateRecord);
@@ -470,64 +504,60 @@
     $.get("/admin/retrieve-users", function (data) {
       if (data.statusCode === 200) {
         records = data.records;
-        const tbody = $("#basic-1 tbody");
-        tbody.empty();
-        records.forEach((group) => {
-          const row = `
-            <tr>
-              <td>${group.fullname}</td>
-              <td>${group.username}</td>
-              <td>${group.email}</td>
-              <td>${group.private_email}</td>
-              <td>${group.branch.name}</td>
-              <td>${group.archive_category.name}</td>
-              <td>${new Date(group.createdAt).toDateString()}</td>
-              <td>
-                <ul class="action">
-                  <li class="edit" data-value="${
-                    group.id
-                  }" data-bs-toggle="modal"
-              data-bs-target="#userGroupModal">
-                    <a href="#"><i class="icon-pencil-alt"></i></a>
-                  </li>
-                  <li class="delete" data-value="${
-                    group.id
-                  }" data-bs-toggle="modal"
-              data-bs-target="#removeUserGroupModal">
-                    <a href="#"><i class="icon-trash"></i></a>
-                  </li>
-                </ul>
-              </td>
-            </tr>
-          `;
-          tbody.append(row);
-        });
-        $("#basic-1").DataTable();
+        renderUsersTable(records);
       } else {
         errorAlert(data.message);
       }
     });
   }
 
-  function clearForm() {
-    $("#scanning").prop("checked", false);
-    $("#archiving").prop("checked", false);
-    $("#view-upload").prop("checked", false);
-    $("#supervision-right").prop("checked", false);
-    $("#email-notification").prop("checked", false);
-    $("#canViewOwnFiles").prop("checked", false);
-    $("#canViewDepartmentFiles").prop("checked", false);
-    $("#canViewBranchFiles").prop("checked", false);
-    $("#is_admin").prop("checked", false);
-    $("#fullname").val(null);
-    $("#branchSelect").val(null);
-    $("#selectUserGroup").val(null);
-    $("#email").val(null);
-    $("#pEmail").val(null);
-    $("#username").val(null);
-    $("#password").val(null);
-    $("#confirm_pass").val(null);
+  function renderUsersTable(filteredRecords) {
+    const tbody = $("#basic-1 tbody");
+    tbody.empty();
+    filteredRecords.forEach((group) => {
+      const row = `
+        <tr>
+          <td>${group.fullname}</td>
+          <td>${group.username}</td>
+          <td>${group.email}</td>
+          <td>${group.private_email}</td>
+          <td>${group.branch.name}</td>
+          <td>${group.archive_category.name}</td>
+          <td>${new Date(group.createdAt).toDateString()}</td>
+          <td>
+            <ul class="action">
+              <li class="edit" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#userGroupModal">
+                <a href="#"><i class="icon-pencil-alt"></i></a>
+              </li>
+              <li class="delete" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#removeUserGroupModal">
+                <a href="#"><i class="icon-trash"></i></a>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      `;
+      tbody.append(row);
+    });
   }
+
+  function filterUsersTable() {
+    const search = $("#userSearchInput").val().toLowerCase();
+    if (!records) return;
+    const filtered = records.filter(group => {
+      return (
+        group.username?.toLowerCase().includes(search) ||
+        group.email?.toLowerCase().includes(search) ||
+        group.fullname?.toLowerCase().includes(search) ||
+        group.private_email?.toLowerCase().includes(search) ||
+        group.branch?.name?.toLowerCase().includes(search) ||
+        group.archive_category?.name?.toLowerCase().includes(search)
+      );
+    });
+    renderUsersTable(filtered);
+  }
+
+  // Attach search event
+  $(document).on("input", "#userSearchInput", filterUsersTable);
 
   $("#userGroupModal").on("show.bs.modal", (e) => {
     const id = $(e.relatedTarget).data("value");
@@ -544,7 +574,7 @@
         $("#selectUserGroup").val(record.archive_category.id);
         $("#email").val(record.email);
         $("#pEmail").val(record.private_email);
-        $("#username").val(record.username);
+        $("#username").val(record.username); // Set username from API response
         const permissions = JSON.parse(record.permissions);
         if (permissions.includes("scanning"))
           $("#scanning").prop("checked", true);
@@ -570,8 +600,9 @@
     } else {
       $("#userGroupModalLabel").text("Create User");
       $("#btnSave").text("Create");
-
       clearForm();
+      // For creation, clear username field (it will be generated on backend)
+      $("#username").val("");
     }
   });
 

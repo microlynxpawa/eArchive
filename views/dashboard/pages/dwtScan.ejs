@@ -24,6 +24,25 @@
 <%- contentFor("customJS") %>
 <script src="https://unpkg.com/dwt/dist/dynamsoft.webtwain.min.js"></script>
 <script>
+  // Toast notification utility
+  function showToast(message, type = 'success') {
+    let toast = document.createElement('div');
+    toast.className = 'custom-toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+    toast.innerText = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '30px';
+    toast.style.right = '30px';
+    toast.style.background = type === 'success' ? '#22c55e' : '#dc3545';
+    toast.style.color = '#fff';
+    toast.style.padding = '16px 28px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontSize = '1.1rem';
+    toast.style.boxShadow = '0 2px 12px rgba(0,0,0,0.18)';
+    toast.style.zIndex = 12000;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 2500);
+  }
+
   let DWObject = null;
 
   Dynamsoft.DWT.ProductKey = "t01928AUAAGsyKSVk7HxDglLrFiQr3mBLNFn27QKws8/3EIZVfRuogxk5RoTtkFUYC5MS+VSwZBwArikW3/iA4iRssgE3Hja6cvIEp4x3Co13YoKTHzmJbJyuqdpL3Bc2sAfeEZDjORwASiCdpQI+al+9MmQA9wDpANI7A3rA6S1c8lWZvFCMNqf3Cnrm5AlOGe8sG2SMExOc/MjpGkSvtGzutltqEJQvJwO4B8gpgP+PrGkQqgHuAdIAojTDxQ9kRCrq;t01908AUAAGfviGABZUHplDnaJqjNs9CgQ2ZqEQTb/EAPV/QqCd+UrqV7wrwKT0ltGho1ESS/F6OTyJm50wEfooMJymPtAJZ15dQOTrZ3Uto70cGpj5wiQ2qG9bRNGhcH6Ay8E8DtOmwAcmCdSwF87NJ7ZdgBWgNYAVibA2rA6SqOm69SBiT/e+dAo1M7ONnemQekjRMdnPrIOQXEBTHjtNpxDQjym7MDtAbwFMD/ITsEREpAawAPAK1TWGd+lXAq5A=="; // <-- replace with your free trial key
@@ -38,7 +57,7 @@
       DWObject = Dynamsoft.DWT.GetWebTwain('dwtcontrol');
 
       if (!DWObject) {
-        alert("Failed to load scanner control.");
+        showToast("Failed to load scanner control.", 'error');
         return;
       }
 
@@ -51,13 +70,13 @@
       });
 
       if (DWObject.SourceCount === 0) {
-        alert("No scanners detected. Please connect a scanner and refresh.");
+        showToast("No scanners detected. Please connect a scanner and refresh.", 'error');
         document.getElementById("scanButton").disabled = true;
       }
 
     }).catch((err) => {
       console.error("DWT load error:", err);
-      alert("Failed to initialize scanner. Please check your setup.");
+      showToast("Failed to initialize scanner. Please check your setup.", 'error');
     });
 
   // Handle scan
@@ -90,7 +109,7 @@
         },
         OnAcquireImageError: (errCode, errStr) => {
           DWObject.CloseSource();
-          alert("Scan failed: " + errStr);
+          showToast("Scan failed: " + errStr, 'error');
         },
       });
     }
@@ -108,12 +127,12 @@
         })
         .then((response) => response.json())
         .then((data) => {
-          alert("Document uploaded successfully!");
+          showToast("Document uploaded successfully!", 'success');
           console.log("Upload response:", data);
         })
         .catch((error) => {
           console.error("Upload failed:", error);
-          alert("Failed to upload the document.");
+          showToast("Failed to upload the document.", 'error');
         });
     });
   });

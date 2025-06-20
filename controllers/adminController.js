@@ -29,6 +29,7 @@ const updateUserPermissions = require("../services/AccessControl/accessControl.s
 const fetchUsersByQuery = require("../services/Share/getMultipleUsers.service");
 const fetchUsersByEmail = require("../services/Share/fetchUsersViaEmails.service");
 const sendFilesViaEmail = require("../services/Share/sendViaEmal.service");
+const sendFilesToUsers = require("../services/Share/sendFiles.service");
 const getDepartmentByName = require("../services/AccessControl/getDepartment");
 const deleteFiles = require("../services/Delete/deleteFile.service");
 const handleDeleteDepartment = require("../services/Branch/removeDepartment.service")
@@ -465,18 +466,17 @@ const uploadProfilePicture = async (req, res) => {
   }
 };
 
-const sendFilesEmail = async (req, res) => {
+// Add this controller for sending files by username
+const sendFilesToUsersController = async (req, res) => {
   try {
     const { users, files } = req.body;
-    const { missingFiles } = await sendFilesViaEmail(users, files);
-
+    const { missingFiles } = await sendFilesToUsers(users, files);
     if (missingFiles.length > 0) {
       return res.status(404).json({
         message: "Some files could not be sent.",
         missingFiles,
       });
     }
-
     res.json({ message: "Files sent successfully to specified users." });
   } catch (error) {
     console.error("Error sending files:", error.message);
@@ -567,7 +567,7 @@ module.exports = {
   getPickSend,
   getUsers,
   getUsersByEmail,
-  sendFilesEmail,
+  sendFilesToUsersController,
   getDepartment,
   deleteFile,
   removeDep,

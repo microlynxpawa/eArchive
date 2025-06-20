@@ -36,7 +36,8 @@ const {
   deleteFile,
   removeDep,
   dwt,
-  multipleFilesUpload
+  multipleFilesUpload,
+  sendFilesToUsersController
 } = require("../controllers/adminController");
 const routeDectector = require("../middleware/routeDectector");
 const authUser  = require('../middleware/authMiddleware');
@@ -93,7 +94,7 @@ app.post('/update-password', updatePassword);
 app.post("/uploadFile", uploading.single('file'), uploadFile);
 app.post("/searchUsers/permissions", accessControl);
 app.post("/upload-profile-picture", uploading.single('profilePicture'), uploadProfilePicture);
-app.post('/sendFilesToUsers-email', sendFilesEmail);
+app.post('/sendFilesToUsers', sendFilesToUsersController);
 app.delete('/delete-file', deleteFile);
 app.delete('/delete-dep', removeDep);
 

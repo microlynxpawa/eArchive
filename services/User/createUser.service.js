@@ -22,8 +22,6 @@ async function createOrUpdateUser({
   updateRecord,
 }) {
   try {
-    const hashPassword = await bcrypt.hash(password, 10);
-
     const userBranch = await branch.findOne({ where: { id: branchId } });
     const group = await ArchiveCategory.findOne({ where: { id: userGroup } });
 
@@ -50,6 +48,7 @@ async function createOrUpdateUser({
 
     if (btnAction === "Create") {
       // Create the user (ignore username from frontend, use generatedUsername)
+      const hashPassword = await bcrypt.hash(password, 10);
       const newUser = await User.create({
         username: generatedUsername,
         fullname: fullname.trim(),
@@ -73,21 +72,23 @@ async function createOrUpdateUser({
       if (!isFound) {
         throw new Error("Record not found");
       }
-
       const oldUserFolderPath = isFound.folderPath;
-
+      // Only update password if provided
+      let updateFields = {
+        username: isFound.username, // do not change username on update
+        fullname: fullname.trim(),
+        email: trimmedEmail,
+        private_email: trimmedPEmail,
+        branchId: branchId,
+        userGroupId: userGroup,
+        permissions,
+        folderPath,
+      };
+      if (password && password.trim().length > 0) {
+        updateFields.password = await bcrypt.hash(password, 10);
+      }
       await User.update(
-        {
-          username: isFound.username, // do not change username on update
-          fullname: fullname.trim(),
-          email: trimmedEmail,
-          private_email: trimmedPEmail,
-          password: hashPassword,
-          branchId: branchId,
-          userGroupId: userGroup,
-          permissions,
-          folderPath,
-        },
+        updateFields,
         { where: { id: updateRecord } }
       );
 

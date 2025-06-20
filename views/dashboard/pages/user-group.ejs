@@ -133,13 +133,27 @@
 </div>
 
 <%- contentFor("pageHeader") %>
-<%- include('../components/page-title.ejs', {title: 'User Group'}) %>
+<%- include('../components/page-title.ejs', {title: 'Departments'}) %>
 
 <%- contentFor("customJS") %>
 <script>
   $(document).ready(function () {
-    $("#basic-1").DataTable();
+    const dt = $("#basic-1").DataTable();
     getUserGroup();
+
+    // Attach custom search logic to DataTables default search input
+    $(document).on("input", '#basic-1_filter input[type="search"]', function() {
+      const search = $(this).val().toLowerCase();
+      if (!records) return;
+      const filtered = records.filter(group => {
+        return (
+          group.name?.toLowerCase().includes(search) ||
+          group.description?.toLowerCase().includes(search) ||
+          group.created_by?.toLowerCase().includes(search)
+        );
+      });
+      renderUserGroupTable(filtered);
+    });
   });
   let records = null;
   let updateRecord = null;
@@ -203,40 +217,40 @@ $('#btnDeleteRecord').click(()=>[
     $.get("/admin/retrieve-user-group", function (data) {
       if (data.statusCode === 200) {
         records = data.records;
-        const tbody = $("#basic-1 tbody");
-        tbody.empty();
-        records.forEach((group) => {
-          const row = `
-          <tr>
-            <td>${group.id}</td>
-            <td>${group.name}</td>
-            <td>${group.description}</td>
-            <td>${group.created_by}</td>
-            <td>${new Date(group.createdAt).toDateString()}</td>
-            <td>
-              <ul class="action">
-                <li class="edit" data-value="${group.id}" data-bs-toggle="modal"
-            data-bs-target="#userGroupModal">
-                  <a href="#"><i class="icon-pencil-alt"></i></a>
-                </li>
-                <li class="delete" data-value="${
-                  group.id
-                }" data-bs-toggle="modal"
-            data-bs-target="#removeUserGroupModal">
-                  <a href="#"><i class="icon-trash"></i></a>
-                </li>
-              </ul>
-            </td>
-          </tr>
-        `;
-          tbody.append(row);
-        });
+        renderUserGroupTable(records);
         // Reinitialize the DataTable
         //   $("#basic-1").DataTable().clear().destroy();
         $("#basic-1").DataTable();
       } else {
         errorAlert(data.message);
       }
+    });
+  }
+
+  function renderUserGroupTable(filteredRecords) {
+    const tbody = $("#basic-1 tbody");
+    tbody.empty();
+    filteredRecords.forEach((group) => {
+      const row = `
+        <tr>
+          <td>${group.id}</td>
+          <td>${group.name}</td>
+          <td>${group.description}</td>
+          <td>${group.created_by}</td>
+          <td>${new Date(group.createdAt).toDateString()}</td>
+          <td>
+            <ul class="action">
+              <li class="edit" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#userGroupModal">
+                <a href="#"><i class="icon-pencil-alt"></i></a>
+              </li>
+              <li class="delete" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#removeUserGroupModal">
+                <a href="#"><i class="icon-trash"></i></a>
+              </li>
+            </ul>
+          </td>
+        </tr>
+      `;
+      tbody.append(row);
     });
   }
 

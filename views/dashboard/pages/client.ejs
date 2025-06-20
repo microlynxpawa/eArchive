@@ -1,4 +1,4 @@
-<!-- This component is not necesary it is just a redesigned version of qudit trail -->
+<!-- This component is not necessary it is just a redesigned version of audit trail -->
 <div class="container-fluid">
   <div class="mb-3">
     <div class="input-group">
@@ -46,6 +46,24 @@
 <%- include('../components/page-title.ejs', {title: 'Audit trail' }) %> 
 <%- contentFor("customJS") %>
 <script>
+  // Toast notification utility
+  function showToast(message, type = 'success') {
+    let toast = document.createElement('div');
+    toast.className = 'custom-toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+    toast.innerText = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '30px';
+    toast.style.right = '30px';
+    toast.style.background = type === 'success' ? '#22c55e' : '#dc3545';
+    toast.style.color = '#fff';
+    toast.style.padding = '16px 28px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontSize = '1.1rem';
+    toast.style.boxShadow = '0 2px 12px rgba(0,0,0,0.18)';
+    toast.style.zIndex = 12000;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 2500);
+  }
   document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const searchButton = document.getElementById('searchButton');
@@ -80,7 +98,7 @@
         }
       } catch (error) {
         console.error('Error fetching audit logs:', error);
-        alert('Failed to fetch audit logs.');
+        showToast('Failed to fetch audit logs.', 'error');
       }
     };
 
@@ -89,7 +107,7 @@
       const username = searchInput.value.trim();
 
       if (!username) {
-        alert('Please enter a username.');
+        showToast('Please enter a username.', 'error');
         return;
       }
 
@@ -98,11 +116,11 @@
         if (!response.ok) throw new Error('Failed to fetch user.');
 
         const userData = await response.json();
-        alert(`User found: ${userData.fullname} (${userData.username})`);
+        showToast(`User found: ${userData.fullname} (${userData.username})`, 'success');
         fetchAndDisplayAuditLogs(userData.id);
       } catch (error) {
         console.error('Error fetching user:', error);
-        alert('User not found or an error occurred.');
+        showToast('User not found or an error occurred.', 'error');
       }
     });
   });

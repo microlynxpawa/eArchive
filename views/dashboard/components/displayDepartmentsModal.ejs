@@ -18,6 +18,25 @@
 </div>
 
 <script>
+  // Toast notification utility
+  function showToast(message, type = 'success') {
+    let toast = document.createElement('div');
+    toast.className = 'custom-toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+    toast.innerText = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '30px';
+    toast.style.right = '30px';
+    toast.style.background = type === 'success' ? '#22c55e' : '#dc3545';
+    toast.style.color = '#fff';
+    toast.style.padding = '16px 28px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontSize = '1.1rem';
+    toast.style.boxShadow = '0 2px 12px rgba(0,0,0,0.18)';
+    toast.style.zIndex = 12000;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 2500);
+  }
+
   $(document).ready(function () {
     // Use event delegation to bind the click event
     $(document).on("click", ".department-column", function () {
@@ -59,7 +78,7 @@
       console.log(`Branch: ${branchName}, Department: ${selectedDepartment}`);
 
       if (!selectedDepartment || !branchName) {
-        alert("Please select a department to delete.");
+        showToast("Please select a department to delete.", 'error');
         return;
       }
 
@@ -70,12 +89,12 @@
         contentType: "application/json",
         data: JSON.stringify({ branchName, departmentName: selectedDepartment }),
         success: function (response) {
-          alert(response.message || "Department deleted successfully.");
+          showToast(response.message || "Department deleted successfully.", 'success');
           $("#departmentListModal").modal("hide");
           location.reload(); // Reload the page to reflect changes
         },
         error: function (xhr, status, error) {
-          alert(xhr.responseJSON?.error || "Failed to delete the department.");
+          showToast(xhr.responseJSON?.error || "Failed to delete the department.", 'error');
         },
       });
     });

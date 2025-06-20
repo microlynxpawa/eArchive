@@ -1,0 +1,198 @@
+Performance/Best Practice Issues in Your Node.js/Express App
+===============================================================
+
+1. Synchronous File System Operations
+   - Using fs.copyFileSync, fs.mkdirSync, etc. in services blocks the Node.js event loop and slows down all requests.
+   - Solution: Use asynchronous versions (fs.promises.copyFile, fs.promises.mkdir, etc.).
+
+2. Heavy or Repeated Database Queries
+   - Many controllers use .findOne/.findAll with includes for related models, which can be slow if the DB is large or underpowered.
+   - Solution: Only select needed fields (attributes), avoid unnecessary includes, and add indexes to frequently queried columns.
+
+3. Large Data Loads
+   - Rendering or sending large file structures (e.g., in seeFile) can be slow if the directory is large or deeply nested.
+   - Solution: Paginate or lazy-load file/folder trees.
+
+4. In-Memory Session Storage
+   - Using express-session with no store option means all sessions are kept in memory, which can grow and is lost on server restart.
+   - Solution: Use a session store like Redis or a database for better scalability and reliability.
+
+5. Static File Serving
+   - Serving static files (especially large or many files) directly from Node.js can slow down the server.
+   - Solution: Use a reverse proxy (like Nginx) or a dedicated file server for static files.
+
+6. Heavy Middleware on Every Request
+   - Middlewares like authUser, getUserPermissions, and passAuths run on every request and may do DB lookups each time.
+   - Solution: Cache user permissions in the session if they don’t change often, and only run heavy middleware where needed.
+
+7. Error Handling
+   - Some controllers catch errors and log them but may not always send a response quickly, which can hang requests.
+   - Solution: Always send a response on error to avoid hanging requests.
+
+8. Cron Jobs
+   - The daily cleanup job could slow down the server if it is heavy and runs in the same process.
+   - Solution: Make sure it runs quickly or offload it to a separate process if needed.
+
+UI/Client-Side Issues
+=====================
+
+1. Large/Unoptimized AJAX and Fetch Requests
+   - Fetching large datasets (e.g., all files, all users) at once can overload the server and slow down the UI.
+   - Solution: Paginate or lazy-load large lists. Only fetch what is needed for the current view.
+
+2. Multiple/Redundant Requests
+   - Triggering multiple requests in quick succession (e.g., on every keystroke) can overwhelm the server.
+   - Solution: Debounce search inputs and batch requests where possible.
+
+3. Heavy Client-Side Rendering
+   - Rendering large lists or trees in the browser can cause slow page loads and high memory usage.
+   - Solution: Render only visible items, or use virtual scrolling for large lists.
+
+4. Synchronous UI Blocking
+   - Synchronous loops or blocking code in the browser can freeze the UI.
+   - Solution: Break up large tasks, use async patterns, and avoid blocking the main thread.
+
+5. Reloading the Entire Page
+   - Using window.location.reload() after actions can be slow if the page is heavy or the server is slow.
+   - Solution: Update the UI dynamically (AJAX/DOM updates) instead of full reloads where possible.
+
+6. Loading Many Scripts/Assets
+   - Loading many JS libraries and assets on every page adds to load time.
+   - Solution: Load only the scripts needed for each page, or use code splitting.
+
+7. No Client-Side Caching
+   - Fetching the same data repeatedly without caching increases server load.
+   - Solution: Cache frequently used data in the browser (localStorage, sessionStorage, or in-memory).
+
+8. No Error Handling for Slow/Failed Requests
+   - Not handling slow or failed responses can lead to a poor user experience.
+   - Solution: Show loading indicators and handle errors with user-friendly messages.
+
+Security Best Practices
+======================
+
+1. Input Validation & Sanitization
+   - Validate and sanitize all user input to prevent SQL injection, XSS, and other attacks.
+   - Use libraries like express-validator or joi.
+
+2. Authentication & Authorization
+   - Protect all sensitive routes with authentication middleware.
+   - Check user permissions on every action.
+
+3. Session Security
+   - Use a strong, unpredictable session secret.
+   - Set cookie.secure: true in production (requires HTTPS).
+   - Set httpOnly: true and sameSite: 'lax' or 'strict' for cookies.
+   - Use a persistent session store for production.
+
+4. HTTPS Everywhere
+   - Always serve your app over HTTPS in production.
+
+5. CSRF Protection
+   - Use CSRF tokens for forms and state-changing requests.
+
+6. Rate Limiting & Brute Force Protection
+   - Limit the number of requests per IP/user.
+
+7. Secure HTTP Headers
+   - Use the helmet middleware to set secure HTTP headers.
+
+8. File Upload Security
+   - Validate file types and sizes. Store uploaded files outside the web root.
+
+9. Error Handling
+   - Never expose stack traces or sensitive error details to the client.
+
+10. Dependency Management
+    - Keep all dependencies up to date. Run npm audit regularly.
+
+11. Prevent NoSQL/SQL Injection
+    - Use parameterized queries or ORM methods.
+
+12. CORS Configuration
+    - Set CORS policy to only allow trusted origins.
+
+13. Logging & Monitoring
+    - Log authentication attempts, errors, and suspicious activity.
+
+14. Limit Data Exposure
+    - Only return necessary fields in API responses.
+
+Server Setup & Windows Server 2019 Tips
+=======================================
+
+1. Keep Windows Updated
+   - Ensure all Windows updates and security patches are installed.
+
+2. Disable Unnecessary Services
+   - Turn off Windows services and background apps you don’t need.
+
+3. Optimize Power Settings
+   - Set the server to “High Performance” mode in Power Options.
+
+4. Use a Reverse Proxy
+   - Use IIS, Nginx, or Apache as a reverse proxy in front of Node.js.
+
+5. Increase System Resources
+   - Add more RAM and use SSD storage if possible.
+
+6. Monitor Resource Usage
+   - Use Task Manager, Resource Monitor, or third-party tools to watch CPU, RAM, and disk usage.
+
+7. Optimize Node.js Process
+   - Use Node.js LTS version. Use a process manager like PM2. Use clustering if you have multiple CPU cores.
+
+8. Network Configuration
+   - Ensure the server is on a wired, stable network.
+
+9. Antivirus/Firewall
+   - Exclude your app’s folders from real-time antivirus scanning. Make sure firewall rules allow necessary traffic.
+
+10. Scheduled Tasks & Backups
+    - Schedule heavy tasks (backups, virus scans, Windows updates) during off-peak hours.
+
+11. Disk Cleanup
+    - Regularly clean up temp files, logs, and unused files.
+
+12. Virtualization
+    - If running in a VM, ensure it has enough dedicated resources.
+
+13. Server Roles
+    - Don’t run unnecessary server roles on the same machine as your app.
+
+14. Logging
+    - Store logs on a separate disk if possible, or rotate logs to prevent disk fill-up.
+
+Summary:
+--------
+- Refactor all synchronous file system calls to async.
+- Profile and optimize DB queries; add indexes.
+- Paginate large data responses.
+- Use a session store for production.
+- Use a reverse proxy for static files.
+- Optimize/caching for heavy middleware.
+- Ensure error handlers always send a response.
+- Monitor cron jobs for performance impact.
+- Optimize AJAX/Fetch requests; implement pagination or lazy-loading.
+- Debounce rapid input requests and batch server requests.
+- Implement virtual scrolling or similar for large list rendering.
+- Avoid synchronous/blocking code in the browser; use async patterns.
+- Prefer dynamic UI updates over full page reloads.
+- Limit script/asset loading to what's necessary for each page.
+- Implement client-side caching for frequently used data.
+- Handle slow/failed requests gracefully with user feedback.
+- Validate and sanitize all user inputs.
+- Protect sensitive routes and check user permissions.
+- Use secure session and cookie settings.
+- Serve the app over HTTPS and use CSRF protection.
+- Implement rate limiting and secure HTTP headers.
+- Validate file uploads and handle errors securely.
+- Keep dependencies updated and monitor for suspicious activity.
+- Configure CORS properly and limit data exposure in responses.
+- Regularly update and optimize the Windows Server environment.
+- Use a reverse proxy, optimize resources, and monitor performance.
+- Ensure network stability and configure antivirus/firewall correctly.
+- Schedule maintenance tasks and clean up unused files regularly.
+- If virtualized, allocate sufficient resources to the VM.
+- Avoid running unnecessary services or server roles on the app server.
+- Manage logs effectively to prevent disk space issues.

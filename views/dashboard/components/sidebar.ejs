@@ -133,7 +133,8 @@
 
 
 <script>
-      $("#scan-button").click(function(event) {
+  $(document).ready(function() {
+    $("#scan-button").click(function(event) {
       event.preventDefault();
 
       // Remove any existing backdrop
@@ -141,8 +142,11 @@
 
       // Show the modal
       $("#upgradeModal").modal("show");
-
-      });
-
-
+    });
+    $("a[href='pick-send']").click(function(event) {
+      // Instead of default navigation, add #picksend to URL
+      event.preventDefault();
+      window.location.href = 'see-file#picksend';
+    });
+  });
 </script>

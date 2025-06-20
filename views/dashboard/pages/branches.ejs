@@ -1,4 +1,3 @@
-
 <div class="container-fluid">
   <div class="row">
     <div class="col-sm-12">
@@ -135,48 +134,182 @@
     getBranch();
     getUserGroup(); // Populate the department dropdown on page load
 
-  let records = [];
-  let updateRecord = null;
-  let deleteRecord = null;
+    let records = [];
+    let updateRecord = null;
+    let deleteRecord = null;
 
-  // Save/Create branch
-  $("#btnSave").click(() => {
-    let name = $("#name").val();
-    let person = $("#person").val();
-    let address = $("#address").val();
-    let phone = $("#phone").val();
-    let reg = $("#reg").val();
-    let email = $("#email").val();
-    let departmentName = $("#selectUserGroup").find(":selected").text();
+    // Attach custom search logic to DataTables default search input
+    $(document).on("input", '#basic-1_filter input[type="search"]', function() {
+      const search = $(this).val().toLowerCase();
+      if (!records) return;
+      const filtered = records.filter(group => {
+        return (
+          group.name?.toLowerCase().includes(search) ||
+          group.contact_person?.toLowerCase().includes(search) ||
+          group.address?.toLowerCase().includes(search) ||
+          group.email?.toLowerCase().includes(search) ||
+          group.phone_number?.toLowerCase().includes(search) ||
+          group.reg_number?.toLowerCase().includes(search) ||
+          (group.departmentNames || "").toLowerCase().includes(search)
+        );
+      });
+      renderBranchTable(filtered);
+    });
 
-    if (name.trim().length < 1) return errorAlert("Name is required");
-    else if (person.trim().length < 1) return errorAlert("Person contact is required");
-    else if (address.trim().length < 1) return errorAlert("Address is required");
-    else if (email.trim().length < 1) return errorAlert("Email is required");
-    else if (phone.trim().length < 1) return errorAlert("Phone is required");
-    else if (reg.trim().length < 1) return errorAlert("Registration is required");
-    else if (departmentName === "--- Select department ----")
-      return errorAlert("Please select a valid department");
+    // Save/Create branch
+    $("#btnSave").click(() => {
+      let name = $("#name").val();
+      let person = $("#person").val();
+      let address = $("#address").val();
+      let phone = $("#phone").val();
+      let reg = $("#reg").val();
+      let email = $("#email").val();
+      let departmentName = $("#selectUserGroup").find(":selected").text();
 
-    let btnAction = $("#btnSave").text();
-    // Send user request
-    $.post(
-      "/admin/branches", {
-        name,
-        person,
-        address,
-        email,
-        phone,
-        reg,
-        departmentName,
-        btnAction,
-        updateRecord
-      },
-      function(data) {
-        if (data.statusCode != 200) return errorAlert(data.message);
+      if (name.trim().length < 1) return errorAlert("Name is required");
+      else if (person.trim().length < 1) return errorAlert("Person contact is required");
+      else if (address.trim().length < 1) return errorAlert("Address is required");
+      else if (email.trim().length < 1) return errorAlert("Email is required");
+      else if (phone.trim().length < 1) return errorAlert("Phone is required");
+      else if (reg.trim().length < 1) return errorAlert("Registration is required");
+      else if (departmentName === "--- Select department ----")
+        return errorAlert("Please select a valid department");
 
-        $("#userGroupModal").modal("hide");
+      let btnAction = $("#btnSave").text();
+      // Send user request
+      $.post(
+        "/admin/branches", {
+          name,
+          person,
+          address,
+          email,
+          phone,
+          reg,
+          departmentName,
+          btnAction,
+          updateRecord
+        },
+        function(data) {
+          if (data.statusCode != 200) return errorAlert(data.message);
+
+          $("#userGroupModal").modal("hide");
+          successAlert(data.message);
+          $("#name").val(null);
+          $("#person").val(null);
+          $("#address").val(null);
+          $("#phone").val(null);
+          $("#reg").val(null);
+          $("#email").val(null);
+          $("#selectUserGroup").val(null);
+          getBranch();
+        }
+      );
+      console.log("Selected department: " + departmentName);
+    });
+
+    // Delete branch
+    $("#btnDeleteRecord").click(() => {
+      $.post("/admin/remove-branch", {
+        deleteRecord
+      }, (data) => {
+        if (data.statusCode == 404) return errorAlert(data.message);
+        console.log(data);
+
         successAlert(data.message);
+        $("#btnDeleteRecord").modal("hide");
+        getBranch();
+      })
+    })
+
+    // Get Branch
+    function getBranch() {
+      $.get("/admin/retrieve-branches", function (data) {
+        if (data.statusCode === 200) {
+          records = data.records;
+          renderBranchTable(records);
+          $("#basic-1").DataTable();
+        } else {
+          errorAlert(data.message);
+        }
+      });
+    }
+
+    function renderBranchTable(filteredRecords) {
+      const tbody = $("#basic-1 tbody");
+      tbody.empty();
+      filteredRecords.forEach((group) => {
+        const row = `
+          <tr>
+            <td class="branchName">${group.name}</td>
+            <td>${group.contact_person}</td>
+            <td>${group.address}</td>
+            <td>${group.email}</td>
+            <td>${group.phone_number}</td>
+            <td>${group.reg_number}</td>
+            <td class="department-column btn">${group.departmentNames || "No Departments"}</td>
+            <td>${new Date(group.createdAt).toDateString()}</td>
+            <td>
+              <ul class="action">
+                <li class="edit" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#userGroupModal">
+                  <a href="#"><i class="icon-pencil-alt"></i></a>
+                </li>
+                <li class="delete" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#removeUserGroupModal">
+                  <a href="#"><i class="icon-trash"></i></a>
+                </li>
+              </ul>
+            </td>
+          </tr>
+        `;
+        tbody.append(row);
+      });
+    }
+
+    // Get department
+    function getUserGroup() {
+      $.get("/admin/retrieve-user-group", function (data) {
+        if (data.statusCode === 200) {
+          const departmentRecords = data.records;
+          const selectUserGroup = $("#selectUserGroup");
+
+          // Clear existing options except for the first one
+          selectUserGroup.find("option:not(:first)").remove();
+          // Loop through records and append new options
+          departmentRecords.forEach((record) => {
+            selectUserGroup.append(
+              `<option value="${record.id}">${record.name}</option>`
+            );
+          });
+        } else {
+          console.error("Failed to retrieve user group");
+        }
+      });
+    }
+
+    // Update branch modal
+    $("#userGroupModal").on("show.bs.modal", (e) => {
+      const id = $(e.relatedTarget).data("value");
+      if (typeof id != "undefined") {
+        $("#userGroupModalLabel").text("Edit Branch");
+        $("#btnSave").text("Update");
+        $("#em1").css("display", "none");
+        $("#em2").css("display", "inline-block");
+        // Display selected data in the modal
+
+        let record = records.filter((record) => record.id == id);
+        if (record.length > 0) {
+          record = record[0];
+          $("#name").val(record.name);
+          $("#person").val(record.contact_person);
+          $("#address").val(record.address);
+          $("#phone").val(record.phone_number);
+          $("#reg").val(record.reg_number);
+          $("#email").val(record.email);
+          $("#selectUserGroup").val(record.departmentId); // Set the selected department
+          updateRecord = record.id;
+        }
+      } else {
+        $("#userGroupModalLabel").text("Create Branch");
+        $("#btnSave").text("Create");
         $("#name").val(null);
         $("#person").val(null);
         $("#address").val(null);
@@ -184,133 +317,20 @@
         $("#reg").val(null);
         $("#email").val(null);
         $("#selectUserGroup").val(null);
-        getBranch();
-      }
-    );
-    console.log("Selected department: " + departmentName);
-  });
-
-  // Delete branch
-  $("#btnDeleteRecord").click(() => {
-    $.post("/admin/remove-branch", {
-      deleteRecord
-    }, (data) => {
-      if (data.statusCode == 404) return errorAlert(data.message);
-      console.log(data);
-
-      successAlert(data.message);
-      $("#btnDeleteRecord").modal("hide");
-      getBranch();
-    })
-  })
-
-  // Get Branch
-  function getBranch() {
-    $.get("/admin/retrieve-branches", function (data) {
-      if (data.statusCode === 200) {
-        records = data.records;
-
-        const tbody = $("#basic-1 tbody");
-        tbody.empty();
-        records.forEach((group) => {
-          const row = `
-            <tr>
-              <td class="branchName">${group.name}</td>
-              <td>${group.contact_person}</td>
-              <td>${group.address}</td>
-              <td>${group.email}</td>
-              <td>${group.phone_number}</td>
-              <td>${group.reg_number}</td>
-              <td class="department-column btn">${group.departmentNames || "No Departments"}</td>
-              <td>${new Date(group.createdAt).toDateString()}</td>
-              <td>
-                <ul class="action">
-                  <li class="edit" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#userGroupModal">
-                    <a href="#"><i class="icon-pencil-alt"></i></a>
-                  </li>
-                  <li class="delete" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#removeUserGroupModal">
-                    <a href="#"><i class="icon-trash"></i></a>
-                  </li>
-                </ul>
-              </td>
-            </tr>
-          `;
-          tbody.append(row);
-        });
-        $("#basic-1").DataTable();
-      } else {
-        errorAlert(data.message);
       }
     });
-  }
 
-  // Get department
-  function getUserGroup() {
-    $.get("/admin/retrieve-user-group", function (data) {
-      if (data.statusCode === 200) {
-        const departmentRecords = data.records;
-        const selectUserGroup = $("#selectUserGroup");
-
-        // Clear existing options except for the first one
-        selectUserGroup.find("option:not(:first)").remove();
-        // Loop through records and append new options
-        departmentRecords.forEach((record) => {
-          selectUserGroup.append(
-            `<option value="${record.id}">${record.name}</option>`
-          );
-        });
-      } else {
-        console.error("Failed to retrieve user group");
-      }
+    // Remove modal
+    $("#removeUserGroupModal").on("show.bs.modal", (e) => {
+      const id = $(e.relatedTarget).data("value");
+      deleteRecord = id;
     });
-  }
 
-  // Update branch modal
-  $("#userGroupModal").on("show.bs.modal", (e) => {
-    const id = $(e.relatedTarget).data("value");
-    if (typeof id != "undefined") {
-      $("#userGroupModalLabel").text("Edit Branch");
-      $("#btnSave").text("Update");
-      $("#em1").css("display", "none");
-      $("#em2").css("display", "inline-block");
-      // Display selected data in the modal
 
-      let record = records.filter((record) => record.id == id);
-      if (record.length > 0) {
-        record = record[0];
-        $("#name").val(record.name);
-        $("#person").val(record.contact_person);
-        $("#address").val(record.address);
-        $("#phone").val(record.phone_number);
-        $("#reg").val(record.reg_number);
-        $("#email").val(record.email);
-        $("#selectUserGroup").val(record.departmentId); // Set the selected department
-        updateRecord = record.id;
-      }
-    } else {
-      $("#userGroupModalLabel").text("Create Branch");
-      $("#btnSave").text("Create");
-      $("#name").val(null);
-      $("#person").val(null);
-      $("#address").val(null);
-      $("#phone").val(null);
-      $("#reg").val(null);
-      $("#email").val(null);
-      $("#selectUserGroup").val(null);
-    }
+    getBranch();
+    $('.department-column').click(function() {console.log("clikkkkkkkkkkkkkkk");
+    });
+
   });
-
-  // Remove modal
-  $("#removeUserGroupModal").on("show.bs.modal", (e) => {
-    const id = $(e.relatedTarget).data("value");
-    deleteRecord = id;
-  });
-
-
-  getBranch();
-  $('.department-column').click(function() {console.log("clikkkkkkkkkkkkkkk");
-  });
-
-});
 
 </script>

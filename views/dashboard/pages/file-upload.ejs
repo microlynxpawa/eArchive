@@ -159,6 +159,7 @@
   Dropzone.autoDiscover = false;
 
   let singleUploadFileName = null;
+  let singleUploading = false;
 
   // Initialize Dropzone for single upload
   const myDropzone = new Dropzone("#fileUploadForm", {
@@ -176,6 +177,7 @@
       });
       document.getElementById("submitBtn").addEventListener("click", function (e) {
         e.preventDefault();
+        if (singleUploading) return;
         const fileNameInput = document.getElementById("fullname").value;
         if (dropzoneInstance.getQueuedFiles().length === 0) {
           showToast('Please select a file to upload.', 'danger');
@@ -185,6 +187,13 @@
         const originalFileName = uploadedFile.name;
         const fileExtension = originalFileName.substring(originalFileName.lastIndexOf('.'));
         singleUploadFileName = fileNameInput ? `${fileNameInput}${fileExtension}` : originalFileName;
+        // Set uploading state
+        singleUploading = true;
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = true;
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+        btn.textContent = 'Uploading....';
         dropzoneInstance.processQueue();
       });
       // Success handler
@@ -193,11 +202,25 @@
         setTimeout(function () {
           document.getElementById('fullname').value = '';
           myDropzone.removeAllFiles();
+          // Reset button
+          singleUploading = false;
+          const btn = document.getElementById("submitBtn");
+          btn.disabled = false;
+          btn.classList.remove('btn-secondary');
+          btn.classList.add('btn-primary');
+          btn.textContent = 'Store';
         }, 1000);
       });
       // Error handler
       this.on("error", function (file, errorMessage) {
         showToast('Failed to upload the file. Please try again.', 'danger');
+        // Reset button
+        singleUploading = false;
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = false;
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn-primary');
+        btn.textContent = 'Store';
       });
     },
   });
@@ -260,8 +283,11 @@
 
   // Multiple upload form validation and AJAX submit with toast
   const multiUploadForm = document.getElementById('multiUploadForm');
+  const multiUploadBtn = multiUploadForm.querySelector('button[type="submit"]');
+  let multiUploading = false;
   multiUploadForm.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (multiUploading) return;
     const previewContainer = document.getElementById('multiPreview');
     const nameInputs = previewContainer.querySelectorAll('input[type="text"]');
     const files = multiFilesInput.files;
@@ -283,6 +309,12 @@
       formData.append(`customNames[${idx}]`, nameToSend);
       formData.append(`originalNames[${idx}]`, file.name);
     });
+    // Set uploading state
+    multiUploading = true;
+    multiUploadBtn.disabled = true;
+    multiUploadBtn.classList.remove('btn-success');
+    multiUploadBtn.classList.add('btn-secondary');
+    multiUploadBtn.textContent = 'Uploading....';
     fetch('/admin/uploadMultipleFiles', {
       method: 'POST',
       body: formData,
@@ -297,8 +329,22 @@
         } else {
           showToast('Error uploading files.', 'danger');
         }
+        // Reset button
+        multiUploading = false;
+        multiUploadBtn.disabled = false;
+        multiUploadBtn.classList.remove('btn-secondary');
+        multiUploadBtn.classList.add('btn-success');
+        multiUploadBtn.textContent = 'Upload All';
       })
-      .catch(() => showToast('Error uploading files.', 'danger'));
+      .catch(() => {
+        showToast('Error uploading files.', 'danger');
+        // Reset button
+        multiUploading = false;
+        multiUploadBtn.disabled = false;
+        multiUploadBtn.classList.remove('btn-secondary');
+        multiUploadBtn.classList.add('btn-success');
+        multiUploadBtn.textContent = 'Upload All';
+      });
   });
 
   // Multiple upload form validation

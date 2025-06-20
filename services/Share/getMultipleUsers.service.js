@@ -23,8 +23,7 @@ const fetchUsersByQuery = async (usernamesString) => {
     // If only one username is present, fetch a single user
     const user = await User.findOne({ where: { username: usernames[0] }, raw: true });
     if (!user) throw new Error("User not found.");
-    
-    return user;
+    return [user]; // Always return an array
   } else {
     // Fetch multiple users
     const users = await User.findAll({

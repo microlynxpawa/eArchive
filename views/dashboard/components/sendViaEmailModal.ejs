@@ -4,127 +4,208 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 41, 59, 0.45); /* subtle dark overlay */
     display: none;
     z-index: 1000;
     justify-content: center;
     align-items: center;
+    transition: background 0.2s;
   }
 
   /* Modal Content */
   .modal-content-email {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    width: 60%;
-    margin: 20% auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+    border-radius: 14px;
+    padding: 32px 28px 24px 28px;
+    width: 420px;
+    max-width: 90vw;
+    margin: 0 auto;
+    box-shadow: 0 8px 32px rgba(30,41,59,0.18);
     z-index: 1100;
     position: relative;
+    border: 1px solid #e3e3e3;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   /* Close Button */
   .close-button-email {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 24px;
-    color: #333;
+    top: 18px;
+    right: 18px;
+    font-size: 22px;
+    color: #64748b;
     cursor: pointer;
     background: none;
     border: none;
+    transition: color 0.15s;
+  }
+  .close-button-email:hover {
+    color: #1e293b;
   }
 
   /* Input Field and Button Styling */
-  #email-search-container {
+  #username-search-container {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+    gap: 10px;
   }
 
-  #email-search-input {
-    width: calc(100% - 50px);
-    padding: 10px;
+  #username-search-input {
+    flex: 1;
+    padding: 11px 14px;
     font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f1f5f9;
+    transition: border 0.2s;
+  }
+  #username-search-input:focus {
+    border: 1.5px solid #007bff;
+    outline: none;
+    background: #fff;
   }
 
-  #email-search-button {
-    margin-left: 10px;
-    padding: 10px;
+  #username-search-button {
+    padding: 11px 18px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #007bff;
+    background: #2563eb;
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
+    transition: background 0.18s;
+    font-weight: 500;
+  }
+  #username-search-button:hover {
+    background: #1d4ed8;
   }
 
   /* User List Section */
-  #email-user-list-container {
-    margin-top: 20px;
-    max-height: 200px;
+  #username-user-list-container {
+    margin-top: 10px;
+    max-height: 180px;
     overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    padding: 10px 8px;
+    border-radius: 6px;
+    background: #f8fafc;
+    margin-bottom: 10px;
   }
 
   .email-user-item {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    padding: 4px 0;
+    font-size: 15px;
+    color: #334155;
   }
 
-  .email-user-item input {
+  .email-user-item input[type="checkbox"] {
     margin-right: 10px;
+    accent-color: #2563eb;
+    width: 18px;
+    height: 18px;
   }
 
-  #send-files-button-email {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #28a745;
+  #send-files-button-username {
+    margin-top: 18px;
+    padding: 12px 0;
+    font-size: 17px;
+    background: #22c55e;
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 7px;
     cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    box-shadow: 0 2px 8px rgba(34,197,94,0.08);
+    transition: background 0.18s;
+  }
+  #send-files-button-username:disabled {
+    background: #a7f3d0;
+    color: #fff;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  #send-files-button-username:not(:disabled):hover {
+    background: #16a34a;
+  }
+
+  /* Toast Notification */
+  .custom-toast-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 16px 28px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    z-index: 12000;
+    opacity: 0.98;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .toast-success {
+    background: linear-gradient(90deg, #22c55e 60%, #16a34a 100%);
+    color: #fff;
+  }
+  .toast-error {
+    background: linear-gradient(90deg, #dc3545 60%, #b91c1c 100%);
+    color: #fff;
+  }
+
+  /* Headings and text */
+  .modal-content-email h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+  .modal-content-email p.text-secondary {
+    color: #64748b;
+    font-size: 1rem;
+    margin-bottom: 18px;
   }
 </style>
 
 <div id="send-files-modal-email">
   <div class="modal-content-email">
     <button class="close-button-email" id="close-send-files-modal-email">&times;</button>
-    <h2>Send Files Via Email</h2>
-    <p class="text-secondary">Enter the eArchive user email address</p>
+    <h2>Send Files To Users</h2>
+    <p class="text-secondary">Enter the eArchive username</p>
 
-    <div id="email-search-container">
-      <input type="text" id="email-search-input" placeholder="Type email(s)" />
-      <button id="email-search-button">🔍 Search</button>
+    <div id="username-search-container">
+      <input type="text" id="username-search-input" placeholder="Type username(s)" />
+      <button id="username-search-button">🔍 Search</button>
     </div>
 
-    <div id="email-user-list-container">
+    <div id="username-user-list-container">
       <!-- Dynamically populated list of users -->
     </div>
 
-    <button id="send-files-button-email" disabled>Send Files</button>
+    <button id="send-files-button-username" disabled>Send Files</button>
   </div>
 </div>
 
-  <script>
- document.addEventListener("DOMContentLoaded", () => {
+<script>
+document.addEventListener("DOMContentLoaded", () => {
   const sendFilesModalEmail = document.getElementById("send-files-modal-email");
   const closeSendFilesModalEmail = document.getElementById("close-send-files-modal-email");
+  // Update selectors for username
   const sendViaEmailButton = document.getElementById("send-button");
-  const emailSearchButton = document.getElementById("email-search-button");
-  const emailSearchInput = document.getElementById("email-search-input");
-  const emailUserListContainer = document.getElementById("email-user-list-container");
-  const sendFilesButtonEmail = document.getElementById("send-files-button-email");
+  const usernameSearchButton = document.getElementById("username-search-button");
+  const usernameSearchInput = document.getElementById("username-search-input");
+  const usernameUserListContainer = document.getElementById("username-user-list-container");
+  const sendFilesButtonUsername = document.getElementById("send-files-button-username");
 
-  let selectedEmails = [];
+  let selectedUsernames = [];
 
   // Open Modal
   sendViaEmailButton.addEventListener("click", () => {
@@ -136,74 +217,131 @@
     sendFilesModalEmail.style.display = "none";
   });
 
-  // Search Users by Email
-  emailSearchButton.addEventListener("click", async () => {
-    const query = emailSearchInput.value.trim();
-    console.log("Query being sent to backend:", query);
-
-    if (!query) return alert("Please enter an email or search term.");
-
+  // Search Users by Username
+  usernameSearchButton.addEventListener("click", async () => {
+    const queryRaw = usernameSearchInput.value.trim();
+    if (!queryRaw) return showNotification("Please enter a username or search term.");
+    // Always send as comma-separated list
+    const usernamesArr = queryRaw.split(/[,\s]+/).map(u => u.trim()).filter(Boolean);
+    const query = usernamesArr.join(",");
     try {
-      const response = await fetch(`/admin/searchUsersByEmail?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`/admin/searchUsers?usernames=${encodeURIComponent(query)}`);
       if (!response.ok) throw new Error("Failed to fetch user list.");
-
       const users = await response.json();
-
-      emailUserListContainer.innerHTML = ""; // Clear previous results
+      usernameUserListContainer.innerHTML = ""; // Clear previous results
+      if (!Array.isArray(users)) {
+        showNotification("No users found.");
+        return;
+      }
       users.forEach(user => {
         const userItem = document.createElement("div");
         userItem.classList.add("email-user-item");
-
         userItem.innerHTML = `
-          <input type="checkbox" value="${user.email}" class="email-user-checkbox" />
-          <span>${user.email}</span>
+          <input type="checkbox" value="${user.username}" class="username-user-checkbox" />
+          <span>${user.username}</span>
         `;
-
-        emailUserListContainer.appendChild(userItem);
+        usernameUserListContainer.appendChild(userItem);
       });
-
       // Enable/Disable Send Button Based on Selection
-      const checkboxes = document.querySelectorAll(".email-user-checkbox");
+      const checkboxes = document.querySelectorAll(".username-user-checkbox");
       checkboxes.forEach(checkbox => {
         checkbox.addEventListener("change", () => {
-          selectedEmails = Array.from(checkboxes)
+          selectedUsernames = Array.from(checkboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.value);
-
-          sendFilesButtonEmail.disabled = selectedEmails.length === 0;
+          sendFilesButtonUsername.disabled = selectedUsernames.length === 0;
         });
       });
     } catch (error) {
-      alert("Error: " + error.message);
+      showNotification("Error: " + error.message);
     }
   });
 
   // Send Files
-  sendFilesButtonEmail.addEventListener("click", async () => {
-    if (selectedEmails.length === 0) return alert("No users selected.");
-    const confirmation = confirm("Are you sure you want to share file(s)?");
-    if (!confirmation) return;
-
-    try {
-      const response = await fetch("/admin/sendFilesToUsers-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          users: selectedEmails,
-          files: selectedFiles, // Ensure selectedFiles is globally defined
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to send files.");
-
-      alert("Files sent successfully.");
-      sendFilesModalEmail.style.display = "none";
-    } catch (error) {
-      alert("Error: file not found in the database " + error.message);
+  sendFilesButtonUsername.addEventListener("click", async () => {
+    if (selectedUsernames.length === 0) return showNotification("No users selected.");
+    if (!window.selectedFiles || !Array.isArray(window.selectedFiles) || window.selectedFiles.length === 0) {
+      // Try to get selected files from checkboxes in the gallery as fallback
+      const fileCheckboxes = document.querySelectorAll('.file-checkbox:checked');
+      window.selectedFiles = Array.from(fileCheckboxes).map(cb => cb.dataset.file);
     }
+    if (!window.selectedFiles || window.selectedFiles.length === 0) {
+      showNotification("No files selected to send. Please select file(s) in the gallery.");
+      return;
+    }
+    // Custom confirmation modal (simple version)
+    if (!window.confirmSendFilesModal) {
+      window.confirmSendFilesModal = function(message, onConfirm) {
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = 0;
+        modal.style.left = 0;
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.background = 'rgba(0,0,0,0.4)';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = 10001;
+        modal.innerHTML = `<div style="background: white; padding: 30px 40px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.18); font-size: 1.2rem; min-width: 250px; text-align: center;">
+          <span>${message}</span><br><br>
+          <button class='btn btn-success' id='confirmSendFilesYes'>Yes</button>
+          <button class='btn btn-secondary' id='confirmSendFilesNo'>No</button>
+        </div>`;
+        document.body.appendChild(modal);
+        document.getElementById('confirmSendFilesYes').onclick = function() {
+          modal.remove();
+          onConfirm();
+        };
+        document.getElementById('confirmSendFilesNo').onclick = function() {
+          modal.remove();
+        };
+      };
+    }
+    window.confirmSendFilesModal("Are you sure you want to share file(s)?", async function() {
+      try {
+        sendFilesButtonUsername.disabled = true;
+        sendFilesButtonUsername.innerText = "Sending...";
+        const response = await fetch("/admin/sendFilesToUsers", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            users: selectedUsernames,
+            files: window.selectedFiles,
+          }),
+        });
+        if (!response.ok) throw new Error("Failed to send files.");
+        showToastNotification("Files sent successfully.", "success");
+        sendFilesModalEmail.style.display = "none";
+        setTimeout(() => { window.location.reload(); }, 1200);
+      } catch (error) {
+        showToastNotification("Error: file not found in the database " + error.message, "error");
+      } finally {
+        sendFilesButtonUsername.disabled = false;
+        sendFilesButtonUsername.innerText = "Send Files";
+      }
+    });
   });
-});
 
-  </script>
+  // Toast notification function
+  window.showToastNotification = function(message, type) {
+    let toast = document.createElement('div');
+    toast.className = 'custom-toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+    toast.innerText = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '30px';
+    toast.style.right = '30px';
+    toast.style.background = type === 'success' ? '#28a745' : '#dc3545';
+    toast.style.color = '#fff';
+    toast.style.padding = '16px 28px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontSize = '1.1rem';
+    toast.style.boxShadow = '0 2px 12px rgba(0,0,0,0.18)';
+    toast.style.zIndex = 12000;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 2500);
+  };
+});
+</script>

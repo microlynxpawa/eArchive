@@ -49,6 +49,8 @@ async function uploadMultipleFiles(files, customNames, userId) {
     }
     await user.update({ folderPath });
   }
+  // Always ensure the directory exists before saving files (handles deleted folders)
+  ensureDirectoryExists(folderPath);
 
   const savedFiles = [];
   for (let i = 0; i < files.length; i++) {

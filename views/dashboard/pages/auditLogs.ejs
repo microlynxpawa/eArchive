@@ -48,84 +48,176 @@
   <%- include('../components/page-title.ejs', {title: 'Audit trail' }) %> 
   <%- contentFor("customJS") %>
   <script>
+    // Toast notification utility
+    function showToast(message, type = 'success') {
+      let toast = document.createElement('div');
+      toast.className = 'custom-toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+      toast.innerText = message;
+      toast.style.position = 'fixed';
+      toast.style.bottom = '30px';
+      toast.style.right = '30px';
+      toast.style.background = type === 'success' ? '#22c55e' : '#dc3545';
+      toast.style.color = '#fff';
+      toast.style.padding = '16px 28px';
+      toast.style.borderRadius = '8px';
+      toast.style.fontSize = '1.1rem';
+      toast.style.boxShadow = '0 2px 12px rgba(0,0,0,0.18)';
+      toast.style.zIndex = 12000;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 2500);
+    }
     document.addEventListener('DOMContentLoaded', () => {
-      const searchInput = document.getElementById('search-input');
-      const searchButton = document.getElementById('searchButton');
-  
-      // Function to fetch and display audit logs for a user
-      const fetchAndDisplayAuditLogs = async (userId) => {
-  try {
-    const response = await fetch(`audit-log/${encodeURIComponent(userId)}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch audit logs.');
-    }
+  const searchInput = document.getElementById('search-input');
+  const searchButton = document.getElementById('searchButton');
+  const searchFormatHint = document.getElementById('search-format-hint');
 
-    const logs = await response.json();
-    const tbody = document.getElementById('audit-log-tbody');
-    console.log("Here are the logs", JSON.stringify(logs));
-    
-
-    // Destroy existing DataTable instance before updating the table
-    if ($.fn.DataTable.isDataTable('#audit-log-table')) {
-      $('#audit-log-table').DataTable().clear().destroy();
-    }
-
-    // Clear existing table rows
-    tbody.innerHTML = '';
-
-    // Populate the table with new audit logs
-    logs.forEach(log => {
-      const row = `
-        <tr>
-          <td>${log.name || 'N/A'}</td>
-          <td>${log.department || 'N/A'}</td>
-          <td>${log.branch || 'N/A'}</td>
-          <td>${log.loginTime ? new Date(log.loginTime).toLocaleString() : 'N/A'}</td>
-          <td>${log.logoutTime ? new Date(log.logoutTime).toLocaleString() : 'N/A'}</td>
-          <td>${log.viewed ? "Viewed" : 'No activity'}</td>
-          <td>${log.uploaded ? "Uploaded" : 'No activity'}</td>
-          <td>${log.deleted ? "Deleted" : 'No activity'}</td>
-        </tr>
-      `;
-      tbody.insertAdjacentHTML('beforeend', row);
-    });
-
-    // Reinitialize DataTable
-    $('#audit-log-table').DataTable();
-    
-  } catch (error) {
-    console.error('Error fetching audit logs:', error);
-    alert('Failed to fetch audit logs.');
+  // Helper: Normalize date/time string for comparison
+  function normalizeDateTime(str) {
+    return str
+      .replace(/[\/-]/g, '-') // replace / and \ with -
+      .replace(/\s+/g, ' ')    // collapse spaces
+      .trim()
+      .toLowerCase();
   }
-};
 
-      // Handle search button click
-      searchButton.addEventListener('click', async () => {
-        const username = searchInput.value.trim();
-  
-        if (!username) {
-          alert('Please enter a username.');
-          return;
-        }
-  
-        try {
-          const response = await fetch(`/admin/getUser/${encodeURIComponent(username)}`);
-          if (!response.ok) {
-            throw new Error('Failed to fetch user.');
-          }
-  
-          const userData = await response.json();
-  
-          // Display user details
-          alert(`User found: ${userData.fullname} (${userData.username})`);
-  
-          // Fetch and display audit logs for the user
-          fetchAndDisplayAuditLogs(userData.id);
-        } catch (error) {
-          console.error('Error fetching user:', error);
-          alert('User not found or an error occurred.');
-        }
+  // Helper: Check if a string matches a date/time in any format
+  function matchesDateTime(cellValue, searchValue) {
+    if (!cellValue) return false;
+    const normCell = normalizeDateTime(cellValue.toString());
+    const normSearch = normalizeDateTime(searchValue);
+    return normCell.includes(normSearch);
+  }
+
+  // Function to fetch and display audit logs for a user, with date/time search
+  const fetchAndDisplayAuditLogs = async (userId, dateSearch = null) => {
+    try {
+      const response = await fetch(`audit-log/${encodeURIComponent(userId)}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch audit logs.');
+      }
+
+      const logs = await response.json();
+      const tbody = document.getElementById('audit-log-tbody');
+      console.log("Here are the logs", JSON.stringify(logs));
+
+      // Destroy existing DataTable instance before updating the table
+      if ($.fn.DataTable.isDataTable('#audit-log-table')) {
+        $('#audit-log-table').DataTable().clear().destroy();
+      }
+
+      // Clear existing table rows
+      tbody.innerHTML = '';
+
+      // Filter logs by date/time if search is provided
+      let filteredLogs = logs;
+      if (dateSearch) {
+        filteredLogs = logs.filter(log => {
+          return (
+            matchesDateTime(log.loginTime ? new Date(log.loginTime).toLocaleString() : '', dateSearch) ||
+            matchesDateTime(log.logoutTime ? new Date(log.logoutTime).toLocaleString() : '', dateSearch)
+          );
+        });
+      }
+
+      // Populate the table with new audit logs
+      filteredLogs.forEach(log => {
+        const row = `
+          <tr>
+            <td>${log.name || 'N/A'}</td>
+            <td>${log.department || 'N/A'}</td>
+            <td>${log.branch || 'N/A'}</td>
+            <td>${log.loginTime ? new Date(log.loginTime).toLocaleString() : 'N/A'}</td>
+            <td>${log.logoutTime ? new Date(log.logoutTime).toLocaleString() : 'N/A'}</td>
+            <td>${log.viewed ? "Viewed" : 'No activity'}</td>
+            <td>${log.uploaded ? "Uploaded" : 'No activity'}</td>
+            <td>${log.deleted ? "Deleted" : 'No activity'}</td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', row);
       });
-    });
+
+      // Reinitialize DataTable
+      $('#audit-log-table').DataTable();
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
+      showToast('Failed to fetch audit logs.', 'error');
+    }
+  };
+
+  // Handle search button click (for username)
+  searchButton.addEventListener('click', async () => {
+    const username = searchInput.value.trim();
+    if (!username) {
+      showToast('Please enter a username.', 'error');
+      return;
+    }
+    try {
+      const response = await fetch(`/admin/getUser/${encodeURIComponent(username)}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user.');
+      }
+      const userData = await response.json();
+      showToast(`User found: ${userData.fullname} (${userData.username})`, 'success');
+      fetchAndDisplayAuditLogs(userData.id);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      showToast('User not found or an error occurred.', 'error');
+    }
+  });
+
+  // Handle date/time search on input
+  searchInput.addEventListener('input', async (e) => {
+    const searchVal = e.target.value.trim();
+    if (!searchVal) return;
+    // Try to get user by username first
+    try {
+      const response = await fetch(`/admin/getUser/${encodeURIComponent(searchVal)}`);
+      if (!response.ok) return; // Not a username, treat as date/time
+      const userData = await response.json();
+      fetchAndDisplayAuditLogs(userData.id);
+      return;
+    } catch {}
+    // If not a username, treat as date/time search for current logs
+    // Find the last fetched userId (if any)
+    const lastUserId = window.lastAuditUserId;
+    if (lastUserId) {
+      fetchAndDisplayAuditLogs(lastUserId, searchVal);
+    }
+  });
+
+  // After DataTable is initialized, move the hint below the DataTables search input
+  $(document).ready(function() {
+  // Wait for DataTable to render the search input
+  setTimeout(function() {
+    if ($('#audit-log-table_filter').length) {
+      // Only add if not already present
+      if ($('#audit-log-table_filter #search-format-hint').length === 0) {
+        $('#audit-log-table_filter').append('<span id="search-format-hint" style="display:none; color:#22c55e; font-size:0.98em; margin-left:10px;">Tip: Search by date (e.g. 2024-06-20, 20/06/2024, 20 06 2024) or time (e.g. 14:30, 2:30 PM, 14-30, 14 30)</span>');
+      }
+      // Show/hide on focus/blur
+      $('#audit-log-table_filter input[type="search"]').on('focus', function() {
+        $('#search-format-hint').show();
+      }).on('blur', function() {
+        setTimeout(function() { $('#search-format-hint').hide(); }, 200);
+      });
+    }
+  }, 500);
+});
+
+  // Show/hide search format hint
+  searchInput.addEventListener('focus', () => {
+    searchFormatHint.style.display = 'block';
+  });
+  searchInput.addEventListener('blur', () => {
+    setTimeout(() => { searchFormatHint.style.display = 'none'; }, 200);
+  });
+
+  // Store last userId for date/time search
+  window.lastAuditUserId = null;
+  const origFetchAndDisplay = fetchAndDisplayAuditLogs;
+  fetchAndDisplayAuditLogs = async (userId, dateSearch = null) => {
+    window.lastAuditUserId = userId;
+    await origFetchAndDisplay(userId, dateSearch);
+  };
+});
   </script>
-  

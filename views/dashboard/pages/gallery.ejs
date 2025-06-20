@@ -213,7 +213,7 @@
         <button id="delete-button" class="btn btn-secondary mt-3">Delete</button>
         <% } %>
         <button id="cancel-delete-button" style="display: none;" class="btn btn-secondary mt-3">Cancel Delete</button>
-        <button id="send-button" style="display: none;" class="btn btn-success mt-3">Send via Email</button>
+        <button id="send-button" style="display: none;" class="btn btn-success mt-3">Send</button>
         <p id="select-file-message" style="display: none; color: green;">Please select a file.</p>
         <p id="delete-info" class="delete-info" style="display: none;">Select file(s) to delete.</p>
       </div>
@@ -230,7 +230,7 @@
 </div>
 
 <%- contentFor("pageHeader") %>
-<%- include('../components/page-title.ejs', {title: 'See File' }) %>
+<%- include('../components/page-title.ejs', {title: 'View Files' }) %>
 <%- contentFor("customJS") %>
 
 
@@ -316,6 +316,10 @@
     pickSendButton.classList.add("btn-danger");
     deleteButton.style.display = "none";
     isPickSendModeActive = true;
+    // Reveal all folders in the folder tree
+    document.querySelectorAll('#folder-tree .sub-items').forEach(el => {
+      el.style.display = 'block';
+    });
   }
 
   /**
@@ -415,6 +419,10 @@
     deleteButton.classList.add('btn-danger');
     pickSendButton.style.display = "none";
     isDeleteModeActive = true;
+    // Reveal all folders in the folder tree (just like Pick & Send)
+    document.querySelectorAll('#folder-tree .sub-items').forEach(el => {
+      el.style.display = 'block';
+    });
   }
 
   /**
@@ -463,6 +471,17 @@
     deleteButton.classList.remove('btn-danger');
     isDeleteModeActive = false;
     selectedFilesForDeleting = [];
+  }
+
+  // Check if we should auto-activate Pick & Send mode (e.g., after coming from sidebar)
+  if (window.location.hash === '#picksend') {
+    setTimeout(() => {
+      if (typeof activatePickSendMode === 'function') {
+        activatePickSendMode();
+      } else if (typeof togglePickSendMode === 'function') {
+        togglePickSendMode();
+      }
+    }, 100); // Wait for DOM
   }
 });
 </script>
@@ -575,69 +594,136 @@
   });
 
   searchButton.addEventListener('click', () => {
-    const searchDate = searchInput.value.trim();
-    const validDateRegex = /^\d{1,2}-\d{1,2}-\d{4}$/; // d-m-yyyy pattern
-
-    if (!searchDate) {
-      alert("Please enter a valid date in the format (d-m-yyyy)");
+    const searchDateRaw = searchInput.value.trim();
+    const normalizedDate = normalizeDateInput(searchDateRaw);
+    if (!searchDateRaw) {
+      showNotification("Please enter a valid date in the format (d-m-yyyy)");
       return;
     }
-
-    if (!validDateRegex.test(searchDate)) {
-      alert("Invalid format. Please enter date as (day-month-year) like 12-4-2024.");
+    if (!normalizedDate) {
+      showNotification("Invalid format. Please enter date as (day-month-year) like 12-4-2024.");
       return;
     }
-
-    const matchedFiles = filterFileStructure(searchDate); // Get matched files
-
+    const matchedFiles = filterFileStructure(normalizedDate); // Get matched files
     if (matchedFiles.length === 0) {
-      alert("No files found for the given date.");
+      showNotification("No files found for the given date.");
     } else {
-      showModal(matchedFiles); // Show the modal with results
+      showModal(matchedFiles, normalizedDate); // Show the modal with results and date
+      matchedFiles.forEach(revealFileInTree); // Expand folders and highlight
     }
   });
+
+  function normalizeDateInput(input) {
+    // Accepts formats like d-m-yyyy, dd-mm-yyyy, d.mm.yyyy, d m yyyy, d/m/yyyy, etc.
+    // Remove all extra spaces and replace with single dash
+    input = input.trim().replace(/[\s\/\.]+/g, '-');
+    const match = input.match(/^0*(\d{1,2})-0*(\d{1,2})-(\d{4})$/);
+    if (!match) return null;
+    const day = String(Number(match[1]));   // Remove leading zeros
+    const month = String(Number(match[2])); // Remove leading zeros
+    const year = match[3];
+    return `${day}-${month}-${year}`;
+  }
+
+  // Notification modal
+  window.showNotification = function(message) {
+    let notif = document.getElementById('customNotificationModal');
+    if (!notif) {
+      notif = document.createElement('div');
+      notif.id = 'customNotificationModal';
+      notif.style.position = 'fixed';
+      notif.style.top = '0';
+      notif.style.left = '0';
+      notif.style.width = '100vw';
+      notif.style.height = '100vh';
+      notif.style.background = 'rgba(0,0,0,0.4)';
+      notif.style.display = 'flex';
+      notif.style.justifyContent = 'center';
+      notif.style.alignItems = 'center';
+      notif.style.zIndex = 10000;
+      notif.innerHTML = `<div style="background: white; padding: 30px 40px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.18); font-size: 1.2rem; min-width: 250px; text-align: center;">
+        <span>${message}</span><br><br>
+        <button class="btn btn-primary" id="closeNotificationModal">OK</button>
+      </div>`;
+      document.body.appendChild(notif);
+      document.getElementById('closeNotificationModal').onclick = function() {
+        notif.remove();
+      };
+    }
+  }
+
+  function revealFileInTree(fileName) {
+    // Find the file-name span
+    const fileSpan = document.querySelector(`.file-name[data-file='${fileName}']`);
+    if (!fileSpan) return;
+    // Traverse up to open all parent .sub-items
+    let parent = fileSpan.parentElement;
+    while (parent) {
+      if (parent.classList && parent.classList.contains('sub-items')) {
+        parent.style.display = 'block';
+      }
+      parent = parent.parentElement;
+    }
+    // Highlight only the matched file
+    fileSpan.style.background = '#ffff99';
+  }
 
   function filterFileStructure(searchDate) {
     const matchedFiles = [];
-
     fileItems.forEach(fileItem => {
       const fileName = fileItem.querySelector('.file-name').getAttribute('data-file');
-      const match = fileName.match(/_(\d{1,2}-\d{1,2}-\d{4})\./);
-      const fileDate = match ? match[1] : null;
-
-      if (fileDate === searchDate) {
-        fileItem.style.display = "block";
+      // Remove any previous highlight
+      fileItem.querySelector('.file-name').style.background = '';
+      // Match _d-m-yyyy. or -d-m-yyyy. or .d-m-yyyy. or space before extension
+      const regex = new RegExp(`[\\s_\\-\\.]${searchDate}\\.`);
+      if (regex.test(fileName)) {
         matchedFiles.push(fileName);
-      } else {
-        fileItem.style.display = "none";
       }
+      // Always show all files
+      fileItem.style.display = "block";
     });
-
-    console.log("Matched Files:", matchedFiles);
     return matchedFiles;
   }
 
-  function showModal(matchedFiles) {
-  modalList.innerHTML = ""; // Clear old results
-
-  matchedFiles.forEach((fileName, index) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<span class="modal-file-name" data-file="${fileName}">${index + 1}. ${fileName}</span>`;
-    modalList.appendChild(li);
-  });
-
-  searchResultModal.style.display = "flex";
-
-  // Add click event to modal file names
-  document.querySelectorAll('.modal-file-name').forEach(fileEl => {
-    fileEl.addEventListener('click', function() {
-      const fileName = this.getAttribute('data-file');
-      loadFilePreview(fileName); // Call file preview
-      searchResultModal.style.display = "none";
+  function showModal(matchedFiles, normalizedDate) {
+    modalList.innerHTML = ""; // Clear old results
+    // Set modal title to show the formatted date
+    const modalTitle = document.querySelector('#filesModalContent h2');
+    if (modalTitle && normalizedDate) {
+      modalTitle.innerHTML = `<i class='fa fa-calendar text-primary'></i> <span style='font-size:1.1em;'>Files uploaded on <b>${formatDateForDisplay(normalizedDate)}</b></span>`;
+    }
+    matchedFiles.forEach((fileName, index) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class=\"modal-file-name\" data-file=\"${fileName}\" style=\"padding: 8px 12px; border-radius: 6px; background: #f5f7fa; margin-bottom: 6px; display: inline-block; cursor:pointer; transition: background 0.2s;\">${index + 1}. <b>${fileName}</b></span>`;
+      modalList.appendChild(li);
     });
-  });
-}
+    // Enhance modal design
+    const modalContent = document.getElementById('filesModalContent');
+    if (modalContent) {
+      modalContent.style.boxShadow = '0 6px 32px rgba(0,0,0,0.18)';
+      modalContent.style.border = '1px solid #e3e3e3';
+      modalContent.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%)';
+    }
+    searchResultModal.style.display = "flex";
+    // Add click event to modal file names
+    document.querySelectorAll('.modal-file-name').forEach(fileEl => {
+      fileEl.addEventListener('click', function() {
+        const fileName = this.getAttribute('data-file');
+        loadFilePreview(fileName); // Call file preview
+        searchResultModal.style.display = "none";
+      });
+    });
+  }
 
+  // Add this function in the same scope as showModal
+  function formatDateForDisplay(normalizedDate) {
+    // normalizedDate is always d-m-yyyy (no leading zeros)
+    const [d, m, y] = normalizedDate.split('-');
+    // Pad day and month for display
+    const day = d.padStart(2, '0');
+    const month = m.padStart(2, '0');
+    return `${day}-${month}-${y}`;
+  }
 
   closeFilesModalButton.addEventListener('click', () => {
     searchResultModal.style.display = "none";
