@@ -14,6 +14,11 @@
           </button>
         </div>
         <div class="card-body">
+          <div class="mb-2">
+            <span style="color:#1a73e8;font-size:1.02em;">
+              Tip: Use <b>Ctrl +</b> or <b>Ctrl -</b> to zoom in or out and see more content at once.
+            </span>
+          </div>
           <div class="table-responsive theme-scrollbar">
             <table class="display" id="basic-1">
               <thead>
@@ -138,22 +143,28 @@
 <%- contentFor("customJS") %>
 <script>
   $(document).ready(function () {
-    const dt = $("#basic-1").DataTable();
-    getUserGroup();
-
-    // Attach custom search logic to DataTables default search input
-    $(document).on("input", '#basic-1_filter input[type="search"]', function() {
-      const search = $(this).val().toLowerCase();
-      if (!records) return;
-      const filtered = records.filter(group => {
-        return (
-          group.name?.toLowerCase().includes(search) ||
-          group.description?.toLowerCase().includes(search) ||
-          group.created_by?.toLowerCase().includes(search)
-        );
-      });
-      renderUserGroupTable(filtered);
+    const dt = $("#basic-1").DataTable({
+      columns: [
+        { data: "id" },
+        { data: "name" },
+        { data: "description" },
+        { data: "created_by" },
+        { data: null, render: function(data) { return new Date(data.createdAt).toDateString(); } },
+        { data: null, orderable: false, render: function(data) {
+            return `<ul class=\"action\">
+              <li class=\"edit\" data-value=\"${data.id}\" data-bs-toggle=\"modal\" data-bs-target=\"#userGroupModal\">
+                <a href=\"#\"><i class=\"icon-pencil-alt\"></i></a>
+              </li>
+              <li class=\"delete\" data-value=\"${data.id}\" data-bs-toggle=\"modal\" data-bs-target=\"#removeUserGroupModal\">
+                <a href=\"#\"><i class=\"icon-trash\"></i></a>
+              </li>
+            </ul>`;
+          }
+        }
+      ],
+      destroy: true
     });
+    getUserGroup();
   });
   let records = null;
   let updateRecord = null;
@@ -217,40 +228,11 @@ $('#btnDeleteRecord').click(()=>[
     $.get("/admin/retrieve-user-group", function (data) {
       if (data.statusCode === 200) {
         records = data.records;
-        renderUserGroupTable(records);
-        // Reinitialize the DataTable
-        //   $("#basic-1").DataTable().clear().destroy();
-        $("#basic-1").DataTable();
+        const dt = $("#basic-1").DataTable();
+        dt.clear().rows.add(records).draw();
       } else {
         errorAlert(data.message);
       }
-    });
-  }
-
-  function renderUserGroupTable(filteredRecords) {
-    const tbody = $("#basic-1 tbody");
-    tbody.empty();
-    filteredRecords.forEach((group) => {
-      const row = `
-        <tr>
-          <td>${group.id}</td>
-          <td>${group.name}</td>
-          <td>${group.description}</td>
-          <td>${group.created_by}</td>
-          <td>${new Date(group.createdAt).toDateString()}</td>
-          <td>
-            <ul class="action">
-              <li class="edit" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#userGroupModal">
-                <a href="#"><i class="icon-pencil-alt"></i></a>
-              </li>
-              <li class="delete" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#removeUserGroupModal">
-                <a href="#"><i class="icon-trash"></i></a>
-              </li>
-            </ul>
-          </td>
-        </tr>
-      `;
-      tbody.append(row);
     });
   }
 

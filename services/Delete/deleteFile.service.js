@@ -13,42 +13,35 @@ const deleteFiles = async (files, userId) => {
   const missingFiles = [];
   const errors = [];
 
-  for (const fileName of files) {
+  for (const filePath of files) {
     try {
+      // Extract fileName from the path
+      const fileName = Path.basename(filePath);
       // Fetch file record from the database
       const fileRecord = await File.findOne({ where: { fileName } });
-      if (!fileRecord) {
-        missingFiles.push(fileName);
-        console.warn(`File not found in database: ${fileName}`);
-        continue;
-      }
 
-      // Construct the full path of the file
-      const filePath = Path.join(fileRecord.filePath, fileName);
-
-      if (!fs.existsSync(filePath)) {
-        missingFiles.push(fileName);
+      // Always attempt to delete the file from the filesystem if it exists
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        deletedFiles.push(filePath);
+      } else {
+        missingFiles.push(filePath);
         console.warn(`File does not exist at path: ${filePath}`);
-        continue;
       }
 
-      // Delete the file from the filesystem
-      fs.unlinkSync(filePath);
-
-      // Update audit log  
-      const userLogs = await AuditLog.findOne({
-        where: { userId: userId },
-        order: [['createdAt', 'DESC']] // Ensures the latest record is selected
-      });
-      await userLogs.update({deleted : true});
-
-      // Delete the file record from the database
-      await File.destroy({ where: { fileName } });
-
-      deletedFiles.push(fileName);
+      // If a DB record exists, delete it
+      if (fileRecord) {
+        // Update audit log  
+        const userLogs = await AuditLog.findOne({
+          where: { userId: userId },
+          order: [['createdAt', 'DESC']]
+        });
+        if (userLogs) await userLogs.update({deleted : true});
+        await File.destroy({ where: { fileName } });
+      }
     } catch (err) {
-      console.error(`Error deleting file ${fileName}:`, err);
-      errors.push({ file: fileName, error: err.message });
+      console.error(`Error deleting file ${filePath}:`, err);
+      errors.push({ file: filePath, error: err.message });
     }
   }
 

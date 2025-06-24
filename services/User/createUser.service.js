@@ -29,10 +29,10 @@ async function createOrUpdateUser({
       throw new Error("Invalid branch or user group");
     }
 
-    // Generate username: last word in fullname + @ + branch name (no spaces, lowercase), trim spaces
-    const lastName = fullname.trim().split(/\s+/).pop();
+    // Generate username: use full name (all words) + @ + branch name (no spaces, lowercase), trim spaces
+    const fullNameSlug = fullname.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     const branchName = userBranch.dataValues.name.replace(/\s+/g, '').toLowerCase();
-    const generatedUsername = `${lastName}@${branchName}`.trim();
+    const generatedUsername = `${fullNameSlug}@${branchName}`.trim();
     const trimmedEmail = email.trim();
     const trimmedPEmail = pEmail.trim();
 
@@ -67,7 +67,7 @@ async function createOrUpdateUser({
       userId = newUser.id;
       console.log("User created successfully.");
     } else {
-      // Update the user (keep username as is, or update if needed)
+      // Update the user (update username as well)
       const isFound = await User.findOne({ where: { id: updateRecord } });
       if (!isFound) {
         throw new Error("Record not found");
@@ -75,7 +75,7 @@ async function createOrUpdateUser({
       const oldUserFolderPath = isFound.folderPath;
       // Only update password if provided
       let updateFields = {
-        username: isFound.username, // do not change username on update
+        username: generatedUsername, // update username on update as well
         fullname: fullname.trim(),
         email: trimmedEmail,
         private_email: trimmedPEmail,
@@ -94,7 +94,8 @@ async function createOrUpdateUser({
 
       const updatingUserFolderPath = folderPath;
 
-      moveFilesAndDeleteOldDirectory(oldUserFolderPath, updatingUserFolderPath);
+      // Move files and update file paths in DB after folder move
+      await moveFilesAndDeleteOldDirectory(oldUserFolderPath, updatingUserFolderPath);
       userId = updateRecord;
       console.log("User updated successfully.");
     }

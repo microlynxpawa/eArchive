@@ -37,10 +37,16 @@ const {
   removeDep,
   dwt,
   multipleFilesUpload,
-  sendFilesToUsersController
+  sendFilesToUsersController,
+  forgotPasswordController,
+  getAdminMessages,
+  createAdminMessage,
+  updateAdminMessage,
+  deleteAdminMessage
 } = require("../controllers/adminController");
 const routeDectector = require("../middleware/routeDectector");
 const authUser  = require('../middleware/authMiddleware');
+const rememberMeMiddleware = require('../middleware/rememberMeMiddleware');
 const passAuths = require("../middleware/passAuths");
 const uploading = require("../util/multer.Config");
 
@@ -54,8 +60,11 @@ app.get("/", login);
 // set sidebar active
 app.use(routeDectector);
 
-app.post('/sign-in', signIn)
+app.post('/sign-in', signIn);
+app.post('/forgot-password', forgotPasswordController);
 
+// Use rememberMeMiddleware before authUser
+app.use(rememberMeMiddleware);
 app.use(authUser)
 
 app.use(getUserPermissions);
@@ -82,6 +91,7 @@ app.get("/searchUsersByEmail", getUsersByEmail);
 app.get("/scanFiles", (req, res)=>{ res.redirect("file-upload") });
 app.get("/getDepartment/:departmentName", getDepartment);
 app.get("/dwt-scan", dwt);
+app.get("/admin/messages", getAdminMessages); // <-- Add this route
 
 app.post("/user-group", createUserGroup);
 app.post("/remove-user-group", removeUserGroup);
@@ -100,6 +110,11 @@ app.delete('/delete-dep', removeDep);
 
 // Route for multiple file uploads
 app.post('/uploadMultipleFiles', upload.array('files'), multipleFilesUpload);
+
+// Admin message management routes
+app.post('/admin/message', createAdminMessage);
+app.put('/admin/message/:id', updateAdminMessage);
+app.delete('/admin/message/:id', deleteAdminMessage);
 
 async function getUserPermissions(req, res,next){
   const userSessionId = req.session.user;

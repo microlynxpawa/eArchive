@@ -8,6 +8,7 @@ const User = require("../model/user");
 const Branch = require("../model/branch");
 const Authorization = require("../model/authorizations");
 const fetch = require('node-fetch');
+const File = require("../model/file"); // Add this import for DB file path updates
 
 // default path
 const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
@@ -241,14 +242,10 @@ const slugify = (text) => {
   return text.trim().toLocaleLowerCase().replaceAll(" ", "-");
 };
 
-const moveFilesAndDeleteOldDirectory = (oldDirectoryPath, newDirectoryPath) => {
-  // Extract the last folder name from the old and new directory paths
-  const oldLastFolder = path.basename(oldDirectoryPath);
-  const newLastFolder = path.basename(newDirectoryPath);
-
-  // Construct the full paths for the last folders
-  const oldLastFolderPath = path.dirname(oldDirectoryPath);
-  const newLastFolderPath = path.dirname(newDirectoryPath);
+const moveFilesAndDeleteOldDirectory = async (oldDirectoryPath, newDirectoryPath) => {
+  const File = require("../model/file"); // Ensure File model is imported
+  const path = require("path");
+  const fs = require("fs");
 
   // Check if the old directory exists
   if (fs.existsSync(oldDirectoryPath)) {
@@ -266,6 +263,18 @@ const moveFilesAndDeleteOldDirectory = (oldDirectoryPath, newDirectoryPath) => {
       const newFilePath = path.join(newDirectoryPath, file);
       fs.renameSync(oldFilePath, newFilePath);
     });
+
+    // Update all File records in the DB whose filePath starts with oldDirectoryPath
+    await File.update(
+      { filePath: newDirectoryPath },
+      {
+        where: {
+          filePath: {
+            [require("sequelize").Op.like]: `${oldDirectoryPath}%`
+          }
+        }
+      }
+    );
 
     // Delete the old directory after moving the files
     fs.rmdirSync(oldDirectoryPath);

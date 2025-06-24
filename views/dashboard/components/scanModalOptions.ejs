@@ -7,7 +7,29 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p>Upgrade to an advanced plan to unlock this feature and more!</p>
+        <p>
+          This feature is only available on advanced plans. To upgrade, click the <b>Upgrade</b> button below to contact us  at info@microlynxe.com and request an upgrade by email. Or, click <b>Upload existing file</b> to continue by selecting a file from your device.
+        </p>
+        <div id="emailTemplateBox" style="display:none; margin-top:10px;">
+          <label for="upgradeEmailTemplate" class="form-label">Email Template:</label>
+          <textarea id="upgradeEmailTemplate" class="form-control" rows="7" readonly>
+Subject: Request for Plan Upgrade
+
+Hello Microlynxe Team,
+
+I would like to upgrade my plan to access advanced features. Please provide me with the available options and next steps.
+
+My details:
+- Name: [Your Name]
+- Organization: [Your Organization]
+- Current Plan: [Your Current Plan]
+
+Thank you.
+          </textarea>
+          <div class="mt-2">
+            <a id="mailtoLink" href="#" class="btn btn-success" target="_blank">Send Email</a>
+          </div>
+        </div>
       </div>
       <div class="modal-footer row d-flex justify-content-between">
         <button type="button" class="btn btn-secondary col-5" id="cancelUpgrade" data-bs-dismiss="modal">Upload existing file</button>
@@ -39,11 +61,15 @@
   }
   $(document).ready(function() {
     $("#upgradeButton").click(function() {
-      showToast("Upgrade button clicked!", 'success');
+      $("#emailTemplateBox").slideDown();
+      // Prepare mailto link with template
+      const subject = encodeURIComponent("Request for Plan Upgrade");
+      const body = encodeURIComponent(document.getElementById('upgradeEmailTemplate').value);
+      $("#mailtoLink").attr("href", `mailto:info@microlynxe.com?subject=${subject}&body=${body}`);
     });
     $("#cancelUpgrade").click((event)=>{
       event.preventDefault();
       window.location.href = "scanFiles";
-    })
+    });
   });
 </script>

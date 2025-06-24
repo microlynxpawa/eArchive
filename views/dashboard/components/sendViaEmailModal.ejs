@@ -19,8 +19,8 @@
     background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
     border-radius: 14px;
     padding: 32px 28px 24px 28px;
-    width: 420px;
-    max-width: 90vw;
+    width: 600px;
+    max-width: 98vw;
     margin: 0 auto;
     box-shadow: 0 8px 32px rgba(30,41,59,0.18);
     z-index: 1100;
@@ -184,6 +184,7 @@
     <div id="username-search-container">
       <input type="text" id="username-search-input" placeholder="Type username(s)" />
       <button id="username-search-button">🔍 Search</button>
+      <button id="open-all-users-modal-email" type="button" style="background:#2563eb; color:#fff; border:none; border-radius:6px; padding:10px 18px; font-size:1.08rem; font-weight:500; cursor:pointer; transition:background 0.18s; margin-left:8px;">All Users</button>
     </div>
 
     <div id="username-user-list-container">
@@ -256,6 +257,20 @@ document.addEventListener("DOMContentLoaded", () => {
       showNotification("Error: " + error.message);
     }
   });
+
+  // All Users modal integration for send files modal
+  const openAllUsersModalEmail = document.getElementById('open-all-users-modal-email');
+  if (openAllUsersModalEmail) {
+    openAllUsersModalEmail.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (window.openAllUsersModal) {
+        window.openAllUsersModal(function(usernames) {
+          usernameSearchInput.value = usernames.join(', ');
+          usernameSearchButton.click();
+        });
+      }
+    });
+  }
 
   // Send Files
   sendFilesButtonUsername.addEventListener("click", async () => {

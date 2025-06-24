@@ -16,7 +16,7 @@ const createOrUpdateBranch = require("../services/Branch/createBranch.service");
 const removeBranchLogic = require("../services/Branch/removeBranch.service");
 const createOrUpdateUser = require("../services/User/createUser.service");
 const deleteUserById = require("../services/User/removeUser.service");
-const authenticateUser = require("../services/Auth/signIn.service");
+const { authenticateUser, forgotPassword } = require("../services/Auth/signIn.service");
 const updateUserPassword = require("../services/Auth/updatePassword.service");
 const buildFolderStructure = require("../services/Display/fileDisplay.service");
 const storeProfilePicture = require("../services/Profile/profilePicture.service");
@@ -33,13 +33,20 @@ const sendFilesToUsers = require("../services/Share/sendFiles.service");
 const getDepartmentByName = require("../services/AccessControl/getDepartment");
 const deleteFiles = require("../services/Delete/deleteFile.service");
 const handleDeleteDepartment = require("../services/Branch/removeDepartment.service")
+const AdminActions = require("../model/adminActions"); // Import the admin-actions model
 
 const DashboardLayout = "dashboard/master";
 
 
 // Get Routes
 const login = (req, res) => {
-  res.render("auth/master", { layout: "auth/master" });
+  // If authenticated (session restored by rememberMeMiddleware or normal login), set flag
+  const isAuthenticated = !!(req.session && req.session.user);
+  if (isAuthenticated) {
+    // Optionally, redirect immediately (but the EJS flag/script will handle it too)
+    // return res.redirect('/admin/dashboard');
+  }
+  res.render("auth/master", { layout: "auth/master", isAuthenticated });
 };
 
 const dashboard = async (req, res) => {
@@ -329,23 +336,33 @@ const removeUser = async (req, res) => {
 };
 
 const signIn = async (req, res) => {
-  const { user, password } = req.body;
-
+  const { user, password, rememberMe } = req.body;
   try {
-    const { userId, route } = await authenticateUser(user, password);
-    req.session.user = userId;
-
-    res.json({
-      message: "Login successfully",
-      statusCode: 200,
-      route,
-    });
+    const result = await authenticateUser(user, password, rememberMe);
+    // Set JWT cookie if rememberMe is true
+    if (result.token) {
+      res.cookie('remember_token', result.token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      });
+    }
+    req.session.user = result.userId;
+    res.json({ statusCode: 200, message: 'Login successful', route: result.route });
   } catch (error) {
-    console.error(error);
-    res.json({
-      message: error.message || "Unable to process request",
-      statusCode: error.message === "Invalid credentials" ? 404 : 400,
-    });
+    res.status(404).json({ statusCode: 404, message: error.message });
+  }
+};
+
+// Forgot password controller
+const forgotPasswordController = async (req, res) => {
+  const { username } = req.body;
+  try {
+    await forgotPassword(username);
+    res.json({ statusCode: 200, message: 'A new password has been sent to your email. Please check your inbox.' });
+  } catch (error) {
+    res.status(400).json({ statusCode: 400, message: error.message });
   }
 };
 
@@ -486,26 +503,12 @@ const sendFilesToUsersController = async (req, res) => {
 
 const deleteFile = async (req, res) => {
   try {
-    const { files } = req.body; // Expect an array of file names
-
-    if (!files || !Array.isArray(files) || files.length === 0) {
-      return res.status(400).json({ error: 'Files array is required and must not be empty.' });
-    }
-    const userId = req.session.user
-    const { deletedFiles, missingFiles, errors } = await deleteFiles(files, userId);
-
-    if (errors.length > 0) {
-      return res.status(500).json({ error: 'Failed to delete some files.', details: errors });
-    }
-
-    if (missingFiles.length > 0) {
-      return res.status(404).json({ error: 'Some files not found.', details: missingFiles });
-    }
-
-    res.json({ success: true, deletedFiles });
+    const { files } = req.body;
+    const userId = req.session.user;
+    const result = await deleteFiles(files, userId);
+    res.json(result); // Always send a response!
   } catch (err) {
-    console.error('Error in /delete-file:', err);
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -535,6 +538,70 @@ const multipleFilesUpload = async (req, res) => {
   }
 };
 
+const adminInformationToUsers = async (req, res) => {
+  req.body = {userId, adminMesseage}
+  
+}
+
+// Fetch latest admin messages (for dashboard display)
+const getAdminMessages = async (req, res) => {
+  try {
+    // Fetch latest 5 messages, newest first
+    const messages = await AdminActions.findAll({
+      order: [["createdAt", "DESC"]],
+      limit: 5,
+      attributes: ["id", "message", "createdAt", "userId"],
+    });
+    res.json({ success: true, messages });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// Create admin message
+const createAdminMessage = async (req, res) => {
+  try {
+    const userId = req.session.user; // Admin user ID from session
+    const { message } = req.body;
+    if (!userId || !message) return res.json({ success: false, error: 'Missing user or message' });
+    const AdminActions = require('../model/adminActions');
+    const newMsg = await AdminActions.create({ userId, message });
+    res.json({ success: true, message: newMsg });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+};
+
+// Update admin message
+const updateAdminMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { message } = req.body;
+    const AdminActions = require('../model/adminActions');
+    const msg = await AdminActions.findByPk(id);
+    if (!msg) return res.json({ success: false, error: 'Message not found' });
+    msg.message = message;
+    await msg.save();
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+};
+
+// Delete admin message
+const deleteAdminMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const AdminActions = require('../model/adminActions');
+    const msg = await AdminActions.findByPk(id);
+    if (!msg) return res.json({ success: false, error: 'Message not found' });
+    await msg.destroy();
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+};
+
 module.exports = {
   login,
   destroyUserSession,
@@ -556,6 +623,7 @@ module.exports = {
   retrieveUsers,
   removeUser,
   signIn,
+  forgotPasswordController,
   uploadFile,
   seeFile,
   fileContent,
@@ -572,5 +640,9 @@ module.exports = {
   deleteFile,
   removeDep,
   dwt,
-  multipleFilesUpload
+  multipleFilesUpload,
+  getAdminMessages, // Export the new controller
+  createAdminMessage,
+  updateAdminMessage,
+  deleteAdminMessage,
 };

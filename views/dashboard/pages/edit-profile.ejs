@@ -183,6 +183,23 @@
           </div>
         </form>
       </div>
+        <!-- <div class="col-xl-12 col-lg-12" id="info-to-users">
+        <div class="col-xl-6 col-lg-6">
+          <div class="card border-radius">
+            <div class="card-header">
+              <h4 class="card-title mb-0">Information to Users</h4> <br>
+              <div class="card-body">
+                <label for="message" class="text-bold">Broadcast Information To All Users</label>
+                <textarea name="message" id="message" class="form-control mb-2"></textarea>
+                <button id="btnSendMessage" class="btn btn-success mb-3">Send Message</button>
+                <hr>
+                <h6>Recent Messages</h6>
+                <ul id="admin-messages-list" class="list-group mb-2"></ul>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div> -->
     </div>
   </div>
 </div>
@@ -211,9 +228,6 @@
     
         if(data.statusCode == 200){
             successAlert(data.message)
-            setTimeout(e=>{
-                location.href = data.route;
-            }, 500)
         }
 
     });
@@ -261,4 +275,106 @@
         alert("Error uploading file.");
       });
   }
+
+  // Fetch and display recent admin messages
+function fetchAdminMessages() {
+  $.get('/admin/messages', function(data) {
+    if (data.success) {
+      const list = $('#admin-messages-list');
+      list.empty();
+      data.messages.forEach(msg => {
+        list.append(`
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>${msg.message}</span>
+            <span>
+              <button class="btn btn-sm btn-primary edit-msg" data-id="${msg.id}" data-msg="${encodeURIComponent(msg.message)}">Edit</button>
+              <button class="btn btn-sm btn-danger delete-msg" data-id="${msg.id}">Delete</button>
+            </span>
+          </li>
+        `);
+      });
+    }
+  });
+}
+
+// Send new message
+$('#btnSendMessage').click(function() {
+  const message = $('#message').val().trim();
+  if (!message) return errorAlert('Message cannot be empty');
+  $.post('/admin/message', { message }, function(data) {
+    if (data.success) {
+      successAlert('Message sent!');
+      $('#message').val('');
+      fetchAdminMessages();
+    } else {
+      errorAlert(data.error || 'Failed to send message');
+    }
+  });
+});
+
+// Edit message
+$('#admin-messages-list').on('click', '.edit-msg', function() {
+  const id = $(this).data('id');
+  const msg = decodeURIComponent($(this).data('msg'));
+  const newMsg = prompt('Edit message:', msg);
+  if (newMsg !== null) {
+    $.ajax({
+      url: '/admin/message/' + id,
+      type: 'PUT',
+      data: { message: newMsg },
+      success: function(data) {
+        if (data.success) {
+          successAlert('Message updated!');
+          fetchAdminMessages();
+        } else {
+          errorAlert(data.error || 'Failed to update message');
+        }
+      }
+    });
+  }
+});
+
+// Delete message
+$('#admin-messages-list').on('click', '.delete-msg', function() {
+  const id = $(this).data('id');
+  if (confirm('Delete this message?')) {
+    $.ajax({
+      url: '/admin/message/' + id,
+      type: 'DELETE',
+      success: function(data) {
+        if (data.success) {
+          successAlert('Message deleted!');
+          fetchAdminMessages();
+        } else {
+          errorAlert(data.error || 'Failed to delete message');
+        }
+      }
+    });
+  }
+});
+
+// Initial fetch
+fetchAdminMessages();
+</script>
+
+<script>
+// --- Notification helpers (fallback to alert if not defined) ---
+function successAlert(msg) {
+  if (typeof toastr !== 'undefined') toastr.success(msg);
+  else if (window.bootstrap && window.bootstrap.Toast) {
+    // Bootstrap 5 toast fallback (if implemented)
+    // You can implement your own toast here
+    alert(msg);
+  } else {
+    alert(msg);
+  }
+}
+function errorAlert(msg) {
+  if (typeof toastr !== 'undefined') toastr.error(msg);
+  else if (window.bootstrap && window.bootstrap.Toast) {
+    alert(msg);
+  } else {
+    alert(msg);
+  }
+}
 </script>

@@ -13,6 +13,11 @@
           </button>
         </div>
         <div class="card-body">
+          <div class="mb-2">
+            <span style="color:#1a73e8;font-size:1.02em;">
+              Tip: Use <b>Ctrl +</b> or <b>Ctrl -</b> to zoom in or out and see more content at once.
+            </span>
+          </div>
           <div class="table-responsive theme-scrollbar">
             <table class="display" id="basic-1">
               <thead>
@@ -63,7 +68,7 @@
                           type="text"
                           class="form-control"
                           id="fullname"
-                          placeholder="e.g john doe"
+                          placeholder="e.g kofi doe"
                         />
                       </div>
                     </div>
@@ -292,30 +297,32 @@
 {title: 'User Management'}) %> <%- contentFor("customJS") %>
 <script>
   $(document).ready(function () {
-    const dt = $("#basic-1").DataTable();
+    const dt = $("#basic-1").DataTable({
+      columns: [
+        { data: "fullname" },
+        { data: "username" },
+        { data: "email" },
+        { data: "private_email" },
+        { data: "branch.name" },
+        { data: "archive_category.name" },
+        { data: null, render: function(data) { return new Date(data.createdAt).toDateString(); } },
+        { data: null, orderable: false, render: function(data) {
+            return `<ul class="action">
+              <li class="edit" data-value="${data.id}" data-bs-toggle="modal" data-bs-target="#userGroupModal">
+                <a href="#"><i class="icon-pencil-alt"></i></a>
+              </li>
+              <li class="delete" data-value="${data.id}" data-bs-toggle="modal" data-bs-target="#removeUserGroupModal">
+                <a href="#"><i class="icon-trash"></i></a>
+              </li>
+            </ul>`;
+          }
+        }
+      ],
+      destroy: true // allow re-init
+    });
     getBranches();
     getUserGroup();
     getUsers();
-
-    // Remove custom search input if present
-    $("#userSearchInput").closest('.row').remove();
-
-    // Attach custom search logic to DataTables default search input
-    $(document).on("input", '#basic-1_filter input[type="search"]', function() {
-      const search = $(this).val().toLowerCase();
-      if (!records) return;
-      const filtered = records.filter(group => {
-        return (
-          group.username?.toLowerCase().includes(search) ||
-          group.email?.toLowerCase().includes(search) ||
-          group.fullname?.toLowerCase().includes(search) ||
-          group.private_email?.toLowerCase().includes(search) ||
-          group.branch?.name?.toLowerCase().includes(search) ||
-          group.archive_category?.name?.toLowerCase().includes(search)
-        );
-      });
-      renderUsersTable(filtered);
-    });
   });
   let records = null;
   let updateRecord = null;
@@ -359,6 +366,16 @@
       return errorAlert("Private Email is required");
     else if (!emailRegex.test(email) || !emailRegex.test(pEmail))
       return errorAlert("Email invalid");
+
+    // Always generate username from full name and branch name for both create and update
+    const branchName = $("#branchSelect option:selected").text().trim();
+    // Remove special chars and spaces, join with dash
+    function slugify(str) {
+      return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    }
+    const usernameGenerated = slugify(fullname) + "-" + slugify(branchName);
+    username = usernameGenerated;
+    $("#username").val(username); // Set for form and for backend
 
     if (!isUpdate) {
       // Only require password fields for creation
@@ -504,64 +521,17 @@
     $.get("/admin/retrieve-users", function (data) {
       if (data.statusCode === 200) {
         records = data.records;
-        renderUsersTable(records);
+        const dt = $("#basic-1").DataTable();
+        dt.clear().rows.add(records).draw();
       } else {
         errorAlert(data.message);
       }
     });
   }
 
-  function renderUsersTable(filteredRecords) {
-    const tbody = $("#basic-1 tbody");
-    tbody.empty();
-    filteredRecords.forEach((group) => {
-      const row = `
-        <tr>
-          <td>${group.fullname}</td>
-          <td>${group.username}</td>
-          <td>${group.email}</td>
-          <td>${group.private_email}</td>
-          <td>${group.branch.name}</td>
-          <td>${group.archive_category.name}</td>
-          <td>${new Date(group.createdAt).toDateString()}</td>
-          <td>
-            <ul class="action">
-              <li class="edit" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#userGroupModal">
-                <a href="#"><i class="icon-pencil-alt"></i></a>
-              </li>
-              <li class="delete" data-value="${group.id}" data-bs-toggle="modal" data-bs-target="#removeUserGroupModal">
-                <a href="#"><i class="icon-trash"></i></a>
-              </li>
-            </ul>
-          </td>
-        </tr>
-      `;
-      tbody.append(row);
-    });
-  }
-
-  function filterUsersTable() {
-    const search = $("#userSearchInput").val().toLowerCase();
-    if (!records) return;
-    const filtered = records.filter(group => {
-      return (
-        group.username?.toLowerCase().includes(search) ||
-        group.email?.toLowerCase().includes(search) ||
-        group.fullname?.toLowerCase().includes(search) ||
-        group.private_email?.toLowerCase().includes(search) ||
-        group.branch?.name?.toLowerCase().includes(search) ||
-        group.archive_category?.name?.toLowerCase().includes(search)
-      );
-    });
-    renderUsersTable(filtered);
-  }
-
-  // Attach search event
-  $(document).on("input", "#userSearchInput", filterUsersTable);
-
+  // In the modal show event, always generate username from full name and branch
   $("#userGroupModal").on("show.bs.modal", (e) => {
     const id = $(e.relatedTarget).data("value");
-
     if (typeof id != "undefined") {
       $("#userGroupModalLabel").text("Edit User");
       $("#btnSave").text("Update");
@@ -574,7 +544,13 @@
         $("#selectUserGroup").val(record.archive_category.id);
         $("#email").val(record.email);
         $("#pEmail").val(record.private_email);
-        $("#username").val(record.username); // Set username from API response
+        // Always generate username from full name and branch
+        const branchName = record.branch.name;
+        function slugify(str) {
+          return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        }
+        const usernameGenerated = slugify(record.fullname) + "-" + slugify(branchName);
+        $("#username").val(usernameGenerated);
         const permissions = JSON.parse(record.permissions);
         if (permissions.includes("scanning"))
           $("#scanning").prop("checked", true);
@@ -594,15 +570,20 @@
           $("#canViewBranchFiles").prop("checked", true);
         if (permissions.includes("is_admin"))
           $("#is_admin").prop("checked", true);
-
         updateRecord = record.id;
       }
     } else {
       $("#userGroupModalLabel").text("Create User");
       $("#btnSave").text("Create");
       clearForm();
-      // For creation, clear username field (it will be generated on backend)
-      $("#username").val("");
+      // For creation, always generate username from full name and branch
+      const fullname = $("#fullname").val();
+      const branchName = $("#branchSelect option:selected").text().trim();
+      function slugify(str) {
+        return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      }
+      const usernameGenerated = slugify(fullname) + "-" + slugify(branchName);
+      $("#username").val(usernameGenerated);
     }
   });
 
@@ -610,4 +591,25 @@
     const id = $(e.relatedTarget).data("value");
     deleteRecord = id;
   });
+
+  // Utility to clear the form fields
+  function clearForm() {
+    $("#scanning").prop("checked", false);
+    $("#archiving").prop("checked", false);
+    $("#view-upload").prop("checked", false);
+    $("#supervision-right").prop("checked", false);
+    $("#email-notification").prop("checked", false);
+    $("#canViewOwnFiles").prop("checked", false);
+    $("#canViewDepartmentFiles").prop("checked", false);
+    $("#canViewBranchFiles").prop("checked", false);
+    $("#is_admin").prop("checked", false);
+    $("#fullname").val("");
+    $("#branchSelect").val("");
+    $("#selectUserGroup").val("");
+    $("#email").val("");
+    $("#pEmail").val("");
+    $("#username").val("");
+    $("#password").val("");
+    $("#confirm_pass").val("");
+  }
 </script>

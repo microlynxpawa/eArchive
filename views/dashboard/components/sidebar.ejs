@@ -74,7 +74,7 @@
             </a>
           </li>
           <% } %>
-          <% if(auths && !auths.is_disabled) { %>
+          <% if(auths && !auths.is_disabled && auths.view_upload) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" href="pick-send">
@@ -83,7 +83,7 @@
             </a>
           </li>
           <% } %>
-          <% if(auths && auths.supervision_right || auths.is_admin) { %>
+          <% if(auths && auths.is_admin) { %>
           <li class="sidebar-list">
             <i class="fa fa-thumb-tack"></i>
             <a class="sidebar-link sidebar-title link-nav" id="access-control-button" href="">
@@ -133,8 +133,7 @@
 
 
 <script>
-  $(document).ready(function() {
-    $("#scan-button").click(function(event) {
+      $("#scan-button").click(function(event) {
       event.preventDefault();
 
       // Remove any existing backdrop
@@ -142,11 +141,20 @@
 
       // Show the modal
       $("#upgradeModal").modal("show");
-    });
-    $("a[href='pick-send']").click(function(event) {
-      // Instead of default navigation, add #picksend to URL
-      event.preventDefault();
-      window.location.href = 'see-file#picksend';
-    });
-  });
+
+      });
+
+
 </script>
+<style>
+  /* Force visible scrollbar for sidebar SimpleBar */
+  .sidebar-main .simplebar-scrollbar:before {
+    background: #e0e0e0 !important;
+    opacity: 1 !important;
+  }
+  .sidebar-main .simplebar-track.simplebar-vertical {
+    width: 9px !important;
+    background: transparent !important;
+    right: 0 !important;
+  }
+</style>

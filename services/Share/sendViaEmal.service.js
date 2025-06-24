@@ -60,6 +60,16 @@ const sendFilesViaEmail = async (emails, files) => {
         // Copy the file
         fs.copyFileSync(sourceFilePath, targetFilePath);
         console.log(`Successfully copied file: ${file} to ${email}'s folder.`);
+
+        // Create a new File record for the recipient
+        await File.create({
+          userId: user.id,
+          fileName: fileRecord.fileName,
+          filePath: targetFilePath,
+          department: fileRecord.department,
+          branchName: fileRecord.branchName,
+          sentFrom: sourceFilePath
+        });
       } catch (err) {
         console.error(
           `Error copying file ${file} to ${email}'s folder:`,

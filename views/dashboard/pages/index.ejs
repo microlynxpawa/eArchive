@@ -5,11 +5,12 @@
         <div class="card-body">
           <div class="d-sm-flex d-block justify-content-between">
             <div class="flex-grow-1">
-              <div class="weather d-flex">
-                <h2 class="f-w-400"> <span>28<sup><i class="fa fa-circle-o f-10"></i></sup>C </span></h2>
-                <div class="span sun-bg"><i class="icofont icofont-sun font-primary"></i></div>
-              </div><span class="font-primary f-w-700">Sunny Day</span>
-              <p>Beautiful Sunny Day Walk</p>
+              <div class="weather d-flex" id="weather-section">
+                <h2 class="f-w-400" id="weather-temp"> <span>--<sup><i class="fa fa-circle-o f-10"></i></sup>C </span></h2>
+                <div class="span sun-bg" id="weather-icon"><i class="icofont icofont-sun font-primary"></i></div>
+              </div>
+              <span class="font-primary f-w-700" id="weather-desc">Sunny Day</span>
+              <p id="weather-message">Beautiful Sunny Day Walk</p>
             </div>
             <div class="badge-group">
               <div class="badge badge-light-primary f-12"> <i class="fa fa-clock-o"></i><span id="txt"></span></div>
@@ -37,7 +38,7 @@
                 <li> <img src="../assets/images/dashboard/default/ribbon7.png" alt=""></li>
               </ul>
             </div>
-            <h4><a href="edit-profile"><span>Welcome Back</span> <%= user.username %> </a><span class="right-circle"><i
+            <h4><a href="edit-profile"><span>View Profile</span> <%= user.username %> </a><span class="right-circle"><i
                   class="fa fa-check-circle font-primary f-14 middle"></i></span></h4>
             
           </div>
@@ -139,61 +140,107 @@
           <div class="user-chart">
             <div id="user-chart"></div>
           </div>
-          <ul>
-            <li>
-              <p class="f-w-200 font-primary f-12">News </p><span class="f-w-100">This is a message from Management</span>
-            </li>
+          <ul id="admin-messages-dashboard">
+            <!-- Admin messages will be injected here -->
           </ul>
-          <div class="code-box-copy">
-            <button class="code-box-copy__btn btn-clipboard" data-clipboard-target="#users"><i
-                class="icofont icofont-copy-alt"></i></button>
-            <pre><code class="language-html" id="users">&lt;div class="card our-user"&gt;
-&lt;div class="card-header pb-0"&gt;
-&lt;div class="d-flex justify-content-between"&gt;
-&lt;div class="flex-grow-1"&gt;
-&lt;p class="square-after f-w-600 header-text-primary"&gt; Our Total Users
-  &lt;i class="fa fa-circle"&gt;&lt;/i&gt;
-&lt;/p&gt;
-&lt;h4&gt; 96.564% &lt;/h4&gt;
-&lt;/div&gt;
-&lt;div class="setting-list"&gt;
-&lt;ul class="list-unstyled setting-option"&gt;
-  &lt;li&gt;&lt;div class="setting-light"&gt;&lt;i class="icon-layout-grid2"&gt;&lt;/i&gt;&lt;/div&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;i class="view-html fa fa-code font-white"&gt;&lt;/i&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;i class="icofont icofont-maximize full-card font-white"&gt;&lt;/i&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;i class="icofont icofont-minus minimize-card font-white"&gt;&lt;/i&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;i class="icofont icofont-refresh reload-card font-white"&gt;&lt;/i&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;i class="icofont icofont-error close-card font-white"&gt; &lt;/i&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="card-body"&gt;
-&lt;div class="user-chart"&gt;
-&lt;div id="user-chart"&gt;&lt;/div&gt;
-&lt;div class="icon-donut"&gt;
-&lt;i class="feather feather-arrow-up-circle"&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p class="f-w-600 font-primary f-12"&gt; Desktop &lt;/p&gt;
-&lt;span class="f-w-600"&gt; 96.564% &lt;/span&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p class="f-w-600 font-primary f-12"&gt; Mobile &lt;/p&gt;
-&lt;span class="f-w-600"&gt; 92.624% &lt;/span&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p class="f-w-600 font-primary f-12"&gt; Tablet &lt;/p&gt;
-&lt;span class="f-w-600"&gt; 46.564% &lt;/span&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;</code></pre>
+        </div>
+      </div>
+
+      <!-- Modal for long messages -->
+      <div class="modal fade" id="adminMessageModal" tabindex="-1" aria-labelledby="adminMessageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="adminMessageModalLabel">Information</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="adminMessageModalBody"></div>
           </div>
         </div>
       </div>
+
+      <script>
+      // Weather fetch using wttr.in (no API key required)
+function updateWeatherSection() {
+  fetch('https://wttr.in/?format=j1')
+    .then(res => res.json())
+    .then(data => {
+      // Get current condition
+      const current = data.current_condition && data.current_condition[0];
+      if (!current) throw new Error('No weather data');
+      const tempC = current.temp_C;
+      const desc = current.weatherDesc[0].value;
+      const iconUrl = current.weatherIconUrl[0].value;
+      // Set temperature
+      document.getElementById('weather-temp').innerHTML = `<span>${tempC}<sup><i class='fa fa-circle-o f-10'></i></sup>C </span>`;
+      // Set icon based on description
+      let iconHtml = '';
+      const descLower = desc.toLowerCase();
+      if (descLower.includes('sun') || descLower.includes('clear')) {
+        iconHtml = `<i class='icofont icofont-sun font-primary'></i>`;
+      } else if (descLower.includes('cloud')) {
+        iconHtml = `<i class='icofont icofont-cloud font-primary'></i>`;
+      } else if (descLower.includes('rain') || descLower.includes('shower') || descLower.includes('thunder')) {
+        iconHtml = `<i class='icofont icofont-rainy font-primary'></i>`;
+      } else {
+        iconHtml = '';
+      }
+      document.getElementById('weather-icon').innerHTML = iconHtml;
+      // Set description
+      document.getElementById('weather-desc').textContent = desc;
+      // Set a dynamic message based on temperature
+      let msg = '';
+      const t = parseInt(tempC, 10);
+      if (t >= 30) msg = 'Stay hydrated! It’s a hot day.';
+      else if (t >= 20) msg = 'Great weather for a walk!';
+      else if (t >= 10) msg = 'A bit chilly, dress warm.';
+      else msg = 'Brrr! Keep warm today.';
+      document.getElementById('weather-message').textContent = msg;
+    })
+    .catch(() => {
+      // Fallback to static
+      document.getElementById('weather-temp').innerHTML = `<span>28<sup><i class='fa fa-circle-o f-10'></i></sup>C </span>`;
+      document.getElementById('weather-icon').innerHTML = `<i class='icofont icofont-sun font-primary'></i>`;
+      document.getElementById('weather-desc').textContent = 'Sunny Day';
+      document.getElementById('weather-message').textContent = 'Beautiful Sunny Day Walk';
+    });
+}
+updateWeatherSection();
+      // Fetch and display admin messages on dashboard
+      function fetchDashboardAdminMessages() {
+        $.get('/admin/messages', function(data) {
+          if (data.success) {
+            const list = $('#admin-messages-dashboard');
+            list.empty();
+            if (data.messages.length === 0) {
+              list.append('<li><span>No information from admin yet.</span></li>');
+            } else {
+              data.messages.forEach(msg => {
+                const shortMsg = msg.message.length > 80 ? msg.message.substring(0, 80) + '...' : msg.message;
+                const needsModal = msg.message.length > 80;
+                list.append(`
+                  <li>
+                    <span class="f-w-200 font-primary f-12">News </span>
+                    <span class="f-w-100">${shortMsg}</span>
+                    ${needsModal ? `<button class="btn btn-link p-0 view-full-msg" data-msg="${encodeURIComponent(msg.message)}">Read more</button>` : ''}
+                  </li>
+                `);
+              });
+            }
+          }
+        });
+      }
+
+      // Show modal for long messages
+      $('#admin-messages-dashboard').on('click', '.view-full-msg', function() {
+        const msg = decodeURIComponent($(this).data('msg'));
+        $('#adminMessageModalBody').text(msg);
+        $('#adminMessageModal').modal('show');
+      });
+
+      // Initial fetch
+      fetchDashboardAdminMessages();
+      </script>
     </div>
   </div>
 </div>
