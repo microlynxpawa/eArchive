@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tivo admin is super flexible, powerful, clean &amp; modern responsive bootstrap 5 admin template with unlimited possibilities.">
+    <meta name="keywords" content="admin template, Tivo admin template, dashboard template, flat admin template, responsive admin template, web app">
+    <meta name="author" content="pixelstrap">
+    <link rel="icon" href="../assets/images/favicon/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="../assets/images/favicon/favicon.png" type="image/x-icon">
+    <title>Dashboard - xCore eArchive</title>
+    
+    <!-- PERFORMANCE OPTIMIZED FONT LOADING -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Font with display=swap for immediate text rendering -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    
+    <!-- CRITICAL ICON FONTS - Load immediately for action buttons -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/icofont.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/themify.css">
+    
+    <!-- Critical performance optimization -->
+    <script>
+      // Performance optimization settings
+      if ('loading' in HTMLImageElement.prototype) {
+        document.documentElement.classList.add('native-lazy-loading');
+      }
+      
+      // Critical performance hints
+      if ('connection' in navigator) {
+        // Adjust loading strategy based on connection
+        const conn = navigator.connection;
+        if (conn.effectiveType === '4g') {
+          document.documentElement.classList.add('fast-connection');
+        }
+      }
+    </script>
+    
+    <style>
+    /* ENHANCED CRITICAL CSS - Prevent all layout shifts during load */
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.5;color:#333;min-height:100vh;padding:0}
+    .page-wrapper{min-height:100vh;display:flex;flex-direction:column;padding:0!important;margin:0!important}
+    .page-body-wrapper{margin-left:260px;flex:1;width:calc(100% - 260px);padding:0!important;margin-left:260px!important}
+    @media (max-width: 991px) { .page-body-wrapper{margin-left:0!important;width:100%!important} }
+    
+    /* SIDEBAR LAYOUT - Prevent sidebar shift */
+    .sidebar-wrapper{position:fixed;top:0;left:0;width:260px;height:100vh;z-index:1000;background:#fff;border-right:1px solid #e8ecef;box-sizing:border-box}
+    .sidebar-main{height:100%;overflow-y:auto}
+    .sidebar-links{list-style:none;padding:0;margin:0}
+    .sidebar-list{padding:12px 20px;border-bottom:1px solid #f4f4f4}
+    .sidebar-link{color:#333;text-decoration:none;display:flex;align-items:center;font-weight:500}
+    
+    /* Force visible scrollbar for sidebar SimpleBar */
+    .sidebar-main .simplebar-scrollbar:before{background:#e0e0e0!important;opacity:1!important}
+    .sidebar-main .simplebar-track.simplebar-vertical{width:9px!important;background:transparent!important;right:0!important}
+    
+    /* MAIN CONTENT AREA - Force no padding/margin except left spacing */
+    .page-body{padding:0!important;margin:0!important;padding-left:40px!important;padding-right:0!important;padding-top:0!important;padding-bottom:0!important}
+    .page-body .container-fluid{padding-left:15px!important;padding-right:15px!important;margin:0!important}
+    
+    /* Override any theme padding that might be applied */
+    .page-wrapper .page-body-wrapper .page-body{padding:0!important;margin:0!important;padding-left:40px!important;box-sizing:border-box!important}
+    
+    /* Ensure container-fluid has proper spacing but page-body doesn't */
+    .page-body > .container-fluid:first-child{padding-top:20px!important}
+    .page-body > *:not(.container-fluid){padding:0!important;margin:0!important}
+    
+    /* FOOTER LAYOUT - Full width footer */
+    .footer{width:100%;background:#f8f9fa;border-top:1px solid #e8ecef;margin-top:auto}
+    .footer .container-fluid{padding:15px 30px}
+    .footer p{margin:0;color:#6c757d;font-size:14px}
+    
+    /* HEADER LAYOUT - Prevent header shift */
+    .page-header{position:sticky;top:0;z-index:999;background:#fff;border-bottom:1px solid #e8ecef;height:70px}
+    .header-wrapper{padding:0 20px;height:70px;align-items:center}
+    
+    /* CARD LAYOUTS - Prevent card content shifts */
+    .card{background:#fff;border-radius:10px;box-shadow:0 5px 20px rgba(0,0,0,0.1);margin-bottom:30px;min-height:200px}
+    .card-header{padding:25px 30px 0;border-bottom:none}
+    .card-body{padding:30px}
+    .profile-greeting{min-height:320px}
+    .total-revenue{min-height:280px}
+    .total-investment{min-height:200px}
+    .our-user{min-height:400px}
+    
+    /* IMAGE CONTAINERS - Prevent image loading shifts */
+    .logo-wrapper img, .logo-header-main img{display:block;width:auto;height:auto}
+    .profile-vector{position:relative;width:150px;height:150px;margin:0 auto}
+    .vector-image img{position:absolute;max-width:35px;max-height:20px}
+    
+    /* UTILITIES */
+    .img-fluid{max-width:100%;height:auto}
+    [data-feather]{width:16px;height:16px;vertical-align:middle}
+    .d-flex{display:flex}
+    .justify-content-between{justify-content:space-between}
+    
+    /* Loading states */
+    body:not(.styles-loaded) { opacity: 0.98; }
+    body.styles-loaded { opacity: 1; transition: opacity 0.2s ease; }
+    
+    /* Prevent FOUC for specific components */
+    .weather, .greeting-user, .badge-group{opacity:1}
+    .dots-images{position:absolute;width:100%;height:100%}
+    
+    /* ACTION BUTTONS - Clean design consistent with existing UI */
+    .action {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .action li {
+      display: inline-block;
+    }
+    
+    .action li a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    
+    /* Edit button - matches primary color scheme */
+    .action li.edit a {
+      background: rgba(26, 115, 232, 0.1);
+      color: #1a73e8;
+      border-color: rgba(26, 115, 232, 0.2);
+    }
+    
+    .action li.edit a:hover {
+      background: #1a73e8;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+    }
+    
+    /* Delete button - matches danger color scheme */
+    .action li.delete a {
+      background: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+      border-color: rgba(220, 53, 69, 0.2);
+    }
+    
+    .action li.delete a:hover {
+      background: #dc3545;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+    
+    /* Icon sizing */
+    .action li a i {
+      font-size: 14px;
+      line-height: 1;
+    }
+    
+    /* Ensure action column is properly sized */
+    table .action {
+      min-width: 80px;
+    }
+    
+    /* Loading state for action buttons */
+    .action li a:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    /* Icon fallbacks if fonts don't load */
+    .icon-pencil-alt:before {
+      content: "✏️";
+      font-size: 12px;
+    }
+    
+    .icon-trash:before {
+      content: "🗑️";  
+      font-size: 12px;
+    }
+    
+    /* Ensure icons display properly */
+    .action li a i {
+      font-style: normal;
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      text-align: center;
+    }
+    </style>
+
+    <!-- CRITICAL CSS ONLY - Minimal blocking styles for layout -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/feather-icon.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/datatables.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/icofont.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/font-awesome.css">
+
+    <!-- ASYNC LOAD NON-CRITICAL STYLES - Prevent render blocking -->
+    <script>
+      // Ultra-fast async CSS loader with immediate application
+      function loadCSSAsync(href, priority = 'low') {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.media = 'print';
+        link.onload = function() { this.media = 'all'; };
+        document.head.appendChild(link);
+        
+        // Fallback for browsers that don't support onload
+        setTimeout(() => { link.media = 'all'; }, 100);
+      }
+
+      // Load styles immediately but non-blocking
+      // CORE STYLES - Load first
+      loadCSSAsync('/assets/css/style.css', 'high');
+      loadCSSAsync('/assets/css/responsive.css', 'high');
+      
+      // ENHANCEMENT STYLES - Load after core
+      setTimeout(() => {
+        loadCSSAsync('/assets/css/color-1.css');
+        loadCSSAsync('/assets/css/vendors/animate.css');
+        loadCSSAsync('/assets/css/vendors/scrollbar.css');
+      }, 50);
+      
+      // FEATURE STYLES - Load last
+      setTimeout(() => {
+        loadCSSAsync('/assets/css/vendors/chartist.css');
+        loadCSSAsync('/assets/css/vendors/prism.css'); 
+        loadCSSAsync('/assets/css/vendors/vector-map.css');
+        loadCSSAsync('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+      }, 100);
+
+      // Mark all styles as loading for visual feedback
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          document.body.classList.add('styles-loaded');
+        }, 200);
+      });
+    </script>
+
+    <!-- Fallback - ensure ALL design loads even without JavaScript -->
+    <noscript>
+      <link rel="stylesheet" type="text/css" href="/assets/css/vendors/animate.css">
+      <link rel="stylesheet" type="text/css" href="/assets/css/vendors/scrollbar.css">
+      <link rel="stylesheet" type="text/css" href="/assets/css/color-1.css">
+      <link rel="stylesheet" type="text/css" href="/assets/css/vendors/chartist.css">
+      <link rel="stylesheet" type="text/css" href="/assets/css/vendors/prism.css">
+      <link rel="stylesheet" type="text/css" href="/assets/css/vendors/vector-map.css">
+      <link rel="stylesheet" type="text/css" href="/assets/css/vendors/datatables.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+      <style>body { opacity: 1 !important; }</style>
+    </noscript>
+    <!-- Remove duplicate jQuery - use local version only -->
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+    
+    <!-- Lazy load heavy scanning library (286KB) - only when scan feature is accessed -->
+    <script>
+      // Load Dynamsoft WebTwain only when scanning functionality is needed
+      window.loadDynamsoft = function() {
+        return new Promise((resolve, reject) => {
+          if (window.Dynamsoft) {
+            resolve(window.Dynamsoft);
+            return;
+          }
+          
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/dwt@18.2.1/dist/dynamsoft.webtwain.min.js';
+          script.onload = () => resolve(window.Dynamsoft);
+          script.onerror = () => reject(new Error('Failed to load Dynamsoft'));
+          document.head.appendChild(script);
+        });
+      };
+      
+      // Auto-load when user clicks any scan button
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('[data-action="scan"]') || 
+            e.target.closest('.scan-btn') || 
+            e.target.textContent.toLowerCase().includes('scan')) {
+          window.loadDynamsoft();
+        }
+      });
+    </script>
+    <% if (typeof customCSS !='undefined' ) { %> <%- customCSS %> <% } %>
+  </head>
+  <body>
+    <!-- tap on top starts-->
+    <div class="tap-top"><i data-feather="chevrons-up"></i></div>
+    <!-- tap on tap ends-->
+    <!-- page-wrapper Start-->
+    <div class="page-wrapper compact-wrapper" id="pageWrapper">
+      <!-- Page Header Start-->
+      <%- include('./components/page-header.ejs') %>
+      <!-- Page Header Ends-->
+      <!-- Page Body Start-->
+      <div class="page-body-wrapper">
+        <!-- Page Sidebar Start-->
+        <%- include('./components/sidebar.ejs', {auths: auths}) %>
+        <!-- Page Sidebar Ends-->
+
+        <!-- Scan modal inclusion -->
+         <%- include('./components/scanModalOptions.ejs') %>
+        <!-- Access Control -->
+         <%- include('./components/accessControl.ejs') %>
+        <!-- Send files component -->
+         <%- include('./components/sendViaEmailModal.ejs') %>
+         <!-- Select Departments Modal -->
+         <%- include('./components/displayDepartmentsModal.ejs') %>
+         <!-- All Users Modal -->
+         <%- include('./components/allUsersModal.ejs') %>
+
+        <div class="page-body">
+          <div class="container-fluid">
+            <%- pageHeader %>
+          </div>
+          <!-- Container-fluid starts-->
+          <%- body %>
+          <!-- Container-fluid Ends-->
+        </div>
+      </div>
+      <!-- footer start - moved outside page-body-wrapper for full width -->
+      <%- include('./components/footer.ejs') %>
+    </div>
+    <!-- ESSENTIAL JQUERY - Load immediately and wait -->
+    <script src="/assets/js/jquery-3.6.0.min.js"></script>
+    <!-- ESSENTIAL BOOTSTRAP - Load after jQuery -->
+    <script src="/assets/js/bootstrap/bootstrap.bundle.min.js"></script>
+    <!-- ESSENTIAL DATATABLES - Load after jQuery -->
+    <script src="/assets/js/datatable/datatables/jquery.dataTables.min.js"></script>
+    <!-- ESSENTIAL SWEETALERT2 - Load for notifications -->
+    <script src="/assets/js/sweetalert2.all.min.js"></script>
+    
+    <!-- OPTIMIZED ASYNC LOADING - Keep performance benefits -->
+    <script>
+      // Efficient script loader with dependency management
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      // Initialize core functionality immediately
+      document.addEventListener('DOMContentLoaded', function() {
+        // Setup Toast notifications immediately (SweetAlert2 loaded synchronously)
+        if (window.Swal) {
+          const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end", 
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
+            }
+          });
+          window.Toast = Toast;
+          window.errorAlert = (message) => Toast.fire({icon: "error", title: message});
+          window.successAlert = (message) => Toast.fire({icon: "success", title: message});
+          window.showToast = (message, type = 'success') => Toast.fire({icon: type, title: message});
+          console.log('Toast notifications ready');
+        }
+        
+        // Load critical UI scripts asynchronously for performance
+        Promise.all([
+          loadScript('/assets/js/icons/feather-icon/feather.min.js'),
+          loadScript('/assets/js/config.js'),
+          loadScript('/assets/js/notify/index.js'),
+          loadScript('/assets/js/notify/bootstrap-notify.min.js')
+        ]).then(() => {
+          // Initialize icons
+          if (window.feather) {
+            feather.replace();
+            console.log('Feather icons initialized');
+          }
+          
+          // Setup scan button functionality
+          $(document).ready(function() {
+            $("#scan-button").click(function(event) {
+              event.preventDefault();
+              $(".modal-backdrop").remove();
+              $("#upgradeModal").modal("show");
+            });
+          });
+          
+          console.log('Core UI ready');
+        }).catch(error => {
+          console.log('Some core scripts failed:', error);
+        });
+      });
+    </script>
+    
+    <!-- Load additional scripts asynchronously after page is interactive -->
+    <script>
+      // Load non-critical scripts for optimal performance
+      window.addEventListener('load', function() {
+        // Load UI enhancement scripts in background
+        Promise.all([
+          loadScript('/assets/js/icons/feather-icon/feather-icon.js'),
+          loadScript('/assets/js/sidebar-menu.js'),
+          loadScript('/assets/js/script.js'),
+          loadScript('/assets/js/additional.js')
+        ]).then(() => {
+          console.log('UI enhancements loaded');
+        }).catch(error => {
+          console.log('Some enhancement scripts failed:', error);
+        });
+        
+        // Defer heavy libraries that aren't immediately needed
+        const deferredScripts = [
+          '/assets/js/scrollbar/simplebar.js',
+          '/assets/js/scrollbar/custom.js',
+          '/assets/js/clipboard/clipboard.min.js',
+          '/assets/js/custom-card/custom-card.js'
+        ];
+
+        // Load in small chunks to prevent blocking
+        let index = 0;
+        const loadChunk = () => {
+          if (index < deferredScripts.length) {
+            loadScript(deferredScripts[index]).then(() => {
+              index++;
+              setTimeout(loadChunk, 10); // Very short delay
+            }).catch(error => {
+              console.log('Script failed to load:', deferredScripts[index], error);
+              index++;
+              setTimeout(loadChunk, 10);
+            });
+          }
+        };
+        
+        setTimeout(loadChunk, 200); // Start after page is ready
+      });
+    </script>
+    
+    <!-- FEATURE-SPECIFIC SCRIPT LOADERS -->
+    <script>
+      // FEATURE-SPECIFIC SCRIPTS - Load only when features are used
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      
+      window.loadCharts = function() {
+        return Promise.all([
+          loadScript('/assets/js/chart/chartist/chartist.js'),
+          loadScript('/assets/js/chart/chartist/chartist-plugin-tooltip.js')
+        ]);
+      };
+
+      window.loadMaps = function() {
+        return Promise.all([
+          loadScript('/assets/js/vector-map/jquery-jvectormap-2.0.2.min.js'),
+          loadScript('/assets/js/vector-map/map/jquery-jvectormap-world-mill-en.js'),
+          loadScript('/assets/js/vector-map/map/jquery-jvectormap-us-aea-en.js'),
+          loadScript('/assets/js/vector-map/map/jquery-jvectormap-uk-mill-en.js'),
+          loadScript('/assets/js/vector-map/map/jquery-jvectormap-au-mill.js'),
+          loadScript('/assets/js/vector-map/map/jquery-jvectormap-chicago-mill-en.js'),
+          loadScript('/assets/js/vector-map/map/jquery-jvectormap-in-mill.js'),
+          loadScript('/assets/js/vector-map/map/jquery-jvectormap-asia-mill.js')
+        ]);
+      };
+
+      window.loadTypeahead = function() {
+        return Promise.all([
+          loadScript('/assets/js/typeahead/handlebars.js'),
+          loadScript('/assets/js/typeahead/typeahead.bundle.js'),
+          loadScript('/assets/js/typeahead/typeahead.custom.js'),
+          loadScript('/assets/js/typeahead-search/handlebars.js'),
+          loadScript('/assets/js/typeahead-search/typeahead-custom.js')
+        ]);
+      };
+
+      window.loadPrism = function() {
+        return loadScript('/assets/js/prism/prism.min.js');
+      };
+
+      // Auto-load features when elements are detected
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check for charts after a delay
+        setTimeout(() => {
+          if (document.querySelector('.chart, #revenue-chart, #user-chart')) {
+            window.loadCharts();
+          }
+          if (document.querySelector('.vector-map, [id*="map"]')) {
+            window.loadMaps();
+          }
+          if (document.querySelector('.typeahead, [data-typeahead]')) {
+            window.loadTypeahead();
+          }
+          if (document.querySelector('pre code, .code-box')) {
+            window.loadPrism();
+          }
+        }, 1000); // Load after initial render is complete
+      });
+    </script>
+    <% if (typeof customJS !='undefined' ) { %> <%- customJS %> <% } %>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+/node_modules
+/.env
+/tests
+/.vscode
+transformedAuths.json
+transformedUsers.json
+transformedUsersHashed.json
+archive.sql
+eArchiiveUploads/*
+bosomtwe.sql
+redb.js
+userCredentials.txt
+util/eArchiiveUploads/*

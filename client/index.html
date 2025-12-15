@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>e-Archive Client (React)</title>
+    <!-- Load vendor CSS first, then theme styles to match original EJS layout -->
+    <link rel="stylesheet" href="/assets/css/vendors/bootstrap.css" />
+    <link rel="stylesheet" href="/assets/css/vendors/feather-icon.css" />
+    <link rel="stylesheet" href="/assets/css/vendors/icofont.css" />
+    <link rel="stylesheet" href="/assets/css/vendors/font-awesome.css" onerror="this.remove()" />
+    <link rel="stylesheet" href="/assets/css/vendors/themify.css" />
+    <link rel="stylesheet" href="/assets/css/vendors/datatables.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link rel="stylesheet" href="/assets/css/responsive.css" />
+
+    <!-- Header/layout CSS is provided by the project's /assets styles (master.ejs loads critical CSS) -->
+    <style>
+      /* Critical login styles (from original auth master) */
+      body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin:0;padding:0}
+      .login-loaded{visibility:visible!important}
+      .login-card{font-family:inherit;background-color:#f8f9fa;min-height:100vh;display:flex;align-items:center;justify-content:center}
+      .login-main{background:#fff;border-radius:10px;box-shadow:0 0 20px rgba(0,0,0,0.1);padding:40px;width:450px;max-width:90vw}
+      .bg-loaded{background-image:url('/assets/images/login/login_bg.jpg')!important}
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <!-- Optional: include main script (deferred) to preserve some UI behaviors from original templates -->
+    <script src="/assets/js/jquery-3.6.0.min.js" defer></script>
+    <script src="/assets/js/bootstrap/bootstrap.bundle.min.js" defer></script>
+    <script src="/assets/js/script.js" defer onerror="console.warn('optional script.js missing')"></script>
+  </body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - xCore eArchive (React)</title>
+    <link rel="icon" href="/assets/images/favicon/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/assets/images/favicon/favicon.png" type="image/x-icon">
+
+    <!-- PERFORMANCE OPTIMIZED FONT LOADING -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <!-- CRITICAL ICON FONTS - mirror server template -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/icofont.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/themify.css">
+    <!-- Bootstrap Icons (used by file upload button) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <!-- ENHANCED CRITICAL CSS copied from server template to prevent layout shifts -->
+    <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Montserrat',sans-serif;line-height:1.5;color:#333;min-height:100vh;padding:0}
+    .page-wrapper{min-height:100vh;display:flex;flex-direction:column;padding:0!important;margin:0!important}
+    .page-body-wrapper{margin-left:260px;flex:1;width:calc(100% - 260px);padding:0!important;margin-left:260px!important}
+    @media (max-width: 991px) { .page-body-wrapper{margin-left:0!important;width:100%!important} }
+    .sidebar-wrapper{position:fixed;top:0;left:0;width:260px;height:100vh;z-index:1000;background:#fff;border-right:1px solid #e8ecef;box-sizing:border-box}
+    .sidebar-main{height:100%;overflow-y:auto}
+    .page-body{padding:0!important;margin:0!important;padding-left:40px!important}
+    .page-header{position:sticky;top:0;z-index:999;background:#fff;border-bottom:1px solid #e8ecef;height:70px}
+    .header-wrapper{padding:0 20px;height:70px;align-items:center}
+    .logo-wrapper img, .logo-header-main img{display:block;width:auto;height:auto}
+    .img-fluid{max-width:100%;height:auto}
+    [data-feather]{width:16px;height:16px;vertical-align:middle}
+    /* Small overrides to restore sidebar visual parity */
+    .sidebar-wrapper .logo-wrapper .back-btn,
+    .sidebar-wrapper .logo-wrapper .toggle-sidebar,
+    .sidebar-wrapper .logo-wrapper .back-btn *,
+    .sidebar-wrapper .logo-wrapper .toggle-sidebar * {
+      background: transparent !important;
+      background-image: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 4px 6px !important;
+      width: auto !important;
+      height: auto !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 0 !important;
+    }
+    /* Also guard against pseudo-elements */
+    .sidebar-wrapper .logo-wrapper .back-btn::before,
+    .sidebar-wrapper .logo-wrapper .back-btn::after,
+    .sidebar-wrapper .logo-wrapper .toggle-sidebar::before,
+    .sidebar-wrapper .logo-wrapper .toggle-sidebar::after {
+      content: none !important;
+      display: none !important;
+      background: transparent !important;
+    }
+    .sidebar-wrapper .mobile-back { background: transparent !important; }
+    .sidebar-wrapper .sidebar-links .sidebar-list { border-bottom: 1px solid rgba(0,0,0,0.08) !important; }
+    .sidebar-wrapper .sidebar-link { display:flex; align-items:center; padding:10px 12px; color:inherit; width:100%; background:transparent !important; }
+    .sidebar-wrapper .sidebar-link:hover { background: rgba(0,0,0,0.03) !important; }
+    .sidebar-wrapper .sidebar-list + .sidebar-list { margin-top: 0 !important; }
+    /* Style feather-generated SVGs inside sidebar */
+    .sidebar-wrapper svg { width:18px !important; height:18px !important; margin-right:8px !important; vertical-align:middle !important; fill:currentColor !important; stroke:currentColor !important; }
+    /* Explicitly target the mobile 'Back' control to remove any residual rectangle */
+    .sidebar-wrapper .back-btn,
+    .sidebar-wrapper .back-btn .mobile-back,
+    .sidebar-wrapper .back-btn .mobile-back span,
+    .sidebar-wrapper .back-btn .mobile-back i,
+    .sidebar-wrapper .back-btn .mobile-back * {
+      background: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+      border: none !important;
+      outline: none !important;
+      width: auto !important;
+      height: auto !important;
+      display: inline-flex !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .sidebar-wrapper .back-btn { border-bottom: none !important; }
+    .sidebar-wrapper .mobile-back { cursor: pointer; }
+    .sidebar-wrapper .fa { background: transparent !important; }
+    /* Strong override: ensure main content clears the header (force if vendor JS/CSS interferes) */
+    .page-header { position: sticky !important; top: 0 !important; z-index: 9999 !important; }
+    .page-wrapper .page-body-wrapper, body .page-body-wrapper, .page-body { padding-top: 70px !important; margin-top: 0 !important; }
+    @media (max-width: 991px) { .page-wrapper .page-body-wrapper, body .page-body-wrapper, .page-body { padding-top: 70px !important; } }
+    /* Fallback for visually-hidden utility if bootstrap isn't available */
+    .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
+    /* Ensure file choose button has pointer cursor and hover visibility like the template */
+    #customFileBtn { cursor: pointer; }
+    #customFileBtn:hover { filter: brightness(0.97); }
+    </style>
+
+    <!-- CRITICAL CSS ONLY - Minimal blocking styles for layout (vendors) -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/feather-icon.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/datatables.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/icofont.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/responsive.css">
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- React entry -->
+    <script type="module" src="/src/main.jsx"></script>
+
+    <!-- ESSENTIAL JQUERY - Load immediately and wait -->
+    <script src="/assets/js/jquery-3.6.0.min.js" defer></script>
+    <!-- ESSENTIAL BOOTSTRAP - Load after jQuery -->
+    <script src="/assets/js/bootstrap/bootstrap.bundle.min.js" defer></script>
+    <!-- ESSENTIAL DATATABLES - Load after jQuery -->
+    <script src="/assets/js/datatable/datatables/jquery.dataTables.min.js" defer></script>
+    <!-- ESSENTIAL SWEETALERT2 - Load for notifications -->
+    <script src="/assets/js/sweetalert2.all.min.js" defer></script>
+
+    <!-- Initialize core UI scripts and icons (non-blocking) -->
+    <script>
+      function loadScript(src){
+        return new Promise((resolve,reject)=>{
+          const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', function(){
+        Promise.all([
+          loadScript('/assets/js/icons/feather-icon/feather.min.js'),
+          loadScript('/assets/js/config.js')
+        ]).then(()=>{
+          if (window.feather && typeof window.feather.replace === 'function'){
+            try{ window.feather.replace(); }catch(e){}
+          }
+          // optional notify scripts (if present) - load plugin first then initializer
+          loadScript('/assets/js/notify/bootstrap-notify.min.js')
+            .then(()=> loadScript('/assets/js/notify/index.js').catch(()=>{}))
+            .catch(()=>{
+              // if plugin fails, still try to load initializer (it will guard against missing plugin)
+              loadScript('/assets/js/notify/index.js').catch(()=>{});
+            });
+        }).catch(()=>{
+          // continue even if some scripts fail
+        });
+      });
+    </script>
+
+    <!-- Load additional UI enhancement scripts after load -->
+    <script>
+      window.addEventListener('load', function(){
+        const enhancementScripts = [
+          '/assets/js/icons/feather-icon/feather-icon.js',
+          '/assets/js/sidebar-menu.js',
+          '/assets/js/script.js',
+          '/assets/js/additional.js'
+        ];
+        enhancementScripts.forEach(src=>{ loadScript(src).catch(()=>{}); });
+      });
+    </script>
+    <script>
+      // Ensure feather icons are replaced even when React mounts later.
+      (function ensureFeatherReplaced(){
+        function replaceIfReady(){
+          if (window.feather && typeof window.feather.replace === 'function'){
+            try{ window.feather.replace(); }catch(e){}
+          }
+        }
+
+        // Run once now and again after scripts load
+        replaceIfReady();
+
+        // Observe DOM additions and replace feather icons when data-feather appears
+        if (window.MutationObserver){
+          const mo = new MutationObserver((mutations)=>{
+            let found = false;
+            for (const m of mutations){
+              for (const n of m.addedNodes){
+                if (n.nodeType===1 && (n.querySelector && n.querySelector('[data-feather]'))){ found = true; break; }
+                if (n.nodeType===1 && n.hasAttribute && n.hasAttribute('data-feather')){ found = true; break; }
+              }
+              if (found) break;
+            }
+            if (found) replaceIfReady();
+          });
+          mo.observe(document.body, { childList:true, subtree:true });
+        }
+      })();
+    </script>
+  </body>
+</html>

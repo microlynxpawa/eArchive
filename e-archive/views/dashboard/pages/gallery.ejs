@@ -1,0 +1,1006 @@
+<style>
+
+#full-screen-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#preview-content {
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+#close-preview {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: red;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.preview-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.preview-text {
+  font-size: 16px;
+  color: black;
+}
+
+  .folder-icon {
+    margin-right: 5px;
+  }
+
+  .file-icon {
+    margin-right: 5px;
+  }
+
+  .file-name {
+    cursor: pointer;
+    color: blue;
+    display: inline-block;
+    max-width: 220px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .file-content {
+    border: 1px solid #ccc;
+    height: 300px;
+    overflow-y: auto;
+    padding: 15px;
+  }
+
+  .sub-items {
+    margin-left: 20px;
+  }
+
+  .file-name:hover {
+    text-decoration: underline;
+  }
+
+  .folder-button {
+    all: unset;
+    cursor: pointer;
+  }
+
+  .folder-button:hover {
+    text-decoration: underline;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    word-break: break-all;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .file-checkbox {
+    margin-right: 10px;
+  }
+
+  .box-shadow {
+    box-shadow: 2px 2px 4px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #ffffff;
+  }
+
+  /* Simple modal styling */
+  #searchResultsModal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  #filesModalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 80%;
+    overflow-y: auto;
+  }
+
+  #matchedFilesList {
+    list-style: none;
+    padding: 0;
+  }
+
+  #matchedFilesList li {
+    margin: 5px 0;
+  }
+
+  #folder-tree {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .box-shadow.col-4 {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+</style>
+<style>
+  .file-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .file-checkbox {
+    margin-right: 10px;
+  }
+
+  .box-shadow {
+    box-shadow: 2px 2px 4px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #ffffff;
+  }
+</style>
+<style>
+  /* Simple modal styling */
+  #searchResultsModal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  #filesModalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 80%;
+    overflow-y: auto;
+  }
+
+  #matchedFilesList {
+    list-style: none;
+    padding: 0;
+  }
+
+  #matchedFilesList li {
+    margin: 5px 0;
+  }
+</style>
+
+<div class="container mt-5 mb-5">
+  <div class="mb-3">
+    <em id="fileSearchInfo" style="color: rgb(5, 196, 5); display: none;">Enter a search date in this format (d-m-yyy)</em>
+    <div class="input-group">
+      <div class="input-group-prepend " id="searchButton">
+        <span class="input-group-text mobile-search"><i class="fa fa-search"></i></span>
+      </div>
+      <input 
+        id="search-input" 
+        class="form-control" 
+        type="text" 
+        placeholder="Search Here........"
+      >
+    </div>
+  </div>
+  <div class="row" id="resizable-panels-row" style="display: flex; flex-direction: row; min-width: 0;">
+    <!-- Folder Panel -->
+    <% if (auths && auths.view_upload) { %>
+    <div class="bg-white box-shadow col-4 border p-3" id="folder-panel" style="min-width: 120px; max-width: 60vw; flex: 0 0 28vw; overflow-x: auto;">
+      <input type="hidden" id="baseUploadPath" value="C:\\e-archiveUploads" />
+      <div id="folder-tree">
+        <a href="#" id="reveal-all-folders" style="font-size:0.95em; color:#888; text-decoration:underline; cursor:pointer; margin-bottom:8px; display:inline-block;">Show all folders</a>
+        <% 
+        // Function to render a folder
+        function renderFolder(key, structure, parentKey = '') { 
+        %>
+        <div>
+          <% const currentPath = parentKey ? `${parentKey}/${key}` : key; %>
+          <button class="folder-button" data-folder="<%= currentPath %>">
+            <i class="fas fa-folder folder-icon"></i>
+            <strong class="folder-name" title="<%= key %>"><%= key %></strong>
+          </button>
+          <div class="sub-items" style="display: none;">
+            <% renderStructure(structure, currentPath); %>
+          </div>
+        </div>
+        <% } %>
+        <% 
+        // Helper: Extract date from filename (expects _d-m-yyyy or -d-m-yyyy or .d-m-yyyy or space d-m-yyyy before extension)
+        function extractDateFromFilename(filename) {
+          // Match _d-m-yyyy, -d-m-yyyy, .d-m-yyyy, or space d-m-yyyy before extension
+          const match = filename.match(/[\s_\-\.](\d{1,2})-(\d{1,2})-(\d{4})\./);
+          if (!match) return null;
+          const day = parseInt(match[1], 10);
+          const month = parseInt(match[2], 10) - 1; // JS months are 0-based
+          const year = parseInt(match[3], 10);
+          return new Date(year, month, day);
+        }
+
+        // Sort files array by extracted date descending (latest first)
+        function sortFilesByDateDesc(files) {
+          return files.slice().sort(function(a, b) {
+            const dateA = extractDateFromFilename(a);
+            const dateB = extractDateFromFilename(b);
+            if (!dateA && !dateB) return 0;
+            if (!dateA) return 1;
+            if (!dateB) return -1;
+            return dateB - dateA;
+          });
+        }
+        %>
+        <% 
+        // Function to extract batch name from filename (returns null if no batch)
+        function extractBatchName(filename) {
+          // Match @batch before _date or .ext
+          const match = filename.match(/@([^@_\-\.]+)[_\-\.]/);
+          return match ? match[1] : null;
+        }
+
+        // Function to group files by batch name
+        function groupFilesByBatch(files) {
+          const groups = {};
+          files.forEach(file => {
+            const batch = extractBatchName(file);
+            if (batch) {
+              if (!groups[batch]) groups[batch] = [];
+              groups[batch].push(file);
+            } else {
+              // Instead of '__no_batch__', use 'Single-Files' as the folder name
+              if (!groups['Single-Files']) groups['Single-Files'] = [];
+              groups['Single-Files'].push(file);
+            }
+          });
+          return groups;
+        }
+        %>
+        <% 
+        // Function to render files in a folder, grouped by batch name
+        function renderFiles(files, parentKey) { 
+          const sortedFiles = sortFilesByDateDesc(files);
+          const grouped = groupFilesByBatch(sortedFiles);
+        %>
+          <% Object.keys(grouped).forEach(batch => { %>
+            <% if (batch !== 'Single-Files') { %>
+              <div class="fake-folder-group">
+                <button class="folder-button fake-folder-toggle" data-batch="<%= batch %>" style="font-weight:bold; color:#2a2a7a; margin-bottom:4px;">
+                  <i class="fas fa-folder folder-icon"></i>
+                  <span><%= batch %></span>
+                </button>
+                <div class="sub-items fake-folder-files" data-batch-files="<%= batch %>" style="display:none;">
+                  <% grouped[batch].forEach(file => { %>
+                    <div class="file-item">
+                      <input type="checkbox" class="file-checkbox" data-file="<%= file %>" data-fullpath="C:\\e-archiveUploads<%= parentKey ? ('\\' + parentKey.replace(/^[\\\/]+|[\\\/]+$/g, '').replace(/[\/]/g, '\\')) : '' %>\<%= file %>" style="display: none;" />
+                      <span class="file-icon"><i class="fas fa-file"></i></span>
+                      <span id="fileName" class="file-name" data-file="<%= file %>" title="<%= file %>" style="max-width: 220px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> <%= file %> </span>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+            <% } else { %>
+              <div class="fake-folder-group">
+                <button class="folder-button fake-folder-toggle" data-batch="Single-Files" style="font-weight:bold; color:#2a2a7a; margin-bottom:4px;">
+                  <i class="fas fa-folder folder-icon"></i>
+                  <span>Single-Files</span>
+                </button>
+                <div class="sub-items fake-folder-files" data-batch-files="Single-Files" style="display:none;">
+                  <% grouped[batch].forEach(file => { %>
+                    <div class="file-item">
+                      <input type="checkbox" class="file-checkbox" data-file="<%= file %>" data-fullpath="C:\\e-archiveUploads<%= parentKey ? ('\\' + parentKey.replace(/^[\\\/]+|[\\\/]+$/g, '').replace(/[\/]/g, '\\')) : '' %>\<%= file %>" style="display: none;" />
+                      <span class="file-icon"><i class="fas fa-file"></i></span>
+                      <span id="fileName" class="file-name" data-file="<%= file %>" title="<%= file %>" style="max-width: 220px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> <%= file %> </span>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+            <% } %>
+          <% }) %>
+        <% } %>
+        <% 
+        // Function to render the folder structure recursively
+        function renderStructure(structure, parentKey = '') { 
+        %>
+        <% for (let key in structure) { %>
+        <% if (key === 'files') { %>
+        <% renderFiles(structure[key], parentKey); %>
+        <% } else if (Array.isArray(structure[key])) { %>
+        <% renderFiles(structure[key], parentKey); %>
+        <% } else { %>
+        <% renderFolder(key, structure[key], parentKey); %>
+        <% } %>
+        <% } %>
+        <% } %>
+        <% 
+        // Render the file structure if available, skipping 'Admin' root if present
+        if (fileStructure) { 
+          let keys = Object.keys(fileStructure);
+          if (keys.length === 1 && keys[0] === 'Admin') {
+            renderStructure(fileStructure['Admin']); 
+          } else {
+            renderStructure(fileStructure); 
+          }
+        } 
+        %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Vertical Resizer Bar -->
+    <div id="panel-resizer" style="width: 3px; cursor: ew-resize; background: #e0e0e003; min-height: 100%; z-index: 10; transition: background 0.2s;"></div>
+
+    <!-- File Viewer Panel -->
+    <div class="col-8" id="file-viewer-panel" style="flex: 1 1 0; min-width: 200px; max-width: 100vw; display: flex; flex-direction: column; min-height: 0;">
+      <div class="bg-white box-shadow file-content" id="file-viewer" style="flex: 0 0 300px; min-height: 120px; max-height: 70vh; overflow-y: auto; position: relative;">
+        <em>Select a file to preview its content here.</em>
+        <!-- Horizontal Resizer Bar -->
+        <div id="horizontal-resizer" style="height: 3px; width: 100%; cursor: ns-resize; background: #e0e0e0; position: absolute; bottom: 0; left: 0; z-index: 11; transition: background 0.2s;"></div>
+      </div>
+      <!-- Pick and send and other content below file viewer -->
+      <div id="file-viewer-below" style="flex: 1 1 auto;">
+        <!-- Pick and send -->
+        <div>
+          <button id="pick-send-button" class="btn btn-primary mt-3">Pick & Send</button>
+
+          <% if (auths && auths.is_admin) { %>
+          <button id="delete-button" class="btn btn-secondary mt-3">Delete</button>
+          <% } %>
+          <button id="cancel-delete-button" style="display: none;" class="btn btn-secondary mt-3">Cancel Delete</button>
+          <button id="send-button" style="display: none;" class="btn btn-success mt-3">Send</button>
+          <p id="select-file-message" style="display: none; color: green;">Please select a file.</p>
+          <p id="delete-info" class="delete-info" style="display: none;">Select file(s) to delete.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="searchResultsModal" style="display: none;">
+      <div id="filesModalContent" style="width: 30%;">
+        <h2>Matched Files</h2>
+        <ul id="matchedFilesList"></ul>
+        <button class="btn btn-primary" id="closeFilesModalButton">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor("pageHeader") %>
+<%- include('../components/page-title.ejs', {title: 'View Files' }) %>
+<%- contentFor("customJS") %>
+
+
+<script>
+  // Log user authorizations to the browser console for debugging
+  // window.auths = <%- JSON.stringify(auths) %>;
+  // console.log('User authorizations:', window.auths);
+  // console.log('File structure:', <%- JSON.stringify(fileStructure) %>);
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // DOM elements
+    const pickSendButton = document.getElementById("pick-send-button");
+    const selectFileMessage = document.getElementById("select-file-message");
+    const sendOptions = document.getElementById("send-options");
+    const deleteButton = document.getElementById("delete-button");
+    const cancelDeleteButton = document.getElementById("cancel-delete-button");
+    const deleteInfo = document.getElementById("delete-info");
+    const fileCheckboxes = document.querySelectorAll(".file-checkbox");
+    const sendButton = document.getElementById("send-button");
+
+    // State variables
+    let selectedFilesForSending = [];
+    let selectedFilesForDeleting = [];
+    let isDeleteModeActive = false;
+    let isPickSendModeActive = false;
+
+    // Initialize global state
+    window.selectedFiles = [];
+
+    // Event listeners
+    pickSendButton.addEventListener("click", togglePickSendMode);
+    fileCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener("change", handleFileCheckboxChange);
+    });
+    deleteButton.addEventListener("click", toggleDeleteMode);
+    cancelDeleteButton.addEventListener("click", cancelDeleteMode);
+
+    // Functions
+
+    /**
+     * Toggles between normal and pick & send modes.
+     */
+    function togglePickSendMode() {
+      if (isPickSendModeActive) {
+        resetPickSendMode();
+      } else {
+        activatePickSendMode();
+      }
+    }
+
+    /**
+     * Resets the UI to the default state after canceling pick & send mode.
+     */
+    function resetPickSendMode() {
+      selectFileMessage.style.display = "none";
+      fileCheckboxes.forEach(checkbox => {
+        checkbox.style.display = "none";
+        checkbox.checked = false;
+      });
+      pickSendButton.innerText = "Pick & Send";
+      pickSendButton.classList.remove("btn-danger");
+      pickSendButton.classList.add("btn-primary");
+      if (deleteButton) deleteButton.style.display = "inline-block";
+      isPickSendModeActive = false;
+    }
+
+    /**
+     * Activates the pick & send mode in the UI.
+     */
+    function activatePickSendMode() {
+      selectFileMessage.style.display = "block";
+      fileCheckboxes.forEach(checkbox => {
+        checkbox.style.display = "inline-block";
+        checkbox.checked = false;
+      });
+      pickSendButton.innerText = "Cancel file sending";
+      pickSendButton.classList.remove("btn-primary");
+      pickSendButton.classList.add("btn-danger");
+      if (deleteButton) deleteButton.style.display = "none";
+      isPickSendModeActive = true;
+      // Reveal all folders in the folder tree
+      document.querySelectorAll('#folder-tree .sub-items').forEach(el => {
+        el.style.display = 'block';
+      });
+    }
+
+    /**
+     * Handles changes in file checkboxes.
+     */
+    function handleFileCheckboxChange(event) {
+      const fileName = event.target.dataset.file;
+
+      if (isDeleteModeActive) {
+        updateSelectedFilesForDeleting(fileName, event.target.checked);
+      } else if (isPickSendModeActive) {
+        updateSelectedFilesForSending(fileName, event.target.checked);
+      }
+
+      updateUIBasedOnSelection();
+    }
+
+    /**
+     * Updates the list of files selected for sending.
+     * @param {string} fileName - The name of the file.
+     * @param {boolean} isChecked - Whether the checkbox is checked.
+     */
+    function updateSelectedFilesForSending(fileName, isChecked) {
+      if (isChecked) {
+        if (!selectedFilesForSending.includes(fileName)) {
+          selectedFilesForSending.push(fileName);
+        }
+      } else {
+        selectedFilesForSending = selectedFilesForSending.filter(file => file !== fileName);
+      }
+    }
+
+    /**
+     * Updates the list of files selected for deletion.
+     * @param {string} fileName - The name of the file.
+     * @param {boolean} isChecked - Whether the checkbox is checked.
+     */
+    function updateSelectedFilesForDeleting(fileName, isChecked) {
+      if (isChecked) {
+        if (!selectedFilesForDeleting.includes(fileName)) {
+          selectedFilesForDeleting.push(fileName);
+        }
+      } else {
+        selectedFilesForDeleting = selectedFilesForDeleting.filter(file => file !== fileName);
+      }
+      deleteButton.textContent = selectedFilesForDeleting.length > 0 ? "Confirm Delete" : "Delete";
+    }
+
+    /**
+     * Updates the UI based on the current selection of files.
+     */
+    function updateUIBasedOnSelection() {
+      if (isPickSendModeActive) {
+        const anyFilesSelected = selectedFilesForSending.length > 0;
+        if (anyFilesSelected) {
+          selectFileMessage.style.display = "none";
+          pickSendButton.style.display = "none";
+          sendButton.style.display = "inline-block";
+        } else {
+          selectFileMessage.style.display = "block";
+          sendButton.style.display = "none";
+          pickSendButton.style.display = "inline-block";
+          pickSendButton.innerText = "Cancel";
+          pickSendButton.classList.remove("btn-primary");
+          pickSendButton.classList.add("btn-danger");
+          sendOptions.style.display = "none";
+          pickSendButton.disabled = false;
+        }
+      }
+    }
+
+
+
+    /**
+     * Toggles between normal and delete modes.
+     */
+    function toggleDeleteMode() {
+      if (isDeleteModeActive) {
+        performFileDeletion();
+      } else {
+        activateDeleteMode();
+      }
+    }
+
+    /**
+     * Activates the delete mode in the UI.
+     */
+    function activateDeleteMode() {
+      deleteInfo.style.display = "block";
+      cancelDeleteButton.style.display = "inline-block";
+      fileCheckboxes.forEach(checkbox => {
+        checkbox.style.display = "inline-block";
+        checkbox.checked = false;
+      });
+      deleteButton.textContent = "Confirm Delete";
+      deleteButton.classList.remove('btn-secondary');
+      deleteButton.classList.add('btn-danger');
+      pickSendButton.style.display = "none";
+      isDeleteModeActive = true;
+      // Reveal all folders in the folder tree (just like Pick & Send)
+      document.querySelectorAll('#folder-tree .sub-items').forEach(el => {
+        el.style.display = 'block';
+      });
+    }
+
+    /**
+     * Sends a request to the server to delete selected files.
+     */
+    function performFileDeletion() {
+      if (selectedFilesForDeleting.length > 0) {
+        // Collect full file paths from the DOM
+        const filePaths = [];
+        document.querySelectorAll('.file-checkbox:checked').forEach(cb => {
+          const fullPath = cb.getAttribute('data-fullpath');
+          if (fullPath) filePaths.push(fullPath);
+        });
+        if (filePaths.length === 0) {
+          showToast('No files selected.', 'warning');
+          return;
+        }
+        fetch('/admin/delete-file', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            files: filePaths
+          }),
+        })
+        .then(async response => {
+          let result = null;
+          let errorText = '';
+          try {
+            result = await response.json();
+          } catch (e) {
+            errorText = await response.text();
+          }
+          if (!response.ok) {
+            // Show error from server if available, else fallback
+            if (result && result.error) {
+              showToast(result.error, 'error');
+            } else if (errorText) {
+              showToast(errorText, 'error');
+            } else {
+              showToast('Failed to delete files.', 'error');
+            }
+            return;
+          }
+          if (result && result.deletedFiles && result.deletedFiles.length > 0) {
+            showToast('Files deleted successfully.', 'success');
+            setTimeout(() => location.reload(), 1200);
+          } else if (result && result.missingFiles && result.missingFiles.length > 0) {
+            showToast('Some files were missing or could not be deleted.', 'warning');
+          } else {
+            showToast('No files were deleted.', 'info');
+          }
+        })
+        .catch(error => {
+          showToast('Error deleting files: ' + (error && error.message ? error.message : error), 'error');
+        });
+      } else {
+        showToast('No files selected.', 'warning');
+      }
+    }
+
+    // Toast notification function (uses your app's toast system)
+    function showToast(message, type) {
+      if (window.showNotification) {
+        // Use your app's notification modal if available
+        window.showNotification(message);
+      } else if (window.toastr) {
+        // If toastr is available
+        toastr[type || 'info'](message);
+      } else {
+        // Fallback: show a simple modal if no toast/modal system is available
+        let notif = document.getElementById('customNotificationModal');
+        if (!notif) {
+          notif = document.createElement('div');
+          notif.id = 'customNotificationModal';
+          notif.style.position = 'fixed';
+          notif.style.top = '0';
+          notif.style.left = '0';
+          notif.style.width = '100vw';
+          notif.style.height = '100vh';
+          notif.style.background = 'rgba(0,0,0,0.4)';
+          notif.style.display = 'flex';
+          notif.style.justifyContent = 'center';
+          notif.style.alignItems = 'center';
+          notif.style.zIndex = 10000;
+          notif.innerHTML = `<div style="background: white; padding: 30px 40px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.18); font-size: 1.2rem; min-width: 250px; text-align: center;">
+            <span>${message}</span><br><br>
+            <button class="btn btn-primary" id="closeNotificationModal">OK</button>
+          </div>`;
+          document.body.appendChild(notif);
+          document.getElementById('closeNotificationModal').onclick = function() {
+            notif.remove();
+          };
+        }
+      }
+    }
+
+    /**
+     * Cancels the delete mode and resets the UI.
+     */
+    function cancelDeleteMode() {
+      pickSendButton.style.display = "inline-block";
+      deleteInfo.style.display = "none";
+      cancelDeleteButton.style.display = "none";
+      fileCheckboxes.forEach(checkbox => {
+        checkbox.style.display = "none";
+        checkbox.checked = false;
+      });
+      deleteButton.textContent = "Delete";
+      deleteButton.classList.add('btn-secondary');
+      deleteButton.classList.remove('btn-danger');
+      isDeleteModeActive = false;
+      selectedFilesForDeleting = [];
+    }
+
+    // Check if we should auto-activate Pick & Send mode (e.g., after coming from sidebar)
+    if (window.location.hash === '#picksend') {
+      setTimeout(() => {
+        if (typeof activatePickSendMode === 'function') {
+          activatePickSendMode();
+        } else if (typeof togglePickSendMode === 'function') {
+          togglePickSendMode();
+        }
+      }, 100); // Wait for DOM
+    }
+
+    // --- SEARCH & MODAL LOGIC ---
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('searchButton');
+    const fileSearchInfo = document.getElementById('fileSearchInfo');
+    const fileItems = document.querySelectorAll('.file-item');
+    const searchResultModal = document.getElementById('searchResultsModal');
+    const modalList = document.getElementById('matchedFilesList');
+    const closeFilesModalButton = document.getElementById('closeFilesModalButton');
+
+    searchInput.addEventListener('click', () => {
+      fileSearchInfo.style.display = 'inline-block';
+    });
+
+    searchButton.addEventListener('click', () => {
+      const searchDateRaw = searchInput.value.trim();
+      const normalizedDate = normalizeDateInput(searchDateRaw);
+      if (!searchDateRaw) {
+        showToast("Please enter a valid date in the format (d-m-yyyy)", 'warning');
+        return;
+      }
+      if (!normalizedDate) {
+        showToast("Invalid format. Please enter date as (day-month-year) like 12-4-2024.", 'warning');
+        return;
+      }
+      const matchedFiles = filterFileStructure(normalizedDate); // Get matched files
+      if (matchedFiles.length === 0) {
+        showToast("No files found for the given date.", 'info');
+      } else {
+        showModal(matchedFiles, normalizedDate); // Show the modal with results and date
+        matchedFiles.forEach(revealFileInTree); // Expand folders and highlight
+      }
+    });
+
+    function normalizeDateInput(input) {
+      input = input.trim().replace(/[\s\/.]+/g, '-');
+      const match = input.match(/^0*(\d{1,2})-0*(\d{1,2})-(\d{4})$/);
+      if (!match) return null;
+      const day = String(Number(match[1]));
+      const month = String(Number(match[2]));
+      const year = match[3];
+      return `${day}-${month}-${year}`;
+    }
+
+    function revealFileInTree(fileName) {
+      // Reveal and highlight all files matching the fileName (may exist in multiple folders)
+      const fileSpans = document.querySelectorAll(`.file-name[data-file='${fileName}']`);
+      if (!fileSpans.length) return;
+      fileSpans.forEach(fileSpan => {
+        let parent = fileSpan.parentElement;
+        while (parent) {
+          if (parent.classList && parent.classList.contains('sub-items')) {
+            parent.style.display = 'block';
+          }
+          parent = parent.parentElement;
+        }
+        fileSpan.style.background = '#ffff99';
+      });
+    }
+
+    function filterFileStructure(searchDate) {
+      const matchedFiles = [];
+      fileItems.forEach(fileItem => {
+        const fileName = fileItem.querySelector('.file-name').getAttribute('data-file');
+        fileItem.querySelector('.file-name').style.background = '';
+        // Match date (d-m-yyyy) right before the file extension, regardless of what comes before
+        const regex = new RegExp(`${searchDate}\\.[^.]+$`);
+        if (regex.test(fileName)) {
+          matchedFiles.push(fileName);
+        }
+        fileItem.style.display = "block";
+      });
+      return matchedFiles;
+    }
+
+    function showModal(matchedFiles, normalizedDate) {
+      modalList.innerHTML = "";
+      const modalTitle = document.querySelector('#filesModalContent h2');
+      if (modalTitle && normalizedDate) {
+        modalTitle.innerHTML = `<i class='fa fa-calendar text-primary'></i> <span style='font-size:1.1em;'>Files uploaded on <b>${formatDateForDisplay(normalizedDate)}</b></span>`;
+      }
+      matchedFiles.forEach((fileName, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class=\"modal-file-name\" data-file=\"${fileName}\" style=\"padding: 8px 12px; border-radius: 6px; background: #f5f7fa; margin-bottom: 6px; display: inline-block; cursor:pointer; transition: background 0.2s;\">${index + 1}. <b>${fileName}</b></span>`;
+        modalList.appendChild(li);
+      });
+      const modalContent = document.getElementById('filesModalContent');
+      if (modalContent) {
+        modalContent.style.boxShadow = '0 6px 32px rgba(0,0,0,0.18)';
+        modalContent.style.border = '1px solid #e3e3e3';
+        modalContent.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%)';
+      }
+      searchResultModal.style.display = "flex";
+      document.querySelectorAll('.modal-file-name').forEach(fileEl => {
+        fileEl.addEventListener('click', function() {
+          const fileName = this.getAttribute('data-file');
+          loadFilePreview(fileName);
+          searchResultModal.style.display = "none";
+        });
+      });
+    }
+
+    function formatDateForDisplay(normalizedDate) {
+      const [d, m, y] = normalizedDate.split('-');
+      const day = d.padStart(2, '0');
+      const month = m.padStart(2, '0');
+      return `${day}-${month}-${y}`;
+    }
+
+    closeFilesModalButton.addEventListener('click', () => {
+      searchResultModal.style.display = "none";
+    });
+    // Also close modal when clicking outside the modal content
+    searchResultModal.addEventListener('mousedown', function(e) {
+      if (e.target === searchResultModal) {
+        searchResultModal.style.display = 'none';
+      }
+    });
+
+    // --- File Preview Function ---
+    function loadFilePreview(fileName) {
+      $.ajax({
+        url: '/file-content',
+        method: 'GET',
+        xhrFields: {
+          responseType: 'blob' // Receive the response as a binary Blob
+        },
+        data: { fileName },
+        success: function(blob) {
+          const fileUrl = URL.createObjectURL(blob);
+          const mimeType = blob.type;
+
+          if (mimeType.startsWith('image/')) {
+            $('#file-viewer').html(`<img src="${fileUrl}" alt="${fileName}" class="img-fluid preview-image" />`);
+          } else if (mimeType.startsWith('text/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              $('#file-viewer').html(`<pre class="preview-text">${e.target.result}</pre>`);
+            };
+            reader.readAsText(blob);
+          } else {
+            $('#file-viewer').html(`<a href="${fileUrl}" target="_blank">Download ${fileName}</a>`);
+          }
+        },
+        error: function() {
+          showToast('Error: Could not load file content.', 'error');
+        }
+      });
+    }
+  });
+</script>
+
+<script>
+  $(document).ready(function() {
+    // Toggle folders
+    $(".folder-button").on("click", function() {
+      const subItems = $(this).next(".sub-items");
+      subItems.toggle();
+    });
+
+    // Subtle reveal/hide all folders link (only one at the top)
+    let foldersRevealed = false;
+    $(document).on('click', '#reveal-all-folders', function(e) {
+      e.preventDefault();
+      if (!foldersRevealed) {
+        $('#folder-tree .sub-items').each(function() {
+          $(this).show();
+        });
+        $(this).text('Hide all folders');
+        foldersRevealed = true;
+      } else {
+        $('#folder-tree .sub-items').each(function() {
+          $(this).hide();
+        });
+        $(this).text('Show all folders');
+        foldersRevealed = false;
+      }
+    });
+
+    // Display file content
+    $('.file-name').on('click', function() {
+      const fileName = $(this).data('file');
+      $.ajax({
+        url: '/file-content',
+        method: 'GET',
+        xhrFields: {
+          responseType: 'blob'
+        },
+        data: { fileName },
+        success: function(blob) {
+          const fileUrl = URL.createObjectURL(blob);
+          const mimeType = blob.type;
+          if (mimeType.startsWith('image/')) {
+            $('#file-viewer').html(`<img src="${fileUrl}" alt="${fileName}" class="img-fluid preview-image" />`);
+          } else if (mimeType.startsWith('text/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              $('#file-viewer').html(`<pre class="preview-text">${e.target.result}</pre>`);
+            };
+            reader.readAsText(blob);
+          } else {
+            $('#file-viewer').html(`<a href="${fileUrl}" target="_blank">Download ${fileName}</a>`);
+          }
+        },
+        error: function() {
+          $('#file-viewer').html('<strong>Error:</strong> Could not load file content.');
+        }
+      });
+    });
+
+    // Open Full-Screen Preview
+    $(document).on('click', '#file-viewer', function() {
+      const content = $(this).html().trim();
+      // Only open full-screen if not showing the placeholder message
+      if (
+        !content ||
+        content.includes('Select a file to preview its content here.') ||
+        content.match(/<em[^>]*>.*select a file.*<\/em>/i)
+      ) {
+        return;
+      }
+      $('body').append(`
+        <div id="full-screen-preview">
+          <div id="preview-content">${content}</div>
+          <button id="close-preview">Close</button>
+        </div>
+      `);
+    });
+
+    // Close Full-Screen Preview
+    $(document).on('click', '#close-preview', function() {
+      $('#full-screen-preview').remove();
+    });
+  });
+</script>
+
+<script>
+  // --- Panel Resizer Logic ---
+  document.addEventListener('DOMContentLoaded', function() {
+    const folderPanel = document.getElementById('folder-panel');
+    const fileViewerPanel = document.getElementById('file-viewer-panel');
+    const resizer = document.getElementById('panel-resizer');
+    let isResizing = false;
+    let lastDownX = 0;
+    resizer.addEventListener('mousedown', function(e) {
+      isResizing = true;
+      lastDownX = e.clientX;
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (!isResizing) return;
+      let newWidth = e.clientX - folderPanel.getBoundingClientRect().left;
+      if (newWidth < 120) newWidth = 120;
+      if (newWidth > window.innerWidth * 0.6) newWidth = window.innerWidth * 0.6;
+      folderPanel.style.flex = `0 0 ${newWidth}px`;
+      folderPanel.style.maxWidth = `${newWidth}px`;
+    });
+    document.addEventListener('mouseup', function(e) {
+      if (isResizing) {
+        isResizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+    });
+
+    // --- Horizontal Resizer Logic ---
+    const fileViewer = document.getElementById('file-viewer');
+    const horizontalResizer = document.getElementById('horizontal-resizer');
+    const fileViewerBelow = document.getElementById('file-viewer-below');
+    let isResizingH = false;
+    let lastDownY = 0;
+    let startHeight = 0;
+    horizontalResizer.addEventListener('mousedown', function(e) {
+      isResizingH = true;
+      lastDownY = e.clientY;
+      startHeight = fileViewer.offsetHeight;
+      document.body.style.cursor = 'ns-resize';
+      document.body.style.userSelect = 'none';
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (!isResizingH) return;
+      let newHeight = startHeight + (e.clientY - lastDownY);
+      if (newHeight < 120) newHeight = 120;
+      if (newHeight > window.innerHeight * 0.7) newHeight = window.innerHeight * 0.7;
+      fileViewer.style.flex = `0 0 ${newHeight}px`;
+      fileViewer.style.maxHeight = `${newHeight}px`;
+    });
+    document.addEventListener('mouseup', function(e) {
+      if (isResizingH) {
+        isResizingH = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+    });
+  });
+</script>
+

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="tivo admin is super flexible, powerful, clean &amp; modern responsive bootstrap 5 admin template with unlimited possibilities."
+    />
+    <meta name="keywords" content="eArchive" />
+    <meta name="author" content="Joel Osei Acquah" />
+    <link
+      rel="icon"
+      href="../assets/images/favicon/favicon.png"
+      type="image/x-icon"
+    />
+    <link
+      rel="shortcut icon"
+      href="../assets/images/favicon/favicon.png"
+      type="image/x-icon"
+    />
+    <title>Login - xCore eArchive</title>
+    
+    <!-- Minimal critical CSS - only for FOUC prevention -->
+    <style>
+      body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin:0;padding:0;visibility:hidden}
+      .login-loaded{visibility:visible!important}
+      .login-card{font-family:inherit;background-color:#f8f9fa;min-height:100vh;display:flex;align-items:center;justify-content:center}
+      .login-main{background:#fff;border-radius:10px;box-shadow:0 0 20px rgba(0,0,0,0.1);padding:40px;width:450px;max-width:90vw}
+      h4,p,label{font-family:inherit}
+      .bg-loaded{background-image:url('/assets/images/login/login_bg.jpg')!important}
+      .login-loader-show{display:flex!important;align-items:center!important;justify-content:center!important}
+      .login-loader-hide{display:none!important}
+    </style>
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- DNS prefetch for critical resources only -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    
+    <!-- Preload only critical resources for login -->
+    <link rel="preload" href="../assets/images/logo/logo.png" as="image" fetchpriority="high">
+    <link rel="preload" href="/assets/css/vendors/bootstrap.css" as="style">
+    
+    <!-- Skip preloading heavy style.css (900KB) as we're not using it -->
+    
+    <!-- Load only essential CSS for login page -->
+    <!-- Only bootstrap for form controls, skip style.css (900KB mostly unused for login) -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/bootstrap.css" />
+    
+    <!-- Skip massive unused CSS files for login -->
+    <!-- style.css (900KB) - has dashboard/admin features not needed for login -->
+    <!-- responsive.css (87KB) - bootstrap handles responsiveness for simple login -->
+    
+    <!-- Load fonts asynchronously to prevent render blocking -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" as="style" onload="this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" /></noscript>
+    
+    <!-- Skip ALL non-essential CSS for login page -->
+    <!-- font-awesome (29KB), color-1.css, responsive.css not needed for simple login form -->
+    
+    <!-- Fallback for browsers that don't support preload -->
+    <noscript>
+      <!-- Only load bootstrap as fallback -->
+      <link rel="stylesheet" href="/assets/css/vendors/bootstrap.css" />
+    </noscript>
+  </head>
+  <body onload="document.body.className='login-loaded'">
+    <!-- login page start-->
+    <div class="container-fluid p-0">
+      <div class="row m-0">
+        <div class="col-12 p-0">
+          <div class="login-card">
+            <div>
+              <div>
+                <a class="logo" href="index.html"
+                  ><img
+                    style="margin-left: 5%; width: 166px; height: 32px;"
+                    class="img-fluid for-light"
+                    src="../assets/images/logo/logo.png"
+                    alt="xCore eArchive Login"
+                    width="166"
+                    height="32"
+                    fetchpriority="high"
+                    loading="eager"
+                /></a>
+              </div>
+              <div class="login-main">
+                <form class="theme-form">
+                  <h4 class="text-center">Sign in to account</h4>
+                  <p class="text-center">
+                    Enter your Username & password to login
+                  </p>
+                  <div class="form-group">
+                    <label for="email" class="col-form-label"
+                      >Username</label
+                    >
+                    <input
+                      class="form-control"
+                      type="name"
+                      required
+                      id="email"
+                      placeholder="user@branch"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="password" class="col-form-label"
+                      >Password</label
+                    >
+                    <div class="form-input position-relative">
+                      <input
+                        class="form-control"
+                        type="password"
+                        name="login[password]"
+                        required
+                        id="password"
+                        placeholder="*********"
+                      />
+                      <div class="show-hide" data-target="password">
+                        <span class="show"> </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mb-0">
+                    <div class="checkbox p-0">
+                      <input id="checkbox1" type="checkbox" />
+                      <label class="text-muted" for="checkbox1"
+                        >Remember password</label
+                      >
+                    </div>
+                    <!-- <a class="link" href="#" id="forgotPasswordLink"
+                      >Forgot password?</a
+                    > -->
+                    <div class="text-end mt-3">
+                      <input
+                        type="submit"
+                        id="btnSign"
+                        value="Sign in"
+                        class="btn btn-primary btn-block w-100"
+                      />
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Forgot Password Modal -->
+      <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="forgot-username" class="form-label">Enter your username or email</label>
+                <input type="text" class="form-control" id="forgot-username" placeholder="Username or Email" />
+              </div>
+              <div id="forgot-password-feedback" class="text-danger mb-2" style="display:none;"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="forgotPasswordSubmit">Send New Password</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="login-loader" class="<% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>login-loader-show<% } else { %>login-loader-hide<% } %>" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:rgba(255,255,255,0.7);">
+        <div class="spinner-border text-primary" role="status" style="width:4rem;height:4rem;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="mt-3 text-primary">Logging you in...</div>
+      </div>
+      <!-- Preload jQuery for faster loading -->
+      <link rel="preload" href="../assets/js/jquery-3.6.0.min.js" as="script">
+      <!-- Preload SweetAlert since it's needed for login feedback -->
+      <link rel="preload" href="../assets/js/sweetalert2.all.min.js" as="script">
+      
+      <!-- Load jQuery immediately as it's critical for login -->
+      <script src="../assets/js/jquery-3.6.0.min.js"></script>
+      <!-- Load SweetAlert immediately for login error/success messages -->
+      <script src="../assets/js/sweetalert2.all.min.js"></script>
+      
+      <!-- Defer non-critical scripts for better performance - only load what login needs -->
+      <script src="../assets/js/bootstrap/bootstrap.bundle.min.js" defer></script>
+      <!-- config.js and script.js are NOT needed for login page - saves 16KB -->
+      <!-- script.js contains dashboard functionality like tap-top, loader, sidebar - not used in login -->
+      
+      <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
+        <script>
+          document.getElementById('login-loader').style.display = 'flex';
+          window.location.href = '/admin/dashboard';
+        </script>
+      <% } %>
+      
+      <script>
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          },
+        });
+        window.Toast = Toast;
+
+        function errorAlert(message) {
+          Toast.fire({
+            icon: "error",
+            title: message && message.trim() ? message : "Login failed. Please check your credentials."
+          });
+        }
+
+        function successAlert(message) {
+          Toast.fire({
+            icon: "success",
+            title: message,
+          });
+        }
+
+        // Lazy load background image after page interaction or 2 seconds
+        setTimeout(() => {
+          const loginCard = document.querySelector('.login-card');
+          if (loginCard) {
+            loginCard.classList.add('bg-loaded');
+          }
+        }, 2000);
+
+        // Also load background on user interaction
+        document.addEventListener('click', () => {
+          const loginCard = document.querySelector('.login-card');
+          if (loginCard && !loginCard.classList.contains('bg-loaded')) {
+            loginCard.classList.add('bg-loaded');
+          }
+        }, { once: true });
+
+        $("#btnSign").click((e) => {
+          e.preventDefault();
+
+          const user = $("#email").val();
+          const password = $("#password").val();
+          const rememberMe = $("#checkbox1").is(":checked");
+
+          if (user.trim().length < 1) errorAlert("User/email field required");
+          else if (password.trim().length < 1) errorAlert("Password required");
+          $.ajax({
+            type: "POST",
+            url: "/admin/sign-in",
+            data: { user, password, rememberMe },
+            beforeSend: function() { $("#login-loader").show(); },
+            complete: function() { $("#login-loader").hide(); },
+            success: (data) => {
+              if (data.statusCode == 404) return errorAlert(data.message);
+              else if (data.statusCode == 200) {
+                successAlert(data.message);
+                setTimeout(() => {
+                  location.href = data.route;
+                }, 500);
+              }
+            },
+            error: (data) => {
+              errorAlert((data && data.message) || "Login failed. Please try again.");
+            },
+          });
+        });
+
+        // Forgot Password Modal logic
+        $("#forgotPasswordLink").click(function(e) {
+          e.preventDefault();
+          $("#forgot-username").val("");
+          $("#forgot-password-feedback").hide();
+          var modal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+          modal.show();
+        });
+        $("#forgotPasswordSubmit").click(function() {
+          const username = $("#forgot-username").val().trim();
+          if (!username) {
+            $("#forgot-password-feedback").text("Please enter your username or email.").show();
+            return;
+          }
+          $("#forgot-password-feedback").hide();
+          $.ajax({
+            type: "POST",
+            url: "/admin/forgot-password",
+            data: { username },
+            success: function(data) {
+              if (data.statusCode == 200) {
+                successAlert(data.message);
+                setTimeout(() => { $("#forgotPasswordModal").modal('hide'); }, 1000);
+              } else {
+                $("#forgot-password-feedback").text(data.message).show();
+              }
+            },
+            error: function(xhr) {
+              let msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred.';
+              $("#forgot-password-feedback").text(msg).show();
+            }
+          });
+        });
+      </script>
+    </div>
+  </body>
+</html>

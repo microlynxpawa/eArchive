@@ -1,0 +1,102 @@
+<!-- Modal for Department List -->
+<div class="modal fade" id="departmentListModal" tabindex="-1" aria-labelledby="departmentListModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" style="width:90%;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="departmentListModalLabel">Select Only one Department for deletion at a time</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="departmentListModalBody">
+        <!-- Department checkboxes will be dynamically inserted here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" id="saveSelectedDepartments">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toast notification utility
+  function showToast(message, type = 'success') {
+    let toast = document.createElement('div');
+    toast.className = 'custom-toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error');
+    toast.innerText = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '30px';
+    toast.style.right = '30px';
+    toast.style.background = type === 'success' ? '#22c55e' : '#dc3545';
+    toast.style.color = '#fff';
+    toast.style.padding = '16px 28px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontSize = '1.1rem';
+    toast.style.boxShadow = '0 2px 12px rgba(0,0,0,0.18)';
+    toast.style.zIndex = 12000;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 2500);
+  }
+
+  $(document).ready(function () {
+    // Use event delegation to bind the click event
+    $(document).on("click", ".department-column", function () {
+      // Get the department names from the clicked column
+      const departmentNames = $(this).text().split(", ");
+
+      // Get the branch name from the same row as the clicked column
+      const branchName = $(this).closest("tr").find(".branchName").text().trim();
+
+      // Clear any existing content in the modal body
+      $("#departmentListModalBody").empty();
+
+      // Populate the modal body with radio buttons for each department
+      departmentNames.forEach(function (department) {
+        const radioButton = `<div class="form-check">
+                              <input class="form-check-input department-list-radio" type="radio" name="selectedDepartment" value="${department}" id="department-${department}">
+                              <label class="form-check-label" for="department-${department}">
+                                ${department}
+                              </label>
+                            </div>`;
+        $("#departmentListModalBody").append(radioButton);
+      });
+
+      // Store the branch name in a hidden input or variable
+      $("#departmentListModal").data("branchName", branchName);
+
+      // Show the modal
+      $("#departmentListModal").modal("show");
+    });
+
+    // Handle the delete button click event
+    $("#saveSelectedDepartments").click(function () {
+      // Get the selected department name
+      const selectedDepartment = $("input[name='selectedDepartment']:checked").val();
+
+      // Retrieve the branch name stored in the modal data
+      const branchName = $("#departmentListModal").data("branchName");
+
+      console.log(`Branch: ${branchName}, Department: ${selectedDepartment}`);
+
+      if (!selectedDepartment || !branchName) {
+        showToast("Please select a department to delete.", 'error');
+        return;
+      }
+
+      // Send the delete request to the backend
+      $.ajax({
+        url: "/admin/delete-dep", // Adjust the endpoint as needed
+        type: "DELETE",
+        contentType: "application/json",
+        data: JSON.stringify({ branchName, departmentName: selectedDepartment }),
+        success: function (response) {
+          showToast(response.message || "Department deleted successfully.", 'success');
+          $("#departmentListModal").modal("hide");
+          location.reload(); // Reload the page to reflect changes
+        },
+        error: function (xhr, status, error) {
+          showToast(xhr.responseJSON?.error || "Failed to delete the department.", 'error');
+        },
+      });
+    });
+  });
+</script>

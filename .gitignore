@@ -1,13 +1,31 @@
-/node_modules
-/.env
+# Dependencies
+**/node_modules
+**/.env
 /tests
 /.vscode
+
+# Build outputs
+**/dist
+**/build
+
+# Database and data files
 transformedAuths.json
 transformedUsers.json
 transformedUsersHashed.json
 archive.sql
-eArchiiveUploads/*
 bosomtwe.sql
 redb.js
 userCredentials.txt
+
+# Uploads and temporary files
+**/eArchiiveUploads/*
 util/eArchiiveUploads/*
+
+# C# build outputs
+**/bin
+**/obj
+
+# React/Vite build outputs
+client/dist
+BackupService/bin
+BackupService/obj

@@ -1,0 +1,433 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header pb-0"></div>
+        <div class="card-body">
+          <!-- Tab navigation -->
+          <ul class="nav nav-tabs mb-3" id="uploadTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="single-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#single"
+                type="button"
+                role="tab"
+                aria-controls="single"
+                aria-selected="true"
+              >
+                Single Upload
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="multiple-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#multiple"
+                type="button"
+                role="tab"
+                aria-controls="multiple"
+                aria-selected="false"
+              >
+                Multiple Upload
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="uploadTabContent">
+            <!-- Single Upload Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="single"
+              role="tabpanel"
+              aria-labelledby="single-tab"
+            >
+              <div class="row">
+                <div class="col-md-12">
+                  <!-- Updated action to match the backend route -->
+                  <form
+                    id="fileUploadForm"
+                    class="dropzone needsclick"
+                    action="/admin/uploadFile"
+                    method="post"
+                    style="border: 2px dashed #dbdade"
+                    enctype="multipart/form-data"
+                  >
+                    <div class="dz-message needsclick">
+                      Drop file here or click to upload
+                      <span class="note needsclick"
+                        >(Select Only one file at a time please.)</span
+                      >
+                    </div>
+                    <div class="fallback">
+                      <input name="file" id="file" required type="file" />
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Input for file name and submit button -->
+              <div class="row mt-4">
+                <div class="col-md-10">
+                  <label for="fullname" class="form-label">File name</label>
+                  <input
+                    required
+                    type="text"
+                    class="form-control"
+                    id="fullname"
+                    placeholder="e.g. new-file"
+                  />
+                </div>
+                <div class="col-md-2 mt-4">
+                  <button id="submitBtn" class="btn btn-primary">Store</button>
+                </div>
+              </div>
+            </div>
+            <!-- Multiple Upload Tab -->
+            <div
+              class="tab-pane fade"
+              id="multiple"
+              role="tabpanel"
+              aria-labelledby="multiple-tab"
+            >
+              <form
+                id="multiUploadForm"
+                action="/admin/uploadMultipleFiles"
+                method="post"
+                enctype="multipart/form-data"
+              >
+                <div class="mb-3">
+                  <label for="multiFiles" class="form-label">Select files</label>
+                  <div class="input-group">
+                    <input
+                      class="form-control visually-hidden"
+                      type="file"
+                      id="multiFiles"
+                      name="files"
+                      multiple
+                      accept=".jpg,.jpeg,.png,.pdf"
+                    />
+                    <button type="button" class="btn btn-outline-primary" id="customFileBtn">
+                      <i class="bi bi-upload"></i> Choose Files
+                    </button>
+                  </div>
+                  <div id="fileCountDisplay" class="form-text mt-2 text-primary"></div>
+                </div>
+                <div class="mb-3">
+                  <label for="batchName" class="form-label">Batch Name (optional, for grouping)</label>
+                  <input type="text" class="form-control" id="batchName" name="batchName" placeholder="e.g. July Reports" />
+                </div>
+                <div class="mb-3">
+                  <button type="submit" class="btn btn-success">Upload All</button>
+                </div>
+                <div id="multiPreview" class="row g-3"></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor("customCSS") %>
+<link rel="stylesheet" href="/assets/js/drop-zone/dropzone.min.css" />
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+/>
+<%- contentFor("pageHeader") %> <%- include('../components/page-title.ejs', {title: 'File upload' }) %>
+
+<%- contentFor("customJS") %>
+<script src="/assets/js/drop-zone/dropzone.min.js"></script>
+<script>
+  const previewTemplate = `
+    <div class="dz-preview dz-file-preview">
+      <div class="dz-details">
+        <div class="dz-thumbnail">
+          <img data-dz-thumbnail />
+          <span class="dz-nopreview">No preview</span>
+          <div class="dz-success-mark"></div>
+          <div class="dz-error-mark"></div>
+          <div class="dz-error-message"><span data-dz-errormessage></span></div>
+          <div class="progress">
+            <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-dz-uploadprogress></div>
+          </div>
+        </div>
+        <div class="dz-filename" data-dz-name></div>
+        <div class="dz-size" data-dz-size></div>
+      </div>
+    </div>`;
+
+  Dropzone.autoDiscover = false;
+
+  let singleUploadFileName = null;
+  let singleUploading = false;
+
+  // Initialize Dropzone for single upload
+  const myDropzone = new Dropzone("#fileUploadForm", {
+    maxFilesize: 1, // Max size in MB
+    previewTemplate,
+    url: "/admin/uploadFile",
+    autoProcessQueue: false,
+    addRemoveLinks: true,
+    acceptedFiles: ".jpg,.jpeg,.png,.pdf",
+    init: function () {
+      const dropzoneInstance = this;
+      // Attach sending handler ONCE
+      this.on("sending", function (file, xhr, formData) {
+        formData.append("fileName", singleUploadFileName);
+      });
+      document.getElementById("submitBtn").addEventListener("click", function (e) {
+        e.preventDefault();
+        if (singleUploading) return;
+        const fileNameInput = document.getElementById("fullname").value;
+        if (dropzoneInstance.getQueuedFiles().length === 0) {
+          showToast('Please select a file to upload.', 'danger');
+          return;
+        }
+        const uploadedFile = dropzoneInstance.getQueuedFiles()[0];
+        const originalFileName = uploadedFile.name;
+        const fileExtension = originalFileName.substring(originalFileName.lastIndexOf('.'));
+        singleUploadFileName = fileNameInput ? `${fileNameInput}${fileExtension}` : originalFileName;
+        // Set uploading state
+        singleUploading = true;
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = true;
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+        btn.textContent = 'Uploading....';
+        dropzoneInstance.processQueue();
+      });
+      // Success handler
+      this.on("success", function (file, response) {
+        showToast('File uploaded successfully!', 'success');
+        setTimeout(function () {
+          document.getElementById('fullname').value = '';
+          myDropzone.removeAllFiles();
+          // Reset button
+          singleUploading = false;
+          const btn = document.getElementById("submitBtn");
+          btn.disabled = false;
+          btn.classList.remove('btn-secondary');
+          btn.classList.add('btn-primary');
+          btn.textContent = 'Store';
+        }, 1000);
+      });
+      // Error handler
+      this.on("error", function (file, errorMessage) {
+        showToast('Failed to upload the file. Please try again.', 'danger');
+        // Reset button
+        singleUploading = false;
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = false;
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn-primary');
+        btn.textContent = 'Store';
+      });
+    },
+  });
+
+  // Modern file input for multiple upload
+  const multiFilesInput = document.getElementById('multiFiles');
+  const customFileBtn = document.getElementById('customFileBtn');
+  const fileCountDisplay = document.getElementById('fileCountDisplay');
+  const batchNameInput = document.getElementById('batchName');
+  let selectedFiles = []; // Track selected files that haven't been removed
+  
+  customFileBtn.addEventListener('click', function() {
+    multiFilesInput.click();
+  });
+  
+  function updateFileCount() {
+    const count = selectedFiles.length;
+    fileCountDisplay.textContent = count > 0 ? `${count} file(s) selected` : '';
+  }
+  
+  function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    updateFileCount();
+    renderFilePreview();
+  }
+  
+  function renderFilePreview() {
+    const previewContainer = document.getElementById('multiPreview');
+    if (previewContainer) {
+      previewContainer.innerHTML = '';
+      selectedFiles.forEach((file, idx) => {
+        const col = document.createElement('div');
+        col.className = 'col-md-4 position-relative';
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.minHeight = '180px';
+        
+        // Add remove button (X icon) at top-right corner
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-close position-absolute';
+        removeBtn.style.cssText = 'top: 5px; right: 5px; z-index: 10; background-color: rgba(255,255,255,0.8); border-radius: 50%; width: 24px; height: 24px; font-size: 10px;';
+        removeBtn.setAttribute('aria-label', 'Remove file');
+        removeBtn.innerHTML = '<i class="bi bi-x" style="font-size: 14px; color: #dc3545;"></i>';
+        removeBtn.addEventListener('click', () => removeFile(idx));
+        
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body text-center pt-4'; // Add top padding for remove button
+        
+        // File preview
+        if (file.type.startsWith('image/')) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          img.style.maxWidth = '80px';
+          img.style.maxHeight = '80px';
+          img.className = 'mb-2';
+          cardBody.appendChild(img);
+        } else if (file.type === 'application/pdf') {
+          const previewHtml = '<i class="bi bi-file-earmark-pdf" style="font-size: 3rem; color: #d9534f;"></i>';
+          cardBody.innerHTML += previewHtml;
+        } else {
+          const previewHtml = '<i class="bi bi-file-earmark" style="font-size: 3rem; color: #6c757d;"></i>';
+          cardBody.innerHTML += previewHtml;
+        }
+        
+        // File name display (truncated if too long)
+        const fileName = file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name;
+        const fileNameDiv = document.createElement('div');
+        fileNameDiv.className = 'small text-muted mb-2';
+        fileNameDiv.textContent = fileName;
+        fileNameDiv.title = file.name; // Full name on hover
+        cardBody.appendChild(fileNameDiv);
+        
+        // File name input (optional)
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'form-control mt-2';
+        nameInput.placeholder = 'Custom name (optional)';
+        nameInput.name = `customNames[${idx}]`;
+        cardBody.appendChild(nameInput);
+        
+        // Original file name (hidden)
+        const origInput = document.createElement('input');
+        origInput.type = 'hidden';
+        origInput.name = `originalNames[${idx}]`;
+        origInput.value = file.name;
+        cardBody.appendChild(origInput);
+        
+        card.appendChild(removeBtn);
+        card.appendChild(cardBody);
+        col.appendChild(card);
+        previewContainer.appendChild(col);
+      });
+    }
+  }
+  
+  multiFilesInput.addEventListener('change', function (e) {
+    const files = Array.from(e.target.files);
+    selectedFiles = [...files]; // Copy all selected files
+    updateFileCount();
+    renderFilePreview();
+  });
+
+  // Multiple upload form validation and AJAX submit with toast
+  const multiUploadForm = document.getElementById('multiUploadForm');
+  const multiUploadBtn = multiUploadForm.querySelector('button[type="submit"]');
+  let multiUploading = false;
+  multiUploadForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (multiUploading) return;
+    const previewContainer = document.getElementById('multiPreview');
+    const nameInputs = previewContainer.querySelectorAll('input[type="text"]');
+    const files = selectedFiles; // Use selectedFiles instead of multiFilesInput.files
+    const batchName = batchNameInput ? batchNameInput.value.trim() : '';
+    if (!files.length) {
+      showToast('Please select at least one file.', 'danger');
+      return;
+    }
+    // Prepare FormData
+    const formData = new FormData();
+    files.forEach((file, idx) => {
+      let customBase = '';
+      const nameInput = nameInputs[idx];
+      if (nameInput && nameInput.value.trim()) {
+        customBase = nameInput.value.trim().replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9@\-_]/g, '_');
+      } else {
+        customBase = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9@\-_]/g, '_');
+      }
+      let finalName = customBase;
+      if (batchName) {
+        finalName += `@${batchName.replace(/[^a-zA-Z0-9\-_]/g, '_')}`;
+      }
+      const ext = file.name.substring(file.name.lastIndexOf('.'));
+      if (!finalName.toLowerCase().endsWith(ext.toLowerCase())) {
+        finalName += ext;
+      }
+      formData.append('files', file);
+      formData.append(`customNames[${idx}]`, finalName);
+      formData.append(`originalNames[${idx}]`, file.name);
+    });
+    // Set uploading state
+    multiUploading = true;
+    multiUploadBtn.disabled = true;
+    multiUploadBtn.classList.remove('btn-success');
+    multiUploadBtn.classList.add('btn-secondary');
+    multiUploadBtn.textContent = 'Uploading....';
+    
+    fetch('/admin/uploadMultipleFiles', {
+      method: 'POST',
+      body: formData,
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.message && !data.error) {
+          showToast('Files uploaded successfully!', 'success');
+          multiUploadForm.reset();
+          fileCountDisplay.textContent = '';
+          document.getElementById('multiPreview').innerHTML = '';
+        } else {
+          showToast('Error uploading files.', 'danger');
+        }
+        // Reset button
+        multiUploading = false;
+        multiUploadBtn.disabled = false;
+        multiUploadBtn.classList.remove('btn-secondary');
+        multiUploadBtn.classList.add('btn-success');
+        multiUploadBtn.textContent = 'Upload All';
+      })
+      .catch(() => {
+        showToast('Error uploading files.', 'danger');
+        // Reset button
+        multiUploading = false;
+        multiUploadBtn.disabled = false;
+        multiUploadBtn.classList.remove('btn-secondary');
+        multiUploadBtn.classList.add('btn-success');
+        multiUploadBtn.textContent = 'Upload All';
+      });
+  });
+
+  // Toast notification function
+  function showToast(message, type = 'success') {
+    let toast = document.getElementById('customToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'customToast';
+      toast.style.position = 'fixed';
+      toast.style.top = '30px';
+      toast.style.right = '30px';
+      toast.style.zIndex = 9999;
+      toast.style.minWidth = '200px';
+      toast.innerHTML = `<div class="toast align-items-center text-white bg-${type} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>`;
+      document.body.appendChild(toast);
+    } else {
+      toast.querySelector('.toast-body').textContent = message;
+      toast.querySelector('.toast').className = `toast align-items-center text-white bg-${type} border-0 show`;
+    }
+    setTimeout(() => {
+      if (toast) toast.remove();
+    }, 3500);
+  }
+</script>

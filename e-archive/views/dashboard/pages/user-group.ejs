@@ -1,0 +1,273 @@
+<div class="container-fluid">
+  <div class="row">
+    <!-- Zero Configuration  Starts-->
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header pb-0">
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#userGroupModal"
+          >
+            Add group
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="mb-2">
+            <span style="color:#1a73e8;font-size:1.02em;">
+              Tip: Use <b>Ctrl +</b> or <b>Ctrl -</b> to zoom in or out and see more content at once.
+            </span>
+          </div>
+          <div class="table-responsive theme-scrollbar">
+            <table class="display" id="basic-1">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Created by</th>
+                  <th>Created on</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div
+            class="modal fade"
+            id="userGroupModal"
+            tabindex="-1"
+            aria-labelledby="userGroupModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content" style="width:90%;">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="userGroupModalLabel">
+                    Create User Group
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label"
+                      >Category Name<span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="catName"
+                      placeholder="e.g financial"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label"
+                      >Description<span class="text-danger">*</span></label
+                    >
+                    <textarea
+                      class="form-control"
+                      id="catDescription"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                  <button type="button" id="btnSave" class="btn btn-primary">
+                    Create
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="modal fade"
+            id="removeUserGroupModal"
+            tabindex="-1"
+            aria-labelledby="removeUserGroupModalLabel"
+            aria-hidden="true" data-bs-dismiss="modal"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="removeUserGroupModalLabel">
+                    Confirm Delete
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">Are you sure?</div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                  >
+                    No, cancel
+                  </button>
+                  <button type="submit" id="btnDeleteRecord" class="btn btn-danger">
+                    Yes, delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Zero Configuration  Ends-->
+  </div>
+</div>
+
+<%- contentFor("pageHeader") %>
+<%- include('../components/page-title.ejs', {title: 'Departments'}) %>
+
+<%- contentFor("customJS") %>
+<script>
+  $(document).ready(function () {
+    // Don't initialize DataTable here - wait for data
+    getUserGroup(); // This will initialize the DataTable after data is loaded
+  });
+  let records = null;
+  let updateRecord = null;
+  let deleteRecord = null;
+
+  function errorAlert(message) {
+    Toast.fire({
+      icon: "error",
+      title: message,
+    });
+  }
+
+  function successAlert(message) {
+    Toast.fire({
+      icon: "success",
+      title: message,
+    });
+  }
+
+  // save user group
+  $("#btnSave").click(() => {
+    let catName = $("#catName").val();
+    let catDescription = $("#catDescription").val();
+
+    if (catName.trim().length < 1)
+      return errorAlert("Category name is required");
+    else if (catDescription.trim().length < 1)
+      return errorAlert("Category description is required");
+
+    let btnAction = $("#btnSave").text();
+    //  send user request
+    $.post(
+      "/admin/user-group",
+      { catName, catDescription, btnAction, updateRecord },
+      function (data) {
+        if (data.statusCode != 200) return errorAlert(data.message);
+
+        $("#userGroupModal").modal("hide");
+        successAlert(data.message);
+        $("#catName").val(null);
+        $("#catDescription").val(null);
+        getUserGroup();
+      }
+    );
+  });
+
+//   delete user group
+$('#btnDeleteRecord').click(()=>[
+    $.post('/admin/remove-user-group',{deleteRecord},(data)=>{
+        if(data.statusCode == 404)
+        return errorAlert(data.message)
+
+        successAlert(data.message)
+        $("#btnDeleteRecord").modal("hide");
+        getUserGroup();
+    })
+])
+
+  //   get user group
+  function getUserGroup() {
+    $.get("/admin/retrieve-user-group", function (data) {
+      if (data.statusCode === 200) {
+        records = data.records;
+        
+        // Check if DataTable is already initialized
+        if ($.fn.DataTable.isDataTable('#basic-1')) {
+          // If it exists, just clear and add new data
+          const dt = $("#basic-1").DataTable();
+          dt.clear().rows.add(records).draw();
+        } else {
+          // Initialize DataTable with data for the first time
+          const dt = $("#basic-1").DataTable({
+            data: records,
+            columns: [
+              { data: "id" },
+              { data: "name" },
+              { data: "description" },
+              { data: "created_by" },
+              { data: null, render: function(data) { return new Date(data.createdAt).toDateString(); } },
+              { data: null, orderable: false, render: function(data) {
+                  return `<ul class=\"action\">
+                    <li class=\"edit\" data-value=\"${data.id}\" data-bs-toggle=\"modal\" data-bs-target=\"#userGroupModal\">
+                      <a href=\"#\"><i class=\"icon-pencil-alt\"></i></a>
+                    </li>
+                    <li class=\"delete\" data-value=\"${data.id}\" data-bs-toggle=\"modal\" data-bs-target=\"#removeUserGroupModal\">
+                      <a href=\"#\"><i class=\"icon-trash\"></i></a>
+                    </li>
+                  </ul>`;
+                }
+              }
+            ],
+            destroy: true
+          });
+        }
+      } else {
+        errorAlert(data.message);
+      }
+    });
+  }
+
+  $("#userGroupModal").on("show.bs.modal", (e) => {
+    const id = $(e.relatedTarget).data("value");
+    if (typeof id != "undefined") {
+      $("#userGroupModalLabel").text("Edit User Group");
+      $("#btnSave").text("Update");
+      // display selected data in the modal
+      let record = records.filter((record) => record.id == id);
+      if (record.length > 0) {
+        record = record[0];
+        $("#catName").val(record.name);
+        $("#catDescription").val(record.description);
+        updateRecord = record.id;
+      }
+    } else {
+      $("#userGroupModalLabel").text("Create User Group");
+      $("#btnSave").text("Create");
+      $("#catName").val(null);
+      $("#catDescription").val(null);
+    }
+  });
+
+  $("#removeUserGroupModal").on("show.bs.modal", (e) => {
+    const id = $(e.relatedTarget).data("value");
+    deleteRecord = id;
+  });
+</script>
