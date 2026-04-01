@@ -44,7 +44,7 @@ const UserPickerModal = React.forwardRef((props, ref) => {
   const fetchUsers = async () => {
     setIsLoading(true)
     try {
-      const res = await fetch('http://localhost:4801/admin/retrieve-users', { 
+      const res = await fetch('/admin/retrieve-users', { 
         credentials: 'include',
         headers: { Accept: 'application/json' }
       })
@@ -426,3 +426,4 @@ const UserPickerModal = React.forwardRef((props, ref) => {
 UserPickerModal.displayName = 'UserPickerModal'
 
 export default UserPickerModal
+

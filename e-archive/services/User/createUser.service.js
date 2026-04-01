@@ -73,6 +73,7 @@ async function createOrUpdateUser({
         throw new Error("Record not found");
       }
       const oldUserFolderPath = isFound.folderPath;
+      console.log(`[User Update] Old user folder path:`, oldUserFolderPath);
       // Only update password if provided
       let updateFields = {
         username: generatedUsername, // update username on update as well
@@ -93,9 +94,14 @@ async function createOrUpdateUser({
       );
 
       const updatingUserFolderPath = folderPath;
-
-      // Move files and update file paths in DB after folder move
-      await moveFilesAndDeleteOldDirectory(oldUserFolderPath, updatingUserFolderPath);
+      console.log(`[User Update] New user folder path:`, updatingUserFolderPath);
+      console.log(`[User Update] Moving files and updating DB metadata...`);
+      await moveFilesAndDeleteOldDirectory(
+        oldUserFolderPath,
+        updatingUserFolderPath,
+        group.dataValues.name,
+        userBranch.dataValues.name
+      );
       userId = updateRecord;
       console.log("User updated successfully.");
     }

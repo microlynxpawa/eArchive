@@ -14,7 +14,7 @@ export default function EditProfile() {
 
   const fetchUserData = async () => {
     try {
-      const res = await fetch('http://localhost:4801/admin/dashboard-data', { 
+      const res = await fetch('/admin/dashboard-data', { 
         credentials: 'include', 
         headers: { Accept: 'application/json' } 
       })
@@ -55,13 +55,16 @@ export default function EditProfile() {
       formData.append('oldPass', oldPass)
       formData.append('newPass', newPass)
 
-      const res = await fetch('http://localhost:4801/admin/update-password', {
+      console.log('Sending password change request...')
+      const res = await fetch('/admin/update-password', {
         method: 'POST',
         body: formData,
         credentials: 'include',
       })
 
+      console.log('Response status:', res.status)
       const data = await res.json()
+      console.log('Response data:', data)
       
       if (data.statusCode === 404) {
         showToast('error', data.message)
@@ -70,8 +73,11 @@ export default function EditProfile() {
         setOldPass('')
         setNewPass('')
         setConfirmPass('')
+      } else {
+        showToast('error', data.message || 'Unexpected response')
       }
     } catch (err) {
+      console.error('Password update error:', err)
       showToast('error', 'Error updating password')
     }
   }
@@ -80,17 +86,23 @@ export default function EditProfile() {
     const file = e.target.files[0]
     if (!file) return
 
+    console.log('=== Profile Picture Upload ===')
+    console.log('File selected:', file.name, file.type, file.size)
+
     const formData = new FormData()
     formData.append('profilePicture', file)
 
     try {
-      const res = await fetch('http://localhost:4801/admin/upload-profile-picture', {
+      console.log('Sending upload request...')
+      const res = await fetch('/admin/upload-profile-picture', {
         method: 'POST',
         body: formData,
         credentials: 'include',
       })
 
+      console.log('Response status:', res.status)
       const data = await res.json()
+      console.log('Response data:', data)
       
       if (data.success) {
         showToast('success', 'Profile picture updated successfully!')
@@ -99,6 +111,7 @@ export default function EditProfile() {
         showToast('error', data.message || 'Error uploading file')
       }
     } catch (err) {
+      console.error('Upload error:', err)
       showToast('error', 'Error uploading file')
     }
   }
@@ -116,7 +129,7 @@ export default function EditProfile() {
   }
 
   const profilePicUrl = user.profilePicturePath 
-    ? `/profile-pictures/${user.profilePicturePath.split(/\/|\\/).pop()}` 
+    ? `/profile-pictures/${user.profilePicturePath.split(/\/|\\/).pop()}?t=${Date.now()}` 
     : '/assets/images/user/7.jpg'
 
   return (
@@ -262,3 +275,4 @@ export default function EditProfile() {
     </>
   )
 }
+

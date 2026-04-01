@@ -22,13 +22,14 @@ const AlertModal = React.forwardRef((props, ref) => {
     cancelText: 'Cancel',
     showCancel: false,
     onConfirm: null,
-    onCancel: null
+    onCancel: null,
+    onClose: null
   })
 
   // Expose methods to parent via ref
   React.useImperativeHandle(ref, () => ({
     // Show alert dialog
-    show: ({ title = '', message = '', type = 'info', confirmText = 'OK' }) => {
+    show: ({ title = '', message = '', type = 'info', confirmText = 'OK', onClose = null }) => {
       setConfig({
         title,
         message,
@@ -37,7 +38,8 @@ const AlertModal = React.forwardRef((props, ref) => {
         cancelText: 'Cancel',
         showCancel: false,
         onConfirm: null,
-        onCancel: null
+        onCancel: null,
+        onClose: onClose || null
       })
       setIsVisible(true)
     },
@@ -76,6 +78,9 @@ const AlertModal = React.forwardRef((props, ref) => {
       config.onConfirm()
     } else {
       setIsVisible(false)
+      if (typeof config.onClose === 'function') {
+        setTimeout(() => config.onClose(), 0)
+      }
     }
   }
 
@@ -84,6 +89,9 @@ const AlertModal = React.forwardRef((props, ref) => {
       config.onCancel()
     } else {
       setIsVisible(false)
+      if (typeof config.onClose === 'function') {
+        setTimeout(() => config.onClose(), 0)
+      }
     }
   }
 

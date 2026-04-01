@@ -10,6 +10,7 @@ export default function Auth() {
   const [forgotUsername, setForgotUsername] = useState('')
   const [forgotFeedbackVisible, setForgotFeedbackVisible] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const navigate = useNavigate()
 
@@ -31,7 +32,7 @@ export default function Auth() {
 
     setIsLoading(true)
     try {
-      const res = await fetch('http://localhost:4801/admin/sign-in', {
+      const res = await fetch('/admin/sign-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -67,7 +68,7 @@ export default function Auth() {
     if (!username) { setForgotFeedbackVisible(true); return }
     setIsLoading(true)
     try {
-      const res = await fetch('http://localhost:4801/admin/forgot-password', {
+      const res = await fetch('/admin/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username }),
@@ -113,8 +114,10 @@ export default function Auth() {
                     <div className="form-group">
                       <label htmlFor="password" className="col-form-label">Password</label>
                       <div className="form-input position-relative">
-                        <input className="form-control" type="password" name="login[password]" required id="password" placeholder="*********" value={password} onChange={e => setPassword(e.target.value)} />
-                        <div className="show-hide" data-target="password"><span className="show"> </span></div>
+                        <input className="form-control" type={showPassword ? "text" : "password"} name="login[password]" required id="password" placeholder="*********" value={password} onChange={e => setPassword(e.target.value)} />
+                        <div className="show-hide" onClick={() => setShowPassword(!showPassword)} style={{ cursor: 'pointer' }}>
+                          <span className={showPassword ? "hide" : "show"}> </span>
+                        </div>
                       </div>
                     </div>
                     <div className="form-group mb-0">

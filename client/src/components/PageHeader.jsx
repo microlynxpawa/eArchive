@@ -167,7 +167,7 @@ export default function PageHeader({ onToggleSidebar }) {
                     <a href="#" onClick={async (e) => {
                       e.preventDefault()
                       try {
-                        await fetch('http://localhost:4801/admin/logout', {
+                        await fetch('/admin/logout', {
                           method: 'GET',
                           credentials: 'include',
                           headers: { Accept: 'application/json' }
@@ -199,3 +199,4 @@ export default function PageHeader({ onToggleSidebar }) {
     </div>
   )
 }
+

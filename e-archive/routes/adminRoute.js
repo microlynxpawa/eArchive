@@ -34,7 +34,10 @@ const {
   getAdminMessages,
   createAdminMessage,
   updateAdminMessage,
-  deleteAdminMessage
+  deleteAdminMessage,
+  getFileSendingHistoryController,
+  getUserFileSendingHistoryController,
+  getFilesReceivedController,
 } = require("../controllers/adminController");
 const routeDectector = require("../middleware/routeDectector");
 const authUser  = require('../middleware/authMiddleware');
@@ -70,7 +73,6 @@ app.use(authUser)
 app.use(getUserPermissions);
 app.use(passAuths)
 
-// COMMENTED OUT: EJS page renders - React app has its own pages
 // app.get("/dashboard", dashboard);
 // app.get("/client", client);
 // app.get("/user-group", userGroup);
@@ -88,6 +90,10 @@ app.use(passAuths)
 app.get('/dashboard-data', dashboardData);
 app.get('/file-structure', getFileStructure);
 app.get('/file-content', fileContent);
+// Health check route (placed just before module.exports)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Backend is running' });
+});
 app.get("/retrieve-user-group", retrieveUserGroup);
 app.get("/retrieve-branches", retrieveBranches);
 app.get('/retrieve-users', retrieveUsers);
@@ -98,14 +104,17 @@ app.get("/searchUsers", getUsers);
 app.get("/searchUsersByEmail", getUsersByEmail);
 app.get("/getDepartment/:departmentName", getDepartment);
 app.get("/messages", getAdminMessages);
+app.get("/file-sending-history", getFileSendingHistoryController);
+app.get("/file-sending-history/:username", getUserFileSendingHistoryController);
+app.get("/files-received", getFilesReceivedController);
 
 app.post("/user-group", createUserGroup);
 app.post("/remove-user-group", removeUserGroup);
 app.post("/branches", createBranch);
 app.post("/remove-branch", removeBranch);
 app.post('/user-management', upload.none(),  createUserManagement);
-app.post('/remove-user', removeUser);
-app.post('/update-password', updatePassword);
+app.post('/remove-user', upload.none(), removeUser);
+app.post('/update-password', upload.none(), updatePassword);
 app.post("/uploadFile", uploading.single('file'), uploadFile);
 app.post("/searchUsers/permissions", accessControl);
 app.post("/upload-profile-picture", uploading.single('profilePicture'), uploadProfilePicture);

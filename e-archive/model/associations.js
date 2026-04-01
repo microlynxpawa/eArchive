@@ -5,6 +5,7 @@ const AuditLog = require("./auditLogs");
 const Authorizations = require("./authorizations");
 const BranchDepartment = require("./branch-department");
 const File = require("./file");
+const FileSendingHistory = require("./fileSendingHistory");
 
 const defineAssociations = () => {
   // User and Branch
@@ -33,6 +34,12 @@ const defineAssociations = () => {
   // File and User
   File.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
   User.hasMany(File, { foreignKey: "userId" });
+
+  // FileSendingHistory and User
+  FileSendingHistory.belongsTo(User, { as: 'sender', foreignKey: 'senderId', onDelete: 'CASCADE' });
+  FileSendingHistory.belongsTo(User, { as: 'receiver', foreignKey: 'receiverId', onDelete: 'SET NULL' });
+  User.hasMany(FileSendingHistory, { as: 'sentFiles', foreignKey: 'senderId' });
+  User.hasMany(FileSendingHistory, { as: 'receivedFiles', foreignKey: 'receiverId' });
 };
 
 module.exports = defineAssociations;

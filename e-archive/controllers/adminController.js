@@ -34,6 +34,7 @@ const getDepartmentByName = require("../services/AccessControl/getDepartment");
 const deleteFiles = require("../services/Delete/deleteFile.service");
 const handleDeleteDepartment = require("../services/Branch/removeDepartment.service")
 const AdminActions = require("../model/adminActions"); // Import the admin-actions model
+const { getFileSendingHistory, getFilesSentByUser, getFileSendingHistoryByReceiver } = require("../services/Share/getFileSendingHistory.service");
 
 const DashboardLayout = "dashboard/master";
 
@@ -347,11 +348,23 @@ const createUserManagement = async (req, res) => {
 
 const removeUser = async (req, res) => {
   try {
-    const { deleteRecord } = req.body;
-    const result = await deleteUserById(deleteRecord);
+    console.log('[adminController.js][removeUser] req.body:', req.body);
+    if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+      console.log('[RemoveUser] Detected multipart/form-data');
+    }
+    let deleteRecord = req.body.deleteRecord;
+    console.log('[adminController.js][removeUser] Raw deleteRecord:', deleteRecord, 'typeof:', typeof deleteRecord);
+    const deleteId = Number(deleteRecord);
+    console.log('[adminController.js][removeUser] Parsed deleteId:', deleteId, 'isNaN:', isNaN(deleteId));
+    if (!deleteId || isNaN(deleteId)) {
+      console.log('[adminController.js][removeUser] Invalid deleteId received:', deleteRecord);
+      return res.status(400).json({ message: "Delete ID not found", statusCode: 400 });
+    }
+    const result = await deleteUserById(deleteId);
+    console.log('[adminController.js][removeUser] Deletion result:', result);
     res.json(result);
   } catch (error) {
-    console.error("Error removing user:", error.message);
+    console.error('[adminController.js][removeUser] Exception:', error && error.message ? error.message : error);
     res.status(400).json({ message: error.message, statusCode: 400 });
   }
 };
@@ -391,11 +404,20 @@ const updatePassword = async (req, res) => {
   const userSession = req.session.user;
   const { oldPass, newPass } = req.body;
 
+  console.log('=== UPDATE PASSWORD DEBUG ===');
+  console.log('User session:', userSession);
+  console.log('Request body:', req.body);
+  console.log('Old password received:', oldPass ? 'Yes' : 'No');
+  console.log('New password received:', newPass ? 'Yes' : 'No');
+
   try {
     const result = await updateUserPassword(userSession, oldPass, newPass);
+    console.log('Password update successful:', result);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Password update error:', error.message);
+    // Return 404 status code for invalid credentials, matching frontend expectations
+    res.json({ statusCode: 404, message: error.message });
   }
 };
 
@@ -486,6 +508,19 @@ const accessControl = async (req, res) => {
 };
 
 const uploadProfilePicture = async (req, res) => {
+  console.log('=== UPLOAD PROFILE PICTURE DEBUG ===');
+  console.log('User session:', req.session.user);
+  console.log('File received:', req.file ? 'Yes' : 'No');
+  if (req.file) {
+    console.log('File details:', {
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname,
+      encoding: req.file.encoding,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      path: req.file.path
+    });
+  }
   try {
     const user = req.session.user; // Assuming session contains the logged-in user's ID
     const file = req.file;
@@ -496,12 +531,18 @@ const uploadProfilePicture = async (req, res) => {
 
     // Call the service function to store the profile picture
     const filePath = await storeProfilePicture(user, file);
+    console.log('File path returned from service:', filePath);
 
     // Update user record in the database
     const updatedUser = await User.update(
       { profilePicturePath: filePath },
       { where: { id: user } }
     );
+    console.log('Database update result:', updatedUser);
+
+    // Fetch the updated user to verify
+    const userRecord = await User.findOne({ where: { id: user } });
+    console.log('User profilePicturePath in DB after update:', userRecord?.profilePicturePath);
 
     if (!updatedUser) {
       return res.status(404).json({ success: false, message: 'User not found.' });
@@ -511,6 +552,7 @@ const uploadProfilePicture = async (req, res) => {
       success: true,
       message: 'Profile picture uploaded successfully.',
       data: filePath,
+      profilePicturePath: userRecord?.profilePicturePath
     });
   } catch (error) {
     console.error(error);
@@ -525,7 +567,21 @@ const uploadProfilePicture = async (req, res) => {
 const sendFilesToUsersController = async (req, res) => {
   try {
     const { users, files } = req.body;
-    const { missingFiles } = await sendFilesToUsers(users, files);
+    const senderId = req.session.user;
+    
+    // Get sender user info
+    const sender = await User.findOne({ where: { id: senderId } });
+    if (!sender) {
+      return res.status(401).json({ error: 'Sender not found' });
+    }
+
+    const senderContext = {
+      senderId: sender.id,
+      senderUsername: sender.username,
+      batchName: null, // Could be extracted from request if needed
+    };
+
+    const { missingFiles } = await sendFilesToUsers(users, files, senderContext);
     if (missingFiles.length > 0) {
       return res.status(404).json({
         message: "Some files could not be sent.",
@@ -602,6 +658,8 @@ const dashboardData = async (req, res) => {
     const userSession = req.session.user;
     if (!userSession) return res.status(401).json({ statusCode: 401, message: 'Unauthorized' });
 
+    const Auths = require('../model/authorizations');
+
     const user = await User.findOne({
       where: { id: userSession },
       include: [
@@ -610,9 +668,11 @@ const dashboardData = async (req, res) => {
       ],
     });
 
+    const auths = await Auths.findOne({ where: { userId: userSession } });
+
     const messages = await AdminActions.findAll({ order: [['createdAt', 'DESC']], limit: 5, attributes: ['id', 'message', 'createdAt', 'userId'] });
 
-    return res.json({ statusCode: 200, user, messages });
+    return res.json({ statusCode: 200, user, auths, messages });
   } catch (err) {
     console.error('dashboardData error', err);
     return res.status(500).json({ statusCode: 500, message: err.message });
@@ -660,6 +720,116 @@ const deleteAdminMessage = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.json({ success: false, error: err.message });
+  }
+};
+
+/**
+ * Get file sending history for current user
+ */
+const getFileSendingHistoryController = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 50;
+    
+    if (!userId) {
+      return res.status(401).json({ statusCode: 401, message: 'Unauthorized' });
+    }
+
+    const history = await getFileSendingHistory(userId, limit, 'sent');
+    
+    return res.json({
+      statusCode: 200,
+      message: 'File sending history retrieved',
+      records: history,
+    });
+  } catch (error) {
+    console.error('[getFileSendingHistoryController] Error:', error);
+    return res.status(500).json({
+      statusCode: 500,
+      message: 'Error retrieving file sending history',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get file sending history for a specific user (admin/supervisor only)
+ */
+const getUserFileSendingHistoryController = async (req, res) => {
+  try {
+    const currentUserId = req.session.user;
+    const targetUsername = req.params.username;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 50;
+
+    // Check permissions - only admin and supervisors can view other users' history
+    const currentUser = await User.findOne({ where: { id: currentUserId } });
+    if (!currentUser) {
+      return res.status(401).json({ statusCode: 401, message: 'Unauthorized' });
+    }
+
+    const Auths = require('../model/authorizations');
+    const auths = await Auths.findOne({ where: { userId: currentUserId } });
+    const isSupervisor = auths && auths.supervision_right;
+    const isAdminOrSupervisor = currentUser.is_admin || isSupervisor;
+
+    // If not admin/supervisor, can only view own history
+    if (!isAdminOrSupervisor) {
+      if (currentUser.username !== targetUsername) {
+        return res.status(403).json({
+          statusCode: 403,
+          message: 'You do not have permission to view this user\'s history',
+        });
+      }
+    }
+
+    const history = await getFilesSentByUser(targetUsername, limit);
+
+    return res.json({
+      statusCode: 200,
+      message: 'User file sending history retrieved',
+      records: history,
+    });
+  } catch (error) {
+    console.error('[getUserFileSendingHistoryController] Error:', error);
+    return res.status(500).json({
+      statusCode: 500,
+      message: 'Error retrieving user file sending history',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get files received by a user
+ */
+const getFilesReceivedController = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 50;
+
+    if (!userId) {
+      return res.status(401).json({ statusCode: 401, message: 'Unauthorized' });
+    }
+
+    const user = await User.findOne({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ statusCode: 404, message: 'User not found' });
+    }
+
+    const history = await getFileSendingHistoryByReceiver(user.username, limit);
+
+    return res.json({
+      statusCode: 200,
+      message: 'Files received history retrieved',
+      records: history,
+    });
+  } catch (error) {
+    console.error('[getFilesReceivedController] Error:', error);
+    return res.status(500).json({
+      statusCode: 500,
+      message: 'Error retrieving files received',
+      error: error.message,
+    });
   }
 };
 
@@ -711,4 +881,7 @@ module.exports = {
   createAdminMessage,
   updateAdminMessage,
   deleteAdminMessage,
+  getFileSendingHistoryController,
+  getUserFileSendingHistoryController,
+  getFilesReceivedController,
 };

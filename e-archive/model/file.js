@@ -14,7 +14,8 @@ const File = sequelize.define(
     fileName: { type: DataTypes.STRING },
     filePath: { type: DataTypes.STRING },
     department: { type: DataTypes.STRING },
-    branchName: { type: DataTypes.STRING},
+    
+    ranchName: { type: DataTypes.STRING},
     sentFrom: { type: DataTypes.STRING, allowNull: true }, // New column for tracking source path
     movedFrom: { type: DataTypes.STRING, allowNull: true }, // New column for future use
   },

@@ -1,77 +1,88 @@
+
+const File = require("../../model/file");
 const Auths = require("../../model/authorizations");
 const User = require("../../model/user");
-const path = require("path");
-const fs = require("fs");
+const ArchiveCategory = require("../../model/archiveCategory");
+const Branch = require("../../model/branch");
 
-async function buildFolderStructure(basePath, userId) {
-  try {
-    const user = await User.findOne({ where: { id: userId } });
-    const auth = await Auths.findOne({ where: { userId: userId } });
+/**
+ * Always build folder structure from the database (File table).
+ * @param {string} basePath - Not used, kept for compatibility.
+ * @param {number} userId
+ * @returns {Promise<object>} Folder structure object
+ */
+async function buildFolderStructure(_basePath, userId) {
+  // Get user and their permissions, including userGroup (department) and branch info
+  const user = await User.findOne({ 
+    where: { id: userId },
+    include: [
+      { model: ArchiveCategory, attributes: ['id', 'name'] },
+      { model: Branch, attributes: ['id', 'name'] }
+    ]
+  });
+  const auth = await Auths.findOne({ where: { userId: userId } });
+  if (!user || !auth) throw new Error("User or authorization data not found");
+  
+  // Get user department and branch
+  const userDepartment = user.archive_category ? user.archive_category.name : null;
+  const userBranch = user.branch ? user.branch.name : null;
+  const userBranchId = user.branchId;
 
-    if (!user || !auth) {
-      throw new Error("User or authorization data not found");
+  // Fetch all files from DB
+  const files = await File.findAll();
+  const structure = {};
+
+  // Helper to insert file into nested structure
+  function insertFile(relPath, fileName) {
+    const parts = relPath.split(/\\|\//).filter(Boolean);
+    let current = structure;
+    for (const part of parts) {
+      if (!current[part]) current[part] = {};
+      current = current[part];
+    }
+    if (!current.files) current.files = [];
+    current.files.push(fileName);
+  }
+
+  
+  // Build structure based on permissions
+  let filesInserted = 0;
+  for (const file of files) {
+    // Extract branch name from file path
+    // Path format: C:\e-archiveUploads\[BRANCH]\[DEPARTMENT]\...
+    // The branch is the first folder after e-archiveUploads
+    let fileBranch = null;
+    const pathMatch = file.filePath.match(/e-archiveUploads[\\\/]([^\\\/]+)/);
+    if (pathMatch && pathMatch[1]) {
+      fileBranch = pathMatch[1];
     }
 
-    const folderPath = user.folderPath;
-    const folderParts = folderPath.split(path.sep);
-
-    if (folderParts.length < 5) {
-      throw new Error("Invalid folderPath structure");
+    // Remove base path from filePath for structure building
+    let relPath = file.filePath;
+    if (relPath.startsWith(process.env.FOLDER)) {
+      relPath = relPath.replace(process.env.FOLDER, '').replace(/^\\|\//, '');
     }
 
-    const [branch, department, userFolder] = [
-      folderParts[2],
-      folderParts[3],
-      folderParts[4],
-    ];
-
-    const adminFolderPath = path.join(basePath);
-    const adminPath = path.join(basePath, branch);
-    const supervisorPath = path.join(adminPath, department);
-    const userPath = path.join(supervisorPath, userFolder);
-
-    const structure = {};
-
+    // Only include files user is allowed to see
     if (auth.canViewBranchFiles) {
-      structure["Admin"] = traverse(adminFolderPath);
+      // Branch-level: show all files
+      insertFile(relPath, file.fileName);
+      filesInserted++;
     } else if (auth.canViewDepartmentFiles) {
-      structure[department] = traverse(supervisorPath);
-    } else if (auth.canViewOwnFiles) {
-      structure[userFolder] = getFiles(userPath);
-    }
-
-    return structure;
-  } catch (error) {
-    console.error("Error building folder structure:", error.message);
-    throw error;
-  }
-
-  // Helper function to traverse directories recursively
-  function traverse(dir) {
-    if (!fs.existsSync(dir)) return {};
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-    const result = {};
-    entries.forEach((entry) => {
-      const entryPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        result[entry.name] = traverse(entryPath);
-      } else if (entry.isFile()) {
-        result.files = result.files || [];
-        result.files.push(entry.name);
+      // Department-level: only files in user's department AND user's branch
+      if (file.department === userDepartment && fileBranch === userBranch) {
+        insertFile(relPath, file.fileName);
+        filesInserted++;
       }
-    });
-    return result;
+    } else if (auth.canViewOwnFiles) {
+      // User-level: only files owned by user
+      if (file.userId === userId) {
+        insertFile(relPath, file.fileName);
+        filesInserted++;
+      }
+    }
   }
-
-  // Helper function to get files in a directory
-  function getFiles(dir) {
-    if (!fs.existsSync(dir)) return [];
-    return fs
-      .readdirSync(dir, { withFileTypes: true })
-      .filter((entry) => entry.isFile())
-      .map((file) => file.name);
-  }
+  return structure;
 }
 
 module.exports = buildFolderStructure;

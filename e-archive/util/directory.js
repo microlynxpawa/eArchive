@@ -242,48 +242,84 @@ const slugify = (text) => {
   return text.trim().toLocaleLowerCase().replaceAll(" ", "-");
 };
 
-const moveFilesAndDeleteOldDirectory = async (oldDirectoryPath, newDirectoryPath) => {
-  const File = require("../model/file"); // Ensure File model is imported
+
+/**
+ * Moves all files from oldDirectoryPath to newDirectoryPath, updates DB records for filePath, department, ranchName, and sets movedFrom.
+ * @param {string} oldDirectoryPath - The old folder path.
+ * @param {string} newDirectoryPath - The new folder path.
+ * @param {string} newDepartment - The new department name.
+ * @param {string} newBranch - The new branch name.
+ */
+const moveFilesAndDeleteOldDirectory = async (oldDirectoryPath, newDirectoryPath, newDepartment, newBranch) => {
+  const File = require("../model/file");
   const path = require("path");
   const fs = require("fs");
 
-  // Check if the old directory exists
+  if (oldDirectoryPath === newDirectoryPath) {
+    console.log(`[moveFilesAndDeleteOldDirectory] Old and new directory are the same. No move needed.`);
+    return;
+  }
+
+  // Move files in filesystem
   if (fs.existsSync(oldDirectoryPath)) {
-    // Ensure the new directory exists
+    // Ensure new directory exists
     if (!fs.existsSync(newDirectoryPath)) {
       fs.mkdirSync(newDirectoryPath, { recursive: true });
+      console.log(`[moveFilesAndDeleteOldDirectory] Created new directory: ${newDirectoryPath}`);
     }
 
-    // Read the contents of the old directory
-    const files = fs.readdirSync(oldDirectoryPath);
-
-    // Move each file to the new directory
-    files.forEach((file) => {
-      const oldFilePath = path.join(oldDirectoryPath, file);
-      const newFilePath = path.join(newDirectoryPath, file);
-      fs.renameSync(oldFilePath, newFilePath);
-    });
-
-    // Update all File records in the DB whose filePath starts with oldDirectoryPath
-    await File.update(
-      { filePath: newDirectoryPath },
-      {
-        where: {
-          filePath: {
-            [require("sequelize").Op.like]: `${oldDirectoryPath}%`
-          }
+    // Move all files and subfolders
+    const moveRecursive = (src, dest) => {
+      const items = fs.readdirSync(src);
+      for (const item of items) {
+        const srcPath = path.join(src, item);
+        const destPath = path.join(dest, item);
+        const stat = fs.statSync(srcPath);
+        if (stat.isDirectory()) {
+          if (!fs.existsSync(destPath)) fs.mkdirSync(destPath);
+          moveRecursive(srcPath, destPath);
+        } else {
+          fs.renameSync(srcPath, destPath);
+          console.log(`[moveFilesAndDeleteOldDirectory] Moved file: ${srcPath} -> ${destPath}`);
         }
       }
-    );
+    };
+    moveRecursive(oldDirectoryPath, newDirectoryPath);
 
-    // Delete the old directory after moving the files
-    fs.rmdirSync(oldDirectoryPath);
+    // Log all filePath values for this user for debugging
+    const allFiles = await File.findAll();
+    const normalizedOldDir = path.normalize(oldDirectoryPath);
+    const matchingFiles = allFiles.filter(f => {
+      // Normalize both paths for comparison
+      return path.normalize(f.filePath).startsWith(normalizedOldDir);
+    });
+    if (matchingFiles.length === 0) {
+      console.warn(`[moveFilesAndDeleteOldDirectory] No files found in DB for oldDirectoryPath: ${normalizedOldDir}`);
+      console.warn(`[moveFilesAndDeleteOldDirectory] Sample filePath values in DB:`);
+      allFiles.slice(0, 10).forEach(f => console.warn(`  ${f.filePath}`));
+    } else {
+      console.log(`[moveFilesAndDeleteOldDirectory] Found ${matchingFiles.length} files to update in DB.`);
+    }
+    for (const file of matchingFiles) {
+      // Compute new filePath
+      const relative = path.relative(normalizedOldDir, path.normalize(file.filePath));
+      const newFilePath = path.join(newDirectoryPath, relative);
+      await file.update({
+        filePath: newFilePath,
+        department: newDepartment,
+        ranchName: newBranch,
+        movedFrom: oldDirectoryPath
+      });
+      console.log(`[moveFilesAndDeleteOldDirectory] Updated DB record for file ID ${file.id}: new filePath=${newFilePath}, department=${newDepartment}, ranchName=${newBranch}, movedFrom=${oldDirectoryPath}`);
+    }
 
-    console.log(`Files moved from ${oldDirectoryPath} to ${newDirectoryPath}`);
+    // Remove old directory
+    fs.rmSync(oldDirectoryPath, { recursive: true, force: true });
+    console.log(`[moveFilesAndDeleteOldDirectory] Removed old directory: ${oldDirectoryPath}`);
   } else {
-    console.error(`Old directory does not exist: ${oldDirectoryPath}`);
+    console.warn(`[moveFilesAndDeleteOldDirectory] Old directory does not exist: ${oldDirectoryPath}`);
   }
-};
+}
 
 async function importUsers() {
   const filePath = path.join("transformedUsersHashed.json");
@@ -480,6 +516,42 @@ function exportUserCredentials() {
   console.log('User credentials exported to userCredentials.txt');
 }
 
+/**
+ * Checks if the DEFAULT_PATH exists and is not empty. If not, builds a folder structure from the File table.
+ * @returns {Promise<null|object>} Returns null if the folder exists and is not empty, or the structure if built from DB.
+ */
+async function getFallbackFolderStructureFromDB() {
+  // Check if DEFAULT_PATH exists and is not empty
+  if (fs.existsSync(DEFAULT_PATH)) {
+    const entries = fs.readdirSync(DEFAULT_PATH);
+    // Filter out system files like .DS_Store, thumbs.db, etc.
+    const filtered = entries.filter(e => !e.startsWith('.') && e !== 'Thumbs.db');
+    if (filtered.length > 0) {
+      // Directory exists and is not empty
+      return null;
+    }
+  }
+
+  // Build structure from File table
+  const files = await File.findAll();
+  const structure = {};
+  for (const file of files) {
+    // file.filePath is the directory, file.fileName is the file
+    // Remove DEFAULT_PATH from filePath if present
+    let relPath = file.filePath.replace(DEFAULT_PATH, '').replace(/^\\|\//, '');
+    const parts = relPath.split(/\\|\//).filter(Boolean);
+    let current = structure;
+    for (const part of parts) {
+      if (!current[part]) current[part] = {};
+      current = current[part];
+    }
+    // Place file in .files array
+    if (!current.files) current.files = [];
+    current.files.push(file.fileName);
+  }
+  return structure;
+}
+
 module.exports = {
   createDefaultDirectory,
   renameDirectory,
@@ -502,4 +574,5 @@ module.exports = {
   cleanTransformedUsers,
   hashTransformedUserPasswords,
   exportUserCredentials,
+  getFallbackFolderStructureFromDB,
 };

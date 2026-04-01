@@ -26,11 +26,7 @@ const deleteUserById = async (deleteRecord) => {
   // Delete the user's folder if the folderPath exists
   if (folderPath) {
     const folderDeleted = removeDirectory(folderPath);
-    if (folderDeleted) {
-      console.log(`Folder at ${folderPath} deleted successfully.`);
-    } else {
-      console.log(`Folder at ${folderPath} not found.`);
-    }
+    // Folder deletion result is not logged
   }
 
   return { message: "Record and associated folder deleted successfully", statusCode: 200 };

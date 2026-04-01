@@ -6,16 +6,18 @@ import Footer from './Footer'
 import AccessControl from './AccessControl'
 import DisplayDepartmentsModal from './DisplayDepartmentsModal'
 import ScanModalOptions from './ScanModalOptions'
+import BreadCrumbs from './BreadCrumbs'
 
 export default function Layout() {
   const navigate = useNavigate()
   const [checkingAuth, setCheckingAuth] = useState(true)
+  const [userAuths, setUserAuths] = useState({})
 
   useEffect(() => {
     let mounted = true
     ;(async () => {
       try {
-        const res = await fetch('http://localhost:4801/admin/check-auth', {
+        const res = await fetch('/admin/check-auth', {
           credentials: 'include',
           headers: { Accept: 'application/json' },
         })
@@ -24,6 +26,21 @@ export default function Layout() {
           // Not authenticated - send user to login
           navigate('/', { replace: true })
         } else {
+          // Fetch real user authorization data
+          try {
+            const authRes = await fetch('/admin/dashboard-data', {
+              credentials: 'include',
+              headers: { Accept: 'application/json' }
+            })
+            if (authRes.ok && mounted) {
+              const authData = await authRes.json()
+              if (authData && authData.statusCode === 200 && authData.auths) {
+                setUserAuths(authData.auths)
+              }
+            }
+          } catch (e) {
+            console.error('Failed to fetch user authorizations', e)
+          }
           setCheckingAuth(false)
         }
       } catch (err) {
@@ -58,12 +75,13 @@ export default function Layout() {
       <div className="page-body-wrapper">
         {/* Sidebar */}
         <aside className="sidebar-wrapper">
-          <Sidebar onToggleSidebar={toggleSidebar} auths={{ is_admin: true, view_upload: true, archiving: true, scanning: true }} />
+          <Sidebar onToggleSidebar={toggleSidebar} auths={userAuths} />
         </aside>
 
         {/* Main content area uses the same wrapper classes as the server template */}
         <div className="page-body">
           <div className="container-fluid">
+            <BreadCrumbs />
             <Outlet />
           </div>
         </div>
@@ -79,3 +97,4 @@ export default function Layout() {
     </div>
   )
 }
+

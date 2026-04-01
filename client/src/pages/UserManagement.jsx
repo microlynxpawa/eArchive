@@ -31,11 +31,14 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [filtered, setFiltered] = useState([])
+  const [page, setPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const [form, setForm] = useState(initialForm)
   const [modalOpen, setModalOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   const showToast = (message, type = 'success') => {
     const toast = document.createElement('div')
@@ -79,14 +82,27 @@ export default function UserManagement() {
       (u.branch && u.branch.name || '').toLowerCase().includes(q) ||
       (u.archive_category && u.archive_category.name || '').toLowerCase().includes(q)
     )))
+    setPage(1)
   }, [search, users])
+  // Pagination logic
+  const totalRows = filtered.length
+  const totalPages = Math.ceil(totalRows / rowsPerPage) || 1
+  const paginatedRows = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
+  const handleRowsPerPageChange = (e) => {
+    setRowsPerPage(Number(e.target.value))
+    setPage(1)
+  }
+  const handlePageChange = (newPage) => {
+    setPage(newPage)
+  }
 
   const fetchBranches = async () => {
     try {
       const res = await fetch('/admin/retrieve-branches', { credentials: 'include' })
       const data = await res.json()
       if (data.statusCode === 200) setBranches(data.records || [])
-    } catch (e) { console.error(e) }
+    } catch (e) { /* error handled */ }
   }
 
   const fetchGroups = async () => {
@@ -94,7 +110,7 @@ export default function UserManagement() {
       const res = await fetch('/admin/retrieve-user-group', { credentials: 'include' })
       const data = await res.json()
       if (data.statusCode === 200) setGroups(data.records || [])
-    } catch (e) { console.error(e) }
+    } catch (e) { /* error handled */ }
   }
 
   const fetchUsers = async () => {
@@ -106,7 +122,7 @@ export default function UserManagement() {
         setUsers(data.records || [])
         setFiltered(data.records || [])
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { /* error handled */ }
     setLoading(false)
   }
 
@@ -192,7 +208,12 @@ export default function UserManagement() {
       const res = await fetch('/admin/user-management', { method: 'POST', body: fd, credentials: 'include' })
       const data = await res.json()
       if (!res.ok || data.statusCode === 404 || data.message && data.message.toLowerCase().includes('not available')) {
-        showToast(data.message || 'Failed to save', 'error')
+        showToast(
+          data.message === 'Username not available.'
+            ? 'This username is already in use. Please change the full name or branch to avoid conflicts.'
+            : (data.message || 'Failed to save'),
+          'error'
+        )
         return
       }
       showToast(data.message || 'Saved', 'success')
@@ -200,7 +221,6 @@ export default function UserManagement() {
       setForm(initialForm) // Clear form after successful save
       fetchUsers()
     } catch (e) {
-      console.error(e)
       showToast('Error saving user', 'error')
     }
   }
@@ -208,17 +228,22 @@ export default function UserManagement() {
   const confirmDelete = (id) => { setDeleteId(id); setDeleteOpen(true) }
 
   const doDelete = async () => {
-    if (!deleteId) return
+    if (!deleteId) {
+      return;
+    }
+    setDeleting(true);
     try {
-      const fd = new FormData(); fd.append('deleteRecord', deleteId)
-      const res = await fetch('/admin/remove-user', { method: 'POST', body: fd, credentials: 'include' })
-      const data = await res.json()
-      if (!res.ok) { showToast('Delete failed', 'error'); return }
+      const fd = new FormData();
+      fd.append('deleteRecord', deleteId);
+      const res = await fetch('/admin/remove-user', { method: 'POST', body: fd, credentials: 'include' });
+      const data = await res.json();
+      if (!res.ok) { showToast('Delete failed', 'error'); setDeleting(false); return }
       showToast(data.message || 'Deleted', 'success')
       setDeleteOpen(false)
       setDeleteId(null)
       fetchUsers()
-    } catch (e) { console.error(e); showToast('Delete failed', 'error') }
+    } catch (e) { showToast('Delete failed', 'error') }
+    setDeleting(false);
   }
 
   return (
@@ -226,11 +251,15 @@ export default function UserManagement() {
       <div className="row">
         <div className="col-sm-12">
           <div className="card">
-            <div className="card-header pb-0 d-flex justify-content-between align-items-center">
-              <h5>User Management</h5>
-              <div>
-                <button className="btn btn-primary me-2" onClick={openCreate}>Add User</button>
-                <input className="form-control d-inline-block" style={{width:240}} placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
+            <div className="card-header pb-0 d-flex justify-content-between align-items-center" style={{gap: '0.5rem', background: 'rgba(245,245,245,0.95)', borderBottom: '1px solid #e0e0e0'}}>
+              <h5 className="mb-0" style={{fontWeight: 700, fontSize: '1.2em', color: '#222'}}>User Management</h5>
+              <div className="d-flex align-items-center" style={{gap: '0.5rem', background: 'rgba(255,255,255,0.85)', borderRadius: 6, padding: '2px 12px', border: '1px solid #e0e0e0'}}>
+                <label htmlFor="usermgmt-rows-per-page" className="form-label mb-0" style={{fontWeight: 600, fontSize: '1em', color: '#222'}}>Rows</label>
+                <select id="usermgmt-rows-per-page" value={rowsPerPage} onChange={handleRowsPerPageChange} style={{width: 56, height: 30, fontSize: '1em', padding: '0 6px', borderRadius: 4, border: '1px solid #bbb', color: '#222', background: '#fff'}}>
+                  {[5, 10, 20, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+                <button className="btn btn-primary ms-2" onClick={openCreate}>Add User</button>
+                <input className="form-control d-inline-block ms-2" style={{width:120}} placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
               </div>
             </div>
             <div className="card-body">
@@ -239,10 +268,16 @@ export default function UserManagement() {
                   Tip: Use <b>Ctrl +</b> or <b>Ctrl -</b> to zoom in or out and see more content at once.
                 </span>
               </div>
+              <div className="d-flex justify-content-end align-items-center mb-2">
+                <span style={{color:'#222', fontWeight:600, fontSize:'1em'}}>Page {page} of {totalPages}</span>
+                <button className="btn btn-sm btn-light ms-2" disabled={page === 1} onClick={() => handlePageChange(page - 1)}>&lt;</button>
+                <button className="btn btn-sm btn-light ms-1" disabled={page === totalPages} onClick={() => handlePageChange(page + 1)}>&gt;</button>
+              </div>
               <div className="table-responsive theme-scrollbar">
                 <table className="table table-striped table-hover">
                   <thead>
                     <tr>
+                      <th>ID</th>
                       <th>Name</th>
                       <th>Username</th>
                       <th>Email</th>
@@ -254,10 +289,11 @@ export default function UserManagement() {
                     </tr>
                   </thead>
                   <tbody>
-                    {loading && <tr><td colSpan={8}>Loading...</td></tr>}
-                    {!loading && filtered.length === 0 && <tr><td colSpan={8}>No users</td></tr>}
-                    {!loading && filtered.map(u=> (
+                    {loading && <tr><td colSpan={9}>Loading...</td></tr>}
+                    {!loading && paginatedRows.length === 0 && <tr><td colSpan={9}>No users</td></tr>}
+                    {!loading && paginatedRows.map((u, idx) => (
                       <tr key={u.id}>
+                        <td>{(page - 1) * rowsPerPage + idx + 1}</td>
                         <td>{u.fullname}</td>
                         <td>{u.username}</td>
                         <td>{u.email}</td>
@@ -304,6 +340,9 @@ export default function UserManagement() {
                 <div className="mb-3">
                   <label className="form-label">Full name<span className="text-danger">*</span></label>
                   <input className="form-control" placeholder="e.g kofi doe" value={form.fullname} onChange={e=>handleFormChange('fullname', e.target.value)} />
+                  <small className="text-muted" style={{fontSize:'0.97em'}}>
+                    Note: Your username is automatically generated from your full name and branch. If you receive a username conflict, please modify your full name to ensure uniqueness.
+                  </small>
                 </div>
                 <div className="row">
                   <div className="col-md-6 mb-3">
@@ -400,10 +439,19 @@ export default function UserManagement() {
           <div className="modal-dialog" role="document">
             <div className="modal-content" style={{zIndex:20001}}>
               <div className="modal-header"><h5 className="modal-title">Confirm Delete</h5></div>
-              <div className="modal-body">Are you sure?</div>
+              <div className="modal-body">
+                <div className="alert alert-warning" style={{fontWeight:600, fontSize:'1.05em'}}>
+                  Are you sure you want to delete this user? This action cannot be undone and all associated data may be permanently removed.
+                </div>
+                <div style={{color:'#b71c1c', fontSize:'0.98em', marginTop:8}}>
+                  Please confirm if you wish to proceed with deleting this user.
+                </div>
+              </div>
               <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={()=>setDeleteOpen(false)}>No, cancel</button>
-                <button id="btnDeleteRecord" className="btn btn-danger" onClick={doDelete}>Yes, delete</button>
+                <button className="btn btn-secondary" onClick={()=>setDeleteOpen(false)} disabled={deleting}>No, cancel</button>
+                <button id="btnDeleteRecord" className="btn btn-danger" onClick={doDelete} disabled={deleting}>
+                  {deleting ? 'Deleting...' : 'Yes, delete'}
+                </button>
               </div>
             </div>
           </div>

@@ -25,6 +25,8 @@ function ShowToast(message, type = 'success') {
 }
 
 export default function FileUpload() {
+  // ...existing code...
+  const [batchNameError, setBatchNameError] = useState('')
   // Single upload state
   const [singleFile, setSingleFile] = useState(null)
   const [singleName, setSingleName] = useState('')
@@ -61,10 +63,12 @@ export default function FileUpload() {
     const fd = new FormData()
     fd.append('file', singleFile)
     const ext = singleFile.name.substring(singleFile.name.lastIndexOf('.'))
-    const finalName = singleName ? `${singleName}${ext}` : singleFile.name
+    // Use custom name if provided, otherwise use original filename without extension
+    const baseName = singleName.trim() || singleFile.name.replace(/\.[^/.]+$/, '')
+    const finalName = `${baseName}${ext}`
     fd.append('fileName', finalName)
     try {
-      const resp = await fetch('http://localhost:4801/admin/uploadFile', { method: 'POST', credentials: 'include', body: fd })
+      const resp = await fetch('/admin/uploadFile', { method: 'POST', credentials: 'include', body: fd })
       const data = await resp.json().catch(() => ({}))
       if (resp.ok) {
         ShowToast(data.message || 'File uploaded', 'success')
@@ -95,9 +99,19 @@ export default function FileUpload() {
   }
 
   async function submitMulti(e) {
-    e && e.preventDefault()
-    if (!multiFiles.length) { ShowToast('Please select files', 'danger'); return }
-    setMultiUploading(true)
+    e && e.preventDefault();
+    if (!multiFiles.length) { ShowToast('Please select files', 'danger'); return; }
+    if (batchName.includes('_')) {
+      setBatchNameError('Batch name cannot contain the _ character.');
+      ShowToast('Batch name cannot contain the _ character.', 'danger');
+      return;
+    }
+    if (batchName.length > 25) {
+      setBatchNameError('Batch name cannot exceed 25 characters.');
+      ShowToast('Batch name cannot exceed 25 characters.', 'danger');
+      return;
+    }
+    setMultiUploading(true);
     const fd = new FormData()
     multiFiles.forEach((m, idx) => {
       const base = (m.customName || m.file.name.replace(/\.[^/.]+$/, '')).replace(/[^a-zA-Z0-9@\-_]/g, '_')
@@ -110,11 +124,11 @@ export default function FileUpload() {
       fd.append(`originalNames[${idx}]`, m.file.name)
     })
     try {
-      const resp = await fetch('http://localhost:4801/admin/uploadMultipleFiles', { method: 'POST', credentials: 'include', body: fd })
+      const resp = await fetch('/admin/uploadMultipleFiles', { method: 'POST', credentials: 'include', body: fd })
       const data = await resp.json().catch(() => ({}))
       if (resp.ok) {
         ShowToast(data.message || 'Files uploaded', 'success')
-        setMultiFiles([]); setBatchName('')
+        setMultiFiles([]); setBatchName(''); setBatchNameError('')
         // clear input
         const el = document.getElementById('multiFiles'); if (el) el.value = ''
       } else {
@@ -136,25 +150,116 @@ export default function FileUpload() {
           </ul>
           <div className="tab-content">
             <div className="tab-pane fade show active" id="single">
-              <div className="mb-3">
-                <div onDrop={onDropSingle} onDragOver={e=>e.preventDefault()} style={{border:'2px dashed #dbdade', padding:20, textAlign:'center', borderRadius:6}}>
-                  <div>Drop file here or click to upload</div>
-                  <div className="small text-muted">(Select Only one file at a time please.)</div>
-                  <input ref={dropRef} type="file" accept=".jpg,.jpeg,.png,.pdf" style={{marginTop:12}} onChange={(e)=>onDropSingle(e)} />
+              <div className="mb-4">
+                <div 
+                  onDrop={onDropSingle} 
+                  onDragOver={e=>e.preventDefault()} 
+                  style={{
+                    border: singleFile ? '2px solid #198754' : '2px dashed #dbdade', 
+                    padding: 40, 
+                    textAlign: 'center', 
+                    borderRadius: 8,
+                    background: singleFile ? '#f8fff9' : '#fafafa',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onClick={() => dropRef.current?.click()}
+                >
+                  {!singleFile ? (
+                    <>
+                      <div style={{fontSize: '3rem', color: '#6c757d', marginBottom: 12}}>
+                        <i className="bi bi-cloud-upload"></i>
+                      </div>
+                      <div style={{fontSize: '1.1rem', fontWeight: 500, marginBottom: 8}}>
+                        Drop your file here or click to browse
+                      </div>
+                      <div className="small text-muted">
+                        Supported formats: JPG, PNG, PDF (Max 10MB)
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <div style={{fontSize: '3rem', color: '#198754', marginBottom: 12}}>
+                        {singleFile.type.startsWith('image/') ? (
+                          <i className="bi bi-file-earmark-image"></i>
+                        ) : singleFile.type === 'application/pdf' ? (
+                          <i className="bi bi-file-earmark-pdf"></i>
+                        ) : (
+                          <i className="bi bi-file-earmark"></i>
+                        )}
+                      </div>
+                      <div style={{fontSize: '1.1rem', fontWeight: 500, marginBottom: 4}}>
+                        {singleFile.name}
+                      </div>
+                      <div className="text-muted small">
+                        {(singleFile.size / 1024).toFixed(2)} KB
+                      </div>
+                      <button 
+                        type="button" 
+                        className="btn btn-sm btn-outline-danger mt-3"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSingleFile(null)
+                          setSingleName('')
+                          if (dropRef.current) dropRef.current.value = ''
+                        }}
+                      >
+                        <i className="bi bi-x-circle"></i> Remove
+                      </button>
+                    </div>
+                  )}
+                  <input 
+                    ref={dropRef} 
+                    type="file" 
+                    accept=".jpg,.jpeg,.png,.pdf" 
+                    style={{display: 'none'}} 
+                    onChange={(e)=>onDropSingle(e)} 
+                  />
                 </div>
               </div>
-              <div className="row mt-3">
-                <div className="col-md-10">
-                  <label className="form-label">File name</label>
-                  <input className="form-control" value={singleName} onChange={e=>setSingleName(e.target.value)} placeholder="e.g. new-file" />
-                </div>
-                <div className="col-md-2 d-flex align-items-end">
-                  <button className="btn btn-primary w-100" onClick={submitSingle} disabled={singleUploading}>{singleUploading? 'Uploading...':'Store'}</button>
-                </div>
-              </div>
+
               {singleFile && (
-                <div className="mt-3">
-                  <strong>Selected:</strong> {singleFile.name} ({Math.round(singleFile.size/1024)} KB)
+                <div className="card shadow-sm mb-3" style={{border: 'none', borderLeft: '4px solid #198754'}}>
+                  <div className="card-body">
+                    <div className="row align-items-end">
+                      <div className="col-md-9">
+                        <label className="form-label fw-semibold mb-2">
+                          <i className="bi bi-pencil-square me-2"></i>
+                          Custom File Name (optional)
+                        </label>
+                        <input 
+                          className="form-control form-control-lg" 
+                          value={singleName} 
+                          onChange={e=>setSingleName(e.target.value)} 
+                          placeholder="Enter custom name or leave blank to use original" 
+                          style={{fontSize: '1rem'}}
+                        />
+                        <div className="form-text">
+                          The file will be saved as: <strong>{singleName || singleFile.name.replace(/\.[^/.]+$/, '')}{singleFile.name.substring(singleFile.name.lastIndexOf('.'))}</strong>
+                        </div>
+                      </div>
+                      <div className="col-md-3">
+                        <button 
+                          className="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-center gap-2" 
+                          onClick={submitSingle} 
+                          disabled={singleUploading}
+                          style={{height: '48px'}}
+                        >
+                          {singleUploading ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <i className="bi bi-upload"></i>
+                              Upload File
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -173,11 +278,32 @@ export default function FileUpload() {
                   <div id="fileCountDisplay" className="form-text mt-2 text-primary">{multiFiles.length ? `${multiFiles.length} file(s) selected` : ''}</div>
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="batchName" className="form-label text-dark">Batch Name (optional, for grouping)</label>
-                  <input id="batchName" name="batchName" className="form-control" value={batchName} onChange={e=>setBatchName(e.target.value)} placeholder="e.g. July Reports" />
+                  <label htmlFor="batchName" className="form-label text-dark">Batch Name (optional, for grouping) 25 characters max</label>
+                  <input id="batchName" name="batchName" className="form-control" maxLength={25} value={batchName} onChange={e => {
+                    const val = e.target.value;
+                    if (val.includes('_')) {
+                      setBatchNameError('Batch name cannot contain the _ character.');
+                    } else if (val.length > 25) {
+                      setBatchNameError('Batch name cannot exceed 25 characters.');
+                    } else {
+                      setBatchNameError('');
+                    }
+                    setBatchName(val);
+                  }} placeholder="e.g. July Reports" />
+                  {batchNameError && <div className="text-danger mt-1">{batchNameError}</div>}
                 </div>
-                <div className="mb-3">
-                  <button className="btn btn-success" type="submit" disabled={multiUploading}>{multiUploading? 'Uploading...':'Upload All'}</button>
+                <div className="mb-3" style={{display:'flex',alignItems:'center',gap:12}}>
+                  <button className="btn btn-success" type="submit" disabled={multiUploading || !!batchNameError}>{multiUploading? 'Uploading...':'Upload All'}</button>
+                  {multiFiles.length > 0 && (
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => { setMultiFiles([]); setBatchName(''); const el = document.getElementById('multiFiles'); if (el) el.value = ''; }}
+                      disabled={multiUploading}
+                    >
+                      Cancel All
+                    </button>
+                  )}
                 </div>
 
                 <div className="row g-3" id="multiPreview">
@@ -187,7 +313,7 @@ export default function FileUpload() {
                         <button type="button" className="btn-close position-absolute" style={{right:8,top:8}} aria-label="Remove" onClick={()=>removeMulti(idx)} />
                         <div className="card-body text-center pt-4">
                           {m.file.type.startsWith('image/') ? <img src={URL.createObjectURL(m.file)} alt="thumb" style={{maxWidth:80,maxHeight:80}} /> : m.file.type==='application/pdf' ? <i className="bi bi-file-earmark-pdf" style={{fontSize:'3rem', color:'#d9534f'}} /> : <i className="bi bi-file-earmark" style={{fontSize:'3rem', color:'#6c757d'}} />}
-                          <div className="small text-muted mt-2" title={m.file.name}>{m.file.name.length>20? m.file.name.substring(0,17)+'...': m.file.name}</div>
+                          <div className="small text-muted mt-2" title={m.file.name}>{m.file.name.length>25? m.file.name.substring(0,17)+'...': m.file.name}</div>
                           <input className="form-control mt-2" value={m.customName} onChange={e=>updateCustomName(idx, e.target.value)} placeholder="Custom name (optional)" />
                         </div>
                       </div>
@@ -202,3 +328,4 @@ export default function FileUpload() {
     </div>
   )
 }
+

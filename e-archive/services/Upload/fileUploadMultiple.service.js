@@ -58,9 +58,16 @@ async function uploadMultipleFiles(files, customNames, userId) {
     const origName = file.originalname;
     const ext = Path.extname(origName);
     const customName = Array.isArray(customNames) ? customNames[i] : customNames;
-    // Allow @ in file names for batch grouping
-    // Only sanitize, do not append ext again if already present
-    let safeName = customName.replace(/[^a-zA-Z0-9@\-_.]/g, "_");
+    // Split at @ to separate base and batch (if any)
+    let base = customName;
+    let batch = '';
+    if (customName.includes('@')) {
+      [base, batch] = customName.split('@', 2);
+    }
+    // Sanitize only the base (file name part) for filesystem safety
+    base = base.replace(/[^a-zA-Z0-9\-_. ]/g, '_');
+    // Batch name: do not change or modify at all
+    let safeName = batch ? `${base}@${batch}` : base;
     // Ensure the name ends with the correct extension, but don't double it
     if (!safeName.toLowerCase().endsWith(ext.toLowerCase())) {
       safeName += ext;

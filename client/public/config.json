@@ -1,0 +1,5 @@
+{
+  "VITE_API_URL": "http://localhost:4801",
+  "ADMIN_API_URL": "http://localhost:4801",
+  "FILE_CONTENT_API_URL": "http://localhost:4801"
+}

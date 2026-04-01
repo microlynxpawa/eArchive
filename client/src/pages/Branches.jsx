@@ -6,6 +6,8 @@ export default function Branches(){
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [filtered, setFiltered] = useState([])
+  const [page, setPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState({ id:null, name:'', person:'', address:'', email:'', phone:'', reg:'', departmentId:'' })
@@ -27,6 +29,7 @@ export default function Branches(){
     const q = search.trim().toLowerCase()
     if(!q) return setFiltered(branches)
     setFiltered(branches.filter(b => (b.name||'').toLowerCase().includes(q) || (b.contact_person||'').toLowerCase().includes(q) || (b.address||'').toLowerCase().includes(q) ))
+    setPage(1)
   }, [search, branches])
 
   useEffect(()=>{
@@ -54,10 +57,25 @@ export default function Branches(){
   }
 
   const openCreate = ()=>{ setForm({ id:null, name:'', person:'', address:'', email:'', phone:'', reg:'', departmentId:'' }); setModalOpen(true) }
-  const openEdit = (r)=>{ setForm({ id:r.id, name:r.name||'', person:r.contact_person||'', address:r.address||'', email:r.email||'', phone:r.phone_number||'', reg:r.reg_number||'', departmentId: r.departmentId||'' }); setModalOpen(true) }
+  const openEdit = (r)=>{
+    const formData = {
+      id: r.id,
+      name: r.name||'',
+      person: r.contact_person||'',
+      address: r.address||'',
+      email: r.email||'',
+      phone: r.phone_number||'',
+      reg: r.reg_number||'',
+      departmentId: r.departmentId||''
+    };
+    console.log('Editing Branch:', formData);
+    setForm(formData);
+    setModalOpen(true);
+  }
   const closeModal = ()=> setModalOpen(false)
 
   const handleSave = async ()=>{
+    console.log('Submitting Branch Form:', form);
     if(!(form.name||'').trim()) return showToast('Name is required','error')
     if(!(form.person||'').trim()) return showToast('Contact person is required','error')
     if(!(form.address||'').trim()) return showToast('Address is required','error')
@@ -92,14 +110,31 @@ export default function Branches(){
     }catch(e){ console.error(e); showToast('Delete failed','error') }
   }
 
+  // Pagination logic
+  const totalRows = filtered.length
+  const totalPages = Math.ceil(totalRows / rowsPerPage) || 1
+  const paginatedRows = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
+  const handleRowsPerPageChange = (e) => {
+    setRowsPerPage(Number(e.target.value))
+    setPage(1)
+  }
+  const handlePageChange = (newPage) => {
+    setPage(newPage)
+  }
+
   return (
     <div className="container-fluid">
       <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5>Branches</h5>
-          <div>
-            <button className="btn btn-primary me-2" onClick={openCreate}>Add branch</button>
-            <input className="form-control d-inline-block" style={{width:240}} placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
+        <div className="card-header d-flex justify-content-between align-items-center" style={{gap: '0.5rem', background: 'rgba(245,245,245,0.95)', borderBottom: '1px solid #e0e0e0'}}>
+          <h5 className="mb-0" style={{fontWeight: 700, fontSize: '1.2em', color: '#222'}}>Branches</h5>
+          <div className="d-flex align-items-center" style={{gap: '0.5rem', background: 'rgba(255,255,255,0.85)', borderRadius: 6, padding: '2px 12px', border: '1px solid #e0e0e0'}}>
+            <label htmlFor="branches-rows-per-page" className="form-label mb-0" style={{fontWeight: 600, fontSize: '1em', color: '#222'}}>Rows</label>
+            <select id="branches-rows-per-page" value={rowsPerPage} onChange={handleRowsPerPageChange} style={{width: 56, height: 30, fontSize: '1em', padding: '0 6px', borderRadius: 4, border: '1px solid #bbb', color: '#222', background: '#fff'}}>
+              {[5, 10, 20, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            <button className="btn btn-primary ms-2" onClick={openCreate}>Add branch</button>
+            <input className="form-control d-inline-block ms-2" style={{width:120}} placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
           </div>
         </div>
         <div className="card-body">
@@ -108,10 +143,16 @@ export default function Branches(){
               Tip: Use <b>Ctrl +</b> or <b>Ctrl -</b> to zoom in or out and see more content at once.
             </span>
           </div>
+          <div className="d-flex justify-content-end align-items-center mb-2">
+            <span style={{color:'#222', fontWeight:600, fontSize:'1em'}}>Page {page} of {totalPages}</span>
+            <button className="btn btn-sm btn-light ms-2" disabled={page === 1} onClick={() => handlePageChange(page - 1)}>&lt;</button>
+            <button className="btn btn-sm btn-light ms-1" disabled={page === totalPages} onClick={() => handlePageChange(page + 1)}>&gt;</button>
+          </div>
           <div className="table-responsive theme-scrollbar">
             <table className="table table-striped">
               <thead>
                 <tr>
+                  <th>ID</th>
                   <th>Name</th>
                   <th>Contact person</th>
                   <th>Address</th>
@@ -124,10 +165,11 @@ export default function Branches(){
                 </tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={9}>Loading...</td></tr>}
-                {!loading && filtered.length===0 && <tr><td colSpan={9}>No records</td></tr>}
-                {!loading && filtered.map(b=> (
+                {loading && <tr><td colSpan={10}>Loading...</td></tr>}
+                {!loading && paginatedRows.length===0 && <tr><td colSpan={10}>No records</td></tr>}
+                {!loading && paginatedRows.map((b, idx) => (
                   <tr key={b.id}>
+                    <td>{(page - 1) * rowsPerPage + idx + 1}</td>
                     <td>{b.name}</td>
                     <td>{b.contact_person}</td>
                     <td>{b.address}</td>

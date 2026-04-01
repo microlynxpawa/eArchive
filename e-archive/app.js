@@ -14,7 +14,11 @@ const cron = require("node-cron");
 const runCleanupTasks = require("./util/tempFolderCleanUp.js");
 const defineAssociations = require("./model/associations.js");
 const fs = require("fs");
+
 const logger = require("./logger"); // <-- Add this line to initialize logger and patch console.error
+
+// Start daily backup scheduler (runs backup immediately and then every 24 hours)
+require("./services/Backup/backupScheduler.js");
 
 const DEFAULT_PATH = process.env.FOLDER ;
 
@@ -48,11 +52,13 @@ app.use(
 
 // Simple CORS + preflight handling to allow the React dev server to make requests with credentials
 const CLIENT_ORIGINS = [
-  'http://localhost:5173',
+  'http://localhost:4500',
 ];
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && CLIENT_ORIGINS.includes(origin)) {
+  // Allow localhost:4500 or any origin from port 4500 (for network access via IP)
+  if (origin && (CLIENT_ORIGINS.includes(origin) || origin.match(/^http:\/\/[\d.]+:4500$/))) {
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
@@ -91,7 +97,11 @@ app.use("/admin", adminRoute);
 
 const startServer = async () => {
    await dbConnect.authenticate();
-   dbConnect.sync({ alter: true });
+  try {
+    await dbConnect.sync({ alter: true });
+  } catch (err) {
+    console.error('[DB Sync] Failed to sync database (server will still start):', err.message);
+  }
   createDefaultDirectory();
   // cleanTransformedUsers();
   // await hashTransformedUserPasswords();

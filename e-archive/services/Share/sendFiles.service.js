@@ -2,11 +2,13 @@ const fs = require('fs');
 const Path = require('path');
 const User = require("../../model/user");
 const File = require("../../model/file");
+const recordFileSending = require('./recordFileSending.service');
 
 // Service Function to Send Files by Username
-const sendFilesToUsers = async (usernames, files) => {
+const sendFilesToUsers = async (usernames, files, senderContext = {}) => {
   console.log("[sendFilesToUsers] Called with usernames:", usernames);
   console.log("[sendFilesToUsers] Called with files:", files);
+  console.log("[sendFilesToUsers] Sender context:", senderContext);
 
   if (!usernames || !files || !Array.isArray(files)) {
     console.error("[sendFilesToUsers] Invalid input: usernames or files missing/invalid");
@@ -14,6 +16,7 @@ const sendFilesToUsers = async (usernames, files) => {
   }
 
   const missingFiles = [];
+  const filePaths = []; // Collect file paths for history recording
 
   for (const file of files) {
     console.log(`[sendFilesToUsers] Processing file: ${file}`);
@@ -37,6 +40,9 @@ const sendFilesToUsers = async (usernames, files) => {
       continue;
     }
     console.log(`[sendFilesToUsers] File exists on disk: ${sourceFilePath}`);
+
+    // Collect file path for history
+    filePaths.push(sourceFilePath);
 
     // Iterate through usernames and copy the file to each user's folder
     for (const username of usernames) {
@@ -92,6 +98,25 @@ const sendFilesToUsers = async (usernames, files) => {
     console.log("[sendFilesToUsers] All files processed successfully.");
   }
 
+  // Record the file sending in history (with sender info from context if available)
+  // This will be called from the controller which has access to the current user
+  if (senderContext.senderId && senderContext.senderUsername) {
+    try {
+      await recordFileSending(
+        senderContext.senderId,
+        senderContext.senderUsername,
+        usernames,
+        files,
+        senderContext.batchName || null,
+        filePaths // Pass collected file paths
+      );
+      console.log("[sendFilesToUsers] File sending history recorded successfully");
+    } catch (err) {
+      console.error("[sendFilesToUsers] Error recording file sending history:", err);
+      // Don't fail the operation if history recording fails
+    }
+  }
+  
   return { missingFiles };
 };
 

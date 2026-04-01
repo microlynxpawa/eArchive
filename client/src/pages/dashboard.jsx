@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react'
 
 export default function Dashboard() {
   const [user, setUser] = useState({ username: 'User', AuditLogs: [] })
-  const [messages, setMessages] = useState([])
-  const [selectedMessage, setSelectedMessage] = useState(null)
 
   useEffect(() => {
     // UI: set static weather and fetch dashboard data from server
@@ -40,12 +38,11 @@ export default function Dashboard() {
 
   async function fetchDashboardData() {
     try {
-      const res = await fetch('http://localhost:4801/admin/dashboard-data', { credentials: 'include', headers: { Accept: 'application/json' } })
+      const res = await fetch('/admin/dashboard-data', { credentials: 'include', headers: { Accept: 'application/json' } })
       if (!res.ok) return
       const data = await res.json()
       if (data && data.statusCode === 200) {
         setUser(data.user || { username: 'User', AuditLogs: [] })
-        setMessages((data.messages || []).map(m => ({ id: m.id, message: m.message, createdAt: m.createdAt })))
       }
     } catch (err) {
       console.error('Failed to fetch dashboard data', err)
@@ -54,8 +51,9 @@ export default function Dashboard() {
 
   return (
     <div className="container-fluid dashboard-default">
-      <div className="row">
-        <div className="col-xxl-6 col-xl-5 col-lg-6 dash-45 box-col-40">
+      <div className="row g-3">
+        {/* Profile Card */}
+        <div className="col-12 col-md-6 col-lg-4">
           <div className="card profile-greeting">
             <div className="card-body">
               <div className="d-sm-flex d-block justify-content-between">
@@ -75,7 +73,7 @@ export default function Dashboard() {
               <div className="greeting-user">
                 <div className="profile-vector">
                   <ul className="dots-images"></ul>
-                  <img className="img-fluid" src={user && user.profilePicturePath ? ('/profile-pictures/' + (user.profilePicturePath.split(/\\|\//).pop())) : '/assets/images/user/default.png'} alt="profile" loading="eager" />
+                  <img className="img-fluid" src={user && user.profilePicturePath ? ('/profile-pictures/' + (user.profilePicturePath.split(/\\|\//).pop()) + '?t=' + Date.now()) : '/assets/images/user/default.png'} alt="profile" loading="eager" />
                   <ul className="vector-image"></ul>
                 </div>
                 <h4>
@@ -87,7 +85,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="col-xl-3 col-lg-6 col-md-6 box-col-25">
+        {/* Date/Time Card */}
+        <div className="col-12 col-md-6 col-lg-4">
           <div className="card total-revenue overflow-hidden">
             <div className="card-header">
               <div className="d-flex justify-content-between">
@@ -101,7 +100,10 @@ export default function Dashboard() {
               <div className="revenue-chart" id="revenue-chart">{/* placeholder chart area */}</div>
             </div>
           </div>
+        </div>
 
+        {/* History Card */}
+        <div className="col-12 col-md-6 col-lg-4">
           <div className="card total-investment">
             <div className="card-header pb-0">
               <div className="d-flex justify-content-between">
@@ -123,49 +125,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
-        <div className="col-xxl-3 col-xl-4 col-md-6 dash-30 box-col-35">
-          <div className="card our-user">
-            <div className="card-header pb-0">
-              <div className="d-flex justify-content-between">
-                <div className="flex-grow-1">
-                  <p className="square-after f-w-600 header-text-primary">Information<i className="fa fa-circle"></i></p>
-                  <h4>Guide Lines</h4>
-                </div>
-              </div>
-            </div>
-            <div className="card-body">
-              <div className="user-chart"><div id="user-chart"></div></div>
-              <ul id="admin-messages-dashboard">
-                {messages.length === 0 && <li><span>No information from admin yet.</span></li>}
-                {messages.map((m, idx) => (
-                  <li key={idx} className="d-flex justify-content-between align-items-start">
-                    <div style={{maxWidth: '80%'}}>{m.message.length > 80 ? m.message.slice(0,80) + '...' : m.message}</div>
-                    {m.message.length > 80 ? (
-                      <button className="btn btn-link view-full-msg" onClick={() => setSelectedMessage(m.message)}>View</button>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Admin message modal */}
-          {selectedMessage && (
-            <div className="modal fade show d-block" id="adminMessageModal" tabIndex={-1} aria-labelledby="adminMessageModalLabel" role="dialog">
-              <div className="modal-dialog">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title" id="adminMessageModalLabel">Information</h5>
-                    <button type="button" className="btn-close" aria-label="Close" onClick={() => setSelectedMessage(null)}></button>
-                  </div>
-                  <div className="modal-body" id="adminMessageModalBody">{selectedMessage}</div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   )
 }
+

@@ -219,3 +219,863 @@
 2025-12-15T12:31:27.041Z [ERROR]: Error: ENOTEMPTY: directory not empty, rmdir 'C:\e-archiveUploads\edwinase\HR\koffimicrolynxe@edwinase'
 2025-12-15T12:40:21.563Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
 2025-12-15T12:40:31.236Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2025-12-16T00:00:00.681Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-16T00:00:00.814Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-16T13:22:56.540Z [ERROR]: Error: Failed to move file: EXDEV: cross-device link not permitted, rename 'W:\Mycrolynxe\e-archive\e-archive\util\eArchiiveUploads\temporary\1765891376452-Azzz.jpeg' -> 'C:\e-archiveUploads\profile-pictures\1_1765891376483.jpeg'
+2025-12-16T13:23:39.023Z [ERROR]: Error: Failed to move file: EXDEV: cross-device link not permitted, rename 'W:\Mycrolynxe\e-archive\e-archive\util\eArchiiveUploads\temporary\1765891418999-vlcsnap-2024-11-05-01h09m07s992 - Copy.png' -> 'C:\e-archiveUploads\profile-pictures\1_1765891419019.png'
+2025-12-16T14:09:02.763Z [ERROR]: Error: Failed to move file: EXDEV: cross-device link not permitted, rename 'W:\Mycrolynxe\e-archive\e-archive\util\eArchiiveUploads\temporary\1765894142732-vlcsnap-2024-11-05-01h09m07s992 - Copy.png' -> 'C:\e-archiveUploads\profile-pictures\1_1765894142755.png'
+2025-12-16T14:26:19.721Z [ERROR]: Password update error: Illegal arguments: undefined, string
+2025-12-16T14:30:43.570Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2025-12-16T14:56:31.415Z [ERROR]: Error creating/updating user: ENOTEMPTY: directory not empty, rmdir 'C:\e-archiveUploads\edwinase\IT\koffimicrolynxe@edwinase'
+2025-12-16T14:56:31.422Z [ERROR]: Error: ENOTEMPTY: directory not empty, rmdir 'C:\e-archiveUploads\edwinase\IT\koffimicrolynxe@edwinase'
+2025-12-16T14:56:34.698Z [ERROR]: Error creating/updating user: ENOTEMPTY: directory not empty, rmdir 'C:\e-archiveUploads\edwinase\IT\koffimicrolynxe@edwinase'
+2025-12-16T14:56:34.699Z [ERROR]: Error: ENOTEMPTY: directory not empty, rmdir 'C:\e-archiveUploads\edwinase\IT\koffimicrolynxe@edwinase'
+2025-12-16T15:06:26.505Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2025-12-16T16:06:48.093Z [ERROR]: User not found.
+2025-12-16T16:06:48.526Z [ERROR]: User not found.
+2025-12-16T16:06:49.677Z [ERROR]: User not found.
+2025-12-16T16:06:49.981Z [ERROR]: User not found.
+2025-12-16T16:06:50.833Z [ERROR]: User not found.
+2025-12-16T16:06:52.197Z [ERROR]: User not found.
+2025-12-16T16:06:52.589Z [ERROR]: User not found.
+2025-12-16T16:06:54.278Z [ERROR]: User not found.
+2025-12-16T16:06:55.188Z [ERROR]: User not found.
+2025-12-16T16:06:55.608Z [ERROR]: User not found.
+2025-12-16T16:06:55.806Z [ERROR]: User not found.
+2025-12-16T16:06:56.610Z [ERROR]: User not found.
+2025-12-16T16:06:57.099Z [ERROR]: User not found.
+2025-12-17T00:00:01.163Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-17T00:00:01.233Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-17T10:24:59.495Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2025-12-17T10:30:16.299Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2025-12-17T10:40:59.567Z [ERROR]: User not found.
+2025-12-17T10:40:59.870Z [ERROR]: User not found.
+2025-12-17T10:40:59.878Z [ERROR]: User not found.
+2025-12-17T10:41:00.035Z [ERROR]: User not found.
+2025-12-17T10:41:00.117Z [ERROR]: User not found.
+2025-12-19T00:00:00.954Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-19T00:00:01.051Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-20T00:00:00.243Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-20T00:00:00.293Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-21T00:00:00.248Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-21T00:00:00.305Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-23T00:00:00.507Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-23T00:00:00.521Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-25T00:00:00.933Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-25T00:00:00.975Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-26T00:00:00.319Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-26T00:00:00.365Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-27T00:00:00.577Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-27T00:00:00.624Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-29T00:00:00.307Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-29T00:00:00.390Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2025-12-30T09:39:16.946Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2025-12-30T09:50:58.771Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2025-12-31T00:00:00.759Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2025-12-31T00:00:00.771Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-01T00:00:00.420Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-01T00:00:00.435Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-02T00:00:00.917Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-02T00:00:00.921Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-03T00:00:01.015Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-03T00:00:01.042Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-05T00:00:00.714Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-05T00:00:00.829Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-07T00:00:00.322Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-07T00:00:00.373Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-09T00:00:00.290Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-09T00:00:00.390Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-10T00:00:00.967Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-10T00:00:00.990Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-11T00:00:00.191Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-11T00:00:00.231Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-12T00:00:00.279Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-12T00:00:00.297Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-14T16:17:20.657Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-01-14T16:25:44.385Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-01-14T16:27:12.842Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-01-16T00:00:00.816Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-16T00:00:00.832Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-23T10:01:03.539Z [ERROR]: User not found.
+2026-01-23T10:01:04.099Z [ERROR]: User not found.
+2026-01-23T10:38:03.545Z [ERROR]: Error: File not found on the server
+2026-01-23T10:38:03.599Z [ERROR]: Error: File not found on the server
+2026-01-23T10:39:26.315Z [ERROR]: Error: File not found on the server
+2026-01-23T10:39:26.347Z [ERROR]: Error: File not found on the server
+2026-01-23T10:40:48.946Z [ERROR]: Error: File not found in the database
+2026-01-23T10:40:49.021Z [ERROR]: Error: File not found in the database
+2026-01-23T10:41:24.178Z [ERROR]: Error: File not found in the database
+2026-01-23T10:41:24.214Z [ERROR]: Error: File not found in the database
+2026-01-23T14:29:36.942Z [ERROR]: Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:30:05.169Z [ERROR]: Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:30:45.494Z [ERROR]: Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:36:00.714Z [ERROR]: Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:38:50.330Z [ERROR]: Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:40:01.049Z [ERROR]: Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:41:00.465Z [ERROR]: Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:42:41.530Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:43:51.103Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:49:27.835Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:57:03.845Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T14:59:11.548Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-23T15:53:37.389Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-24T11:44:12.817Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-25T11:44:45.407Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-25T17:28:49.530Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-26T04:58:31.592Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-26T07:47:41.690Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-26T13:50:57.373Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-26T14:46:22.416Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-26T15:31:46.631Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: getaddrinfo ENOTFOUND worldtimeapi.org
+2026-01-27T00:00:00.288Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-27T00:00:00.310Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-28T00:00:00.435Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-28T00:00:00.443Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-28T00:22:35.633Z [ERROR]: Process disconnected from parent! (not connected)
+2026-01-28T09:31:02.240Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-28T13:25:49.650Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-28T16:42:50.296Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-01-28T21:11:11.330Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-29T00:00:00.104Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-29T00:00:00.109Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-29T02:00:01.455Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-30T00:00:00.850Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-01-30T00:00:00.865Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-01-30T02:00:00.796Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-01-31T18:30:31.551Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-01T03:39:40.093Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-01T21:44:44.415Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-02T00:00:00.112Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-02T00:00:00.125Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-02T08:21:38.865Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-02T09:37:56.203Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-02T09:57:20.253Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-02T10:01:17.026Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-02T10:01:25.553Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-02T20:11:37.674Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-03T07:49:55.723Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-03T10:41:51.678Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-03T10:47:27.065Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-03T10:53:46.427Z [ERROR]: Error: File not found on the server
+2026-02-03T10:53:46.464Z [ERROR]: Error: File not found on the server
+2026-02-03T10:53:46.501Z [ERROR]: Error: File not found on the server
+2026-02-03T10:53:49.601Z [ERROR]: Error: File not found on the server
+2026-02-03T10:53:49.630Z [ERROR]: Error: File not found on the server
+2026-02-03T10:53:49.660Z [ERROR]: Error: File not found on the server
+2026-02-03T10:54:00.201Z [ERROR]: Error: File not found in the database
+2026-02-03T10:54:00.237Z [ERROR]: Error: File not found in the database
+2026-02-03T10:54:00.274Z [ERROR]: Error: File not found in the database
+2026-02-03T10:54:05.861Z [ERROR]: Error: File not found on the server
+2026-02-03T10:54:05.897Z [ERROR]: Error: File not found on the server
+2026-02-03T10:54:05.940Z [ERROR]: Error: File not found on the server
+2026-02-03T11:26:45.721Z [ERROR]: Error: File not found on the server
+2026-02-03T11:26:45.749Z [ERROR]: Error: File not found on the server
+2026-02-03T13:13:10.498Z [ERROR]: [getFileSendingHistory] Error: SequelizeDatabaseError: Unknown column 'sender.firstName' in 'field list'
+2026-02-03T13:13:10.565Z [ERROR]: [getFileSendingHistoryController] Error: SequelizeDatabaseError: Unknown column 'sender.firstName' in 'field list'
+2026-02-03T13:14:24.823Z [ERROR]: [getFileSendingHistory] Error: SequelizeDatabaseError: Unknown column 'sender.firstName' in 'field list'
+2026-02-03T13:14:24.881Z [ERROR]: [getFileSendingHistoryController] Error: SequelizeDatabaseError: Unknown column 'sender.firstName' in 'field list'
+2026-02-03T13:25:11.200Z [ERROR]: [getFileSendingHistory] Error: SequelizeDatabaseError: Unknown column 'sender.firstName' in 'field list'
+2026-02-03T13:25:11.246Z [ERROR]: [getFileSendingHistoryController] Error: SequelizeDatabaseError: Unknown column 'sender.firstName' in 'field list'
+2026-02-03T13:31:03.063Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.080Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.090Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.108Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.125Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.156Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.256Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.290Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.392Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.440Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:03.642Z [ERROR]: Error: File not found in the database
+2026-02-03T13:31:03.676Z [ERROR]: Error: File not found in the database
+2026-02-03T13:31:19.185Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.199Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.225Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.253Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.439Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.482Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.515Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.549Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.642Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.719Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.729Z [ERROR]: Error: File not found on the server
+2026-02-03T13:31:19.739Z [ERROR]: Error: File not found on the server
+2026-02-03T13:34:09.110Z [ERROR]: Error: File not found in the database
+2026-02-03T13:34:09.127Z [ERROR]: Error: File not found in the database
+2026-02-03T13:34:12.890Z [ERROR]: Error: File not found on the server
+2026-02-03T13:34:12.897Z [ERROR]: Error: File not found on the server
+2026-02-03T18:25:00.117Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-03T18:30:16.374Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-04T00:00:00.245Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-04T00:00:00.281Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-04T02:00:01.389Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-04T10:09:03.052Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-04T10:31:51.262Z [ERROR]: Error: File not found on the server
+2026-02-04T10:31:51.307Z [ERROR]: Error: File not found on the server
+2026-02-04T10:32:08.139Z [ERROR]: Error: File not found on the server
+2026-02-04T10:32:08.175Z [ERROR]: Error: File not found on the server
+2026-02-04T10:32:14.651Z [ERROR]: Error: File not found on the server
+2026-02-04T10:32:14.686Z [ERROR]: Error: File not found on the server
+2026-02-04T10:39:13.992Z [ERROR]: Error: File not found on the server
+2026-02-04T10:39:14.030Z [ERROR]: Error: File not found on the server
+2026-02-04T10:39:17.719Z [ERROR]: Error: File not found on the server
+2026-02-04T10:39:17.749Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:29.368Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:29.394Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:34.727Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:34.767Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:37.758Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:37.789Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:40.434Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:40.461Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:43.603Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:43.628Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:46.181Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:46.219Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:48.747Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:48.774Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:51.162Z [ERROR]: Error: File not found on the server
+2026-02-04T10:40:51.191Z [ERROR]: Error: File not found on the server
+2026-02-04T11:32:13.089Z [ERROR]: Error: File not found on the server
+2026-02-04T11:32:13.120Z [ERROR]: Error: File not found on the server
+2026-02-04T11:32:16.346Z [ERROR]: Error: File not found on the server
+2026-02-04T11:32:16.378Z [ERROR]: Error: File not found on the server
+2026-02-04T11:33:56.429Z [ERROR]: Error: File not found on the server
+2026-02-04T11:33:56.456Z [ERROR]: Error: File not found on the server
+2026-02-04T11:34:20.831Z [ERROR]: Error: File not found on the server
+2026-02-04T11:34:20.861Z [ERROR]: Error: File not found on the server
+2026-02-04T11:34:24.071Z [ERROR]: Error: File not found on the server
+2026-02-04T11:34:24.100Z [ERROR]: Error: File not found on the server
+2026-02-04T11:41:52.833Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-04T11:44:00.076Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-04T11:58:42.465Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-04T13:53:46.105Z [ERROR]: Error: File not found on the server
+2026-02-04T13:53:46.139Z [ERROR]: Error: File not found on the server
+2026-02-04T17:56:31.318Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-05T00:00:01.119Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-05T00:00:01.226Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-05T00:43:19.648Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-05T02:00:01.205Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-05T21:41:14.688Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-06T00:00:00.857Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-06T00:00:00.885Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-06T02:00:00.780Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-06T10:30:45.454Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-06T10:51:52.491Z [ERROR]: getFileStructure error SequelizeDatabaseError: Unknown column 'department' in 'field list'
+2026-02-06T10:51:52.511Z [ERROR]: getFileStructure error SequelizeDatabaseError: Unknown column 'department' in 'field list'
+2026-02-06T12:11:47.138Z [ERROR]: Error: File not found on the server
+2026-02-06T12:11:47.152Z [ERROR]: Error: File not found on the server
+2026-02-06T12:11:50.255Z [ERROR]: Error: File not found on the server
+2026-02-06T12:11:50.264Z [ERROR]: Error: File not found on the server
+2026-02-06T12:12:37.268Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-06T12:16:43.617Z [ERROR]: Error: File not found on the server
+2026-02-06T12:16:43.649Z [ERROR]: Error: File not found on the server
+2026-02-06T12:16:46.639Z [ERROR]: Error: File not found on the server
+2026-02-06T12:16:46.670Z [ERROR]: Error: File not found on the server
+2026-02-06T12:16:49.135Z [ERROR]: Error: File not found on the server
+2026-02-06T12:16:49.167Z [ERROR]: Error: File not found on the server
+2026-02-06T12:16:51.061Z [ERROR]: Error: File not found on the server
+2026-02-06T12:16:51.095Z [ERROR]: Error: File not found on the server
+2026-02-06T12:19:14.039Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-06T12:19:25.507Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-06T12:20:02.166Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-06T12:20:36.265Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-06T12:20:55.591Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-06T12:21:12.841Z [ERROR]: Error: File not found on the server
+2026-02-06T12:21:12.872Z [ERROR]: Error: File not found on the server
+2026-02-06T12:21:30.538Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-06T12:24:59.113Z [ERROR]: Error: File not found on the server
+2026-02-06T12:24:59.127Z [ERROR]: Error: File not found on the server
+2026-02-06T12:25:02.181Z [ERROR]: Error: File not found on the server
+2026-02-06T12:25:02.195Z [ERROR]: Error: File not found on the server
+2026-02-06T12:25:33.009Z [ERROR]: Error: File not found on the server
+2026-02-06T12:25:33.020Z [ERROR]: Error: File not found on the server
+2026-02-06T12:25:39.306Z [ERROR]: Error: File not found on the server
+2026-02-06T12:25:39.312Z [ERROR]: Error: File not found on the server
+2026-02-06T14:28:59.045Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-07T09:58:48.260Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-07T15:32:27.298Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-08T02:00:01.244Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-08T03:05:38.192Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-08T19:38:11.010Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-09T00:00:00.167Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-09T00:00:00.175Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-09T07:48:35.977Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-09T09:03:34.233Z [ERROR]: Error removing user: Delete ID not found
+2026-02-09T09:03:36.692Z [ERROR]: Error removing user: Delete ID not found
+2026-02-09T09:12:55.146Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-09T09:57:47.114Z [ERROR]: Failed to fetch reliable time, falling back to system time: request to http://worldtimeapi.org/api/timezone/Etc/UTC failed, reason: read ECONNRESET
+2026-02-09T10:19:59.020Z [ERROR]: Directory not found: C:\e-archiveUploads\C:\e-archiveUploads\atonsuagogo\Credit and marketing\supervisoruser@atonsuagogo
+2026-02-09T10:40:35.914Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-09T11:08:14.836Z [ERROR]: Directory not found: C:\e-archiveUploads\C:\e-archiveUploads\kuntanase\Credit and marketing\nopermissions@kuntanase
+2026-02-09T11:08:14.860Z [ERROR]: Directory not found: C:\e-archiveUploads\C:\e-archiveUploads\kuntanase\Credit and marketing\nopermissions@kuntanase
+2026-02-09T11:16:34.966Z [ERROR]: Directory not found: C:\e-archiveUploads\C:\e-archiveUploads\kuntanase\Credit and marketing\regularuser@kuntanase
+2026-02-09T11:26:59.684Z [ERROR]: Directory not found: C:\e-archiveUploads\C:\e-archiveUploads\magazine\Operations\Appiah@magazine
+2026-02-09T21:26:03.401Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-10T00:00:01.013Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-10T00:00:01.129Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-10T12:26:56.798Z [ERROR]: Could not delete old directory C:\e-archiveUploads\Bantama\Finance\mensah@bantama: ENOENT: no such file or directory, rmdir 'C:\e-archiveUploads\Bantama\Finance\mensah@bantama'
+2026-02-10T12:28:12.678Z [ERROR]: Error creating/updating user: read ECONNRESET
+2026-02-10T12:28:12.683Z [ERROR]: Error: read ECONNRESET
+2026-02-10T12:28:12.710Z [ERROR]: Error creating/updating user: 
+2026-02-10T13:05:05.422Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-11T10:33:13.319Z [ERROR]: Error: File not found on the server
+2026-02-11T10:33:13.362Z [ERROR]: Error: File not found on the server
+2026-02-11T11:55:44.727Z [ERROR]: Error: File not found on the server
+2026-02-11T11:55:44.777Z [ERROR]: Error: File not found on the server
+2026-02-11T11:56:04.430Z [ERROR]: Error: File not found on the server
+2026-02-11T11:56:04.668Z [ERROR]: Error: File not found on the server
+2026-02-11T11:56:04.709Z [ERROR]: Error: File not found on the server
+2026-02-11T11:56:04.753Z [ERROR]: Error: File not found on the server
+2026-02-11T14:31:56.014Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-11T19:01:14.444Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-12T00:00:00.852Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-12T00:00:00.914Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-12T01:44:29.611Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-12T02:00:00.695Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-12T08:55:23.815Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-13T01:07:36.342Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-13T02:00:00.599Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-13T17:07:36.654Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-14T00:00:00.219Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-14T00:00:00.249Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-14T02:20:50.074Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-15T10:35:34.891Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-16T00:00:00.569Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-16T00:00:00.578Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-16T02:00:00.724Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-16T09:01:00.451Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-16T17:23:43.251Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-17T00:00:01.029Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-17T00:00:01.068Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-17T02:00:00.503Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-17T14:37:26.546Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-18T00:00:00.181Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-18T00:00:00.207Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-18T02:00:00.606Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-18T17:06:06.907Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-18T23:01:41.660Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-19T00:00:00.214Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-19T00:00:00.246Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-19T02:00:00.434Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-19T07:45:50.426Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-19T22:26:27.700Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-20T00:00:00.560Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-20T00:00:00.568Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-20T02:00:00.373Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-20T13:38:49.720Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-21T03:28:04.992Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-22T00:00:00.653Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-22T00:00:00.667Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-22T02:00:01.154Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-22T14:05:24.028Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-23T00:00:00.706Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-23T00:00:00.723Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-23T02:00:00.969Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-23T09:40:37.048Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-23T20:41:58.983Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-24T00:00:00.862Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-24T00:00:00.892Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-24T02:00:00.720Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-24T16:14:21.797Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-24T19:48:10.582Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-25T02:00:01.280Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-25T09:56:23.844Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-25T18:24:50.841Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-26T00:00:00.565Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-26T00:00:00.897Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-26T02:00:01.009Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-26T08:45:13.895Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-26T22:06:52.521Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-27T03:35:50.638Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-27T11:50:36.634Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-27T17:04:36.738Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-28T00:00:01.031Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-02-28T00:00:01.110Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-02-28T02:00:00.658Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-28T06:16:36.907Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-02-28T09:22:34.614Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-01T00:00:00.501Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-01T00:00:00.523Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-01T02:00:00.744Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-01T09:32:03.728Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-01T14:36:07.905Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-02T00:00:00.887Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-02T00:00:00.958Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-02T02:00:01.148Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-03T07:48:12.814Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-03T10:01:12.048Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-04T09:05:31.597Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-05T02:11:17.999Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-05T03:19:33.305Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-05T09:55:51.503Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-05T17:09:14.954Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-06T00:00:01.148Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-06T00:00:01.188Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-06T02:00:00.829Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-06T07:35:39.400Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-07T00:53:11.969Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-07T02:00:00.497Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-07T11:46:23.844Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-08T09:04:35.351Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-08T14:51:01.169Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-09T10:22:40.603Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-09T13:55:18.714Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-09T13:59:21.735Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-09T14:46:04.214Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-09T15:19:57.171Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-09T15:35:46.266Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-09T15:45:34.686Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-09T17:01:39.437Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-09T19:09:11.502Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-10T00:00:00.706Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-10T00:00:00.755Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-10T02:00:00.519Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-10T18:48:56.005Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-10T21:51:40.580Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-11T00:00:00.555Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-11T00:00:00.575Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-11T02:00:00.962Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-11T12:04:37.632Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-12T00:26:14.420Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-12T02:00:00.704Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-12T14:14:58.746Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-12T18:05:22.752Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-13T00:08:17.884Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-13T02:00:00.954Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-13T09:31:50.517Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-13T10:57:19.177Z [ERROR]: Error: File not found on the server
+2026-03-13T10:57:19.204Z [ERROR]: Error: File not found on the server
+2026-03-13T10:57:24.550Z [ERROR]: Error: File not found on the server
+2026-03-13T10:57:24.597Z [ERROR]: Error: File not found on the server
+2026-03-14T21:42:48.548Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-15T00:00:00.848Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-15T00:00:00.855Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-15T02:00:01.069Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-15T09:21:27.880Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-16T00:00:00.862Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-16T00:00:00.875Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-16T16:21:52.712Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-17T00:09:14.349Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-17T02:00:00.788Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-17T10:47:06.819Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-17T21:08:00.756Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-18T00:00:00.406Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-18T00:00:00.429Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-18T02:09:57.107Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-18T17:09:47.094Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-18T20:55:05.266Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-19T00:00:00.675Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-19T00:00:00.681Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-19T02:15:09.286Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-20T22:49:26.174Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-21T00:00:00.283Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-21T00:00:00.292Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-21T09:34:29.145Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-22T07:37:21.952Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-23T00:00:00.371Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-23T00:00:00.396Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-23T02:00:00.515Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-24T00:00:00.335Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-24T00:00:00.348Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-24T16:26:44.419Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-25T10:54:27.428Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-25T13:57:45.495Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-26T10:03:06.264Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-27T13:33:05.017Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-28T10:11:30.861Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-29T00:15:05.366Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-29T02:00:00.761Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-29T11:57:16.598Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-30T08:16:14.252Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-30T16:36:40.249Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-30T20:34:20.711Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-30T20:37:13.385Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-30T23:09:50.145Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-30T23:34:19.496Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-31T00:00:00.782Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-03-31T00:00:00.787Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'
+2026-03-31T02:00:01.218Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-03-31T10:58:09.109Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Credit and marketing\rubinmicrolynxe@kuntanase\1920_x_1080_wallpaper@pictures_20-10-2025.jpg -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Credit and marketing\rubinmicrolynxe@kuntanase\1920_x_1080_wallpaper@pictures_20-10-2025.jpg Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Credit and marketing\rubinmicrolynxe@kuntanase\1920_x_1080_wallpaper@pictures_20-10-2025.jpg' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Credit and marketing\rubinmicrolynxe@kuntanase\1920_x_1080_wallpaper@pictures_20-10-2025.jpg'
+2026-03-31T10:58:09.132Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Credit and marketing\rubinmicrolynxe@kuntanase\aesthetic_computer_wallpaper_@pictures_20-10-2025.jpg -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Credit and marketing\rubinmicrolynxe@kuntanase\aesthetic_computer_wallpaper_@pictures_20-10-2025.jpg Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Credit and marketing\rubinmicrolynxe@kuntanase\aesthetic_computer_wallpaper_@pictures_20-10-2025.jpg' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Credit and marketing\rubinmicrolynxe@kuntanase\aesthetic_computer_wallpaper_@pictures_20-10-2025.jpg'
+2026-03-31T10:58:09.159Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\kkk_png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\kkk_png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\kkk_png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\kkk_png_21-6-2025.png'
+2026-03-31T10:58:09.176Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png'
+2026-03-31T10:58:09.188Z [ERROR]: [Backup] Backup failed: Error: ENOSPC: no space left on device, mkdir 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations'
+2026-03-31T11:04:19.085Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png'
+2026-03-31T11:04:19.125Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-28-02_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-28-02_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-28-02_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-28-02_20-10-2025.png'
+2026-03-31T11:04:19.183Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-29-16_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-29-16_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-29-16_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-29-16_20-10-2025.png'
+2026-03-31T11:04:19.223Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23@resume_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23@resume_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23@resume_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23@resume_20-10-2025.png'
+2026-03-31T11:04:19.257Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23_20-10-2025.png'
+2026-03-31T11:04:19.293Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-33_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-33_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-33_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-33_20-10-2025.png'
+2026-03-31T11:04:19.323Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-53_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-53_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-53_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-53_20-10-2025.png'
+2026-03-31T11:04:19.353Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-35-37_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-35-37_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-35-37_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-35-37_20-10-2025.png'
+2026-03-31T11:04:19.409Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\magazine\Credit and marketing\Mensah@magazine\Screenshot__2__png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\magazine\Credit and marketing\Mensah@magazine\Screenshot__2__png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\magazine\Credit and marketing\Mensah@magazine\Screenshot__2__png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\magazine\Credit and marketing\Mensah@magazine\Screenshot__2__png_21-6-2025.png'
+2026-03-31T11:04:19.444Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\profile-pictures\1_1765894504486.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765894504486.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\profile-pictures\1_1765894504486.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765894504486.png'
+2026-03-31T11:04:19.473Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\profile-pictures\1_1765894890888.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765894890888.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\profile-pictures\1_1765894890888.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765894890888.png'
+2026-03-31T11:04:19.503Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\profile-pictures\1_1765895768776.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765895768776.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\profile-pictures\1_1765895768776.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765895768776.png'
+2026-03-31T11:04:19.524Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\profile-pictures\1_1765896943779.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765896943779.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\profile-pictures\1_1765896943779.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765896943779.png'
+2026-03-31T11:04:19.547Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\trede\Credit and marketing\Donkor@trede\kkk_png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\trede\Credit and marketing\Donkor@trede\kkk_png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\trede\Credit and marketing\Donkor@trede\kkk_png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\trede\Credit and marketing\Donkor@trede\kkk_png_21-6-2025.png'
+2026-03-31T11:04:19.568Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\trede\Credit and marketing\Donkor@trede\Screenshot__2__png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\trede\Credit and marketing\Donkor@trede\Screenshot__2__png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\trede\Credit and marketing\Donkor@trede\Screenshot__2__png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\trede\Credit and marketing\Donkor@trede\Screenshot__2__png_21-6-2025.png'
+2026-03-31T11:07:57.366Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Microfinance\SARFO@kuntanase\Screenshot__2__png_21-6-2025.png'
+2026-03-31T11:07:57.405Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-28-02_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-28-02_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-28-02_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-28-02_20-10-2025.png'
+2026-03-31T11:07:57.432Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-29-16_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-29-16_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-29-16_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-29-16_20-10-2025.png'
+2026-03-31T11:07:57.468Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23@resume_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23@resume_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23@resume_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23@resume_20-10-2025.png'
+2026-03-31T11:07:57.501Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-30-23_20-10-2025.png'
+2026-03-31T11:07:57.527Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-33_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-33_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-33_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-33_20-10-2025.png'
+2026-03-31T11:07:57.551Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-53_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-53_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-53_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-32-53_20-10-2025.png'
+2026-03-31T11:07:57.577Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-35-37_20-10-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-35-37_20-10-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-35-37_20-10-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\kuntanase\Operations\koffimicrolynxe@kuntanase\Screenshot_from_2024-11-14_19-35-37_20-10-2025.png'
+2026-03-31T11:07:57.607Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\magazine\Credit and marketing\Mensah@magazine\Screenshot__2__png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\magazine\Credit and marketing\Mensah@magazine\Screenshot__2__png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\magazine\Credit and marketing\Mensah@magazine\Screenshot__2__png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\magazine\Credit and marketing\Mensah@magazine\Screenshot__2__png_21-6-2025.png'
+2026-03-31T11:07:57.635Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\profile-pictures\1_1765894504486.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765894504486.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\profile-pictures\1_1765894504486.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765894504486.png'
+2026-03-31T11:07:57.651Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\profile-pictures\1_1765894890888.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765894890888.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\profile-pictures\1_1765894890888.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765894890888.png'
+2026-03-31T11:07:57.677Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\profile-pictures\1_1765895768776.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765895768776.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\profile-pictures\1_1765895768776.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765895768776.png'
+2026-03-31T11:07:57.698Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\profile-pictures\1_1765896943779.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765896943779.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\profile-pictures\1_1765896943779.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\profile-pictures\1_1765896943779.png'
+2026-03-31T11:07:57.725Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\trede\Credit and marketing\Donkor@trede\kkk_png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\trede\Credit and marketing\Donkor@trede\kkk_png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\trede\Credit and marketing\Donkor@trede\kkk_png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\trede\Credit and marketing\Donkor@trede\kkk_png_21-6-2025.png'
+2026-03-31T11:07:57.758Z [ERROR]: [Backup] Failed to copy file: C:\e-archiveUploads\trede\Credit and marketing\Donkor@trede\Screenshot__2__png_21-6-2025.png -> C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\trede\Credit and marketing\Donkor@trede\Screenshot__2__png_21-6-2025.png Error: ENOSPC: no space left on device, copyfile 'C:\e-archiveUploads\trede\Credit and marketing\Donkor@trede\Screenshot__2__png_21-6-2025.png' -> 'C:\e-archive-back-up-data\2026-03-31\e-archiveUploads\trede\Credit and marketing\Donkor@trede\Screenshot__2__png_21-6-2025.png'
+2026-03-31T11:08:47.653Z [ERROR]: Error: File not found on the server
+2026-03-31T11:08:47.662Z [ERROR]: Error: File not found on the server
+2026-03-31T11:08:47.726Z [ERROR]: Error: File not found on the server
+2026-03-31T11:08:47.739Z [ERROR]: Error: File not found on the server
+2026-03-31T11:18:18.953Z [ERROR]: [DB Sync] Failed to sync database (server will still start): Create table/tablespace '#sql-18ac_3d' failed, as disk is full
+2026-03-31T11:18:40.221Z [ERROR]: Error: File not found on the server
+2026-03-31T11:18:40.252Z [ERROR]: Error: File not found on the server
+2026-03-31T21:32:38.303Z [ERROR]: [Backup] Backup failed: 'mysqldump' is not recognized as an internal or external command,
+operable program or batch file.
+
+2026-04-01T00:00:00.092Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads\\temporary: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads\temporary'
+2026-04-01T00:00:00.108Z [ERROR]: Error cleaning folder C:\\Users\\LENOVO\\Downloads\\e-archive\\e-archive\\e-archive\\eArchiiveUploads: Error: ENOENT: no such file or directory, scandir 'C:\Users\LENOVO\Downloads\e-archive\e-archive\e-archive\eArchiiveUploads'

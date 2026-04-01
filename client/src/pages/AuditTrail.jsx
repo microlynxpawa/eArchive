@@ -1,11 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react'
+import UserPickerModal from '../components/UserPickerModal'
+import FileSendingHistoryModal from '../components/FileSendingHistoryModal'
 
 export default function AuditTrail() {
   const [searchValue, setSearchValue] = useState('')
   const [logs, setLogs] = useState([])
+  const [page, setPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const lastUserIdRef = useRef(null)
+  const lastUsernameRef = useRef(null)
+  const userPickerModalRef = useRef(null)
+  const fileSendingHistoryModalRef = useRef(null)
 
   const showToast = (message, type = 'success') => {
     const toast = document.createElement('div')
@@ -41,7 +48,7 @@ export default function AuditTrail() {
     return normCell.includes(normSearch)
   }
 
-  const fetchAndDisplayAuditLogs = async (userId, dateSearch = null) => {
+  const fetchAndDisplayAuditLogs = async (userId, dateSearch = null, username = null) => {
     if (!userId) return
     setLoading(true)
     setError(null)
@@ -60,6 +67,7 @@ export default function AuditTrail() {
       }
       setLogs(filtered)
       lastUserIdRef.current = userId
+      lastUsernameRef.current = username
     } catch (err) {
       console.error(err)
       setError(err.message || 'Failed to fetch audit logs')
@@ -81,7 +89,7 @@ export default function AuditTrail() {
       if (!res.ok) throw new Error('User not found')
       const userData = await res.json()
       showToast(`User found: ${userData.fullname || userData.username}`, 'success')
-      await fetchAndDisplayAuditLogs(userData.id)
+      await fetchAndDisplayAuditLogs(userData.id, null, userData.username)
     } catch (err) {
       console.error('Error fetching user', err)
       showToast('User not found or an error occurred.', 'error')
@@ -98,7 +106,7 @@ export default function AuditTrail() {
       const res = await fetch(`/admin/getUser/${encodeURIComponent(val)}`, { credentials: 'include' })
       if (!res.ok) return // not a username
       const userData = await res.json()
-      await fetchAndDisplayAuditLogs(userData.id)
+      await fetchAndDisplayAuditLogs(userData.id, null, userData.username)
       return
     } catch (err) {
       // ignore and treat as date/time
@@ -112,13 +120,49 @@ export default function AuditTrail() {
   }
 
   useEffect(() => {
+    // wire up username modal search button
+    setTimeout(() => {
+      const btn = document.getElementById('search-username-btn')
+      if (btn && userPickerModalRef.current?.show) {
+        btn.onclick = async () => {
+          const selectedUsernames = await userPickerModalRef.current.show()
+          if (!selectedUsernames || !selectedUsernames.length) return
+          const username = selectedUsernames[0]
+          setSearchValue(username)
+          try {
+            const res = await fetch(`/admin/getUser/${encodeURIComponent(username)}`, { credentials: 'include' })
+            if (!res.ok) throw new Error('User not found')
+            const userData = await res.json()
+            showToast(`User found: ${userData.fullname || userData.username}`, 'success')
+            await fetchAndDisplayAuditLogs(userData.id, null, userData.username)
+          } catch (err) {
+            showToast('User not found or an error occurred.', 'error')
+          }
+        }
+      }
+    }, 200)
     // on mount nothing to do; we wait for a user search
   }, [])
 
+  // Pagination logic
+  const totalRows = logs.length
+  const totalPages = Math.ceil(totalRows / rowsPerPage) || 1
+  const paginatedLogs = logs.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
+  const handleRowsPerPageChange = (e) => {
+    setRowsPerPage(Number(e.target.value))
+    setPage(1)
+  }
+  const handlePageChange = (newPage) => {
+    setPage(newPage)
+  }
+
   return (
     <div className="container-fluid">
+      <UserPickerModal ref={userPickerModalRef} />
+      <FileSendingHistoryModal ref={fileSendingHistoryModalRef} />
       <div className="mb-3">
-        <div className="input-group">
+        <div className="input-group mb-2">
           <div className="input-group-prepend" id="searchButton">
             <button className="input-group-text mobile-search btn" onClick={handleSearchClick} style={{cursor:'pointer'}}>
               <i className="fa fa-search" />
@@ -133,21 +177,52 @@ export default function AuditTrail() {
             onChange={handleInputChange}
           />
         </div>
+        <button id="search-username-btn" className="btn btn-outline-primary btn-sm" type="button" style={{marginTop:4}}>Search by Username</button>
         <small id="search-format-hint" style={{display:'none', color:'#22c55e', fontSize:'0.95em'}}>Tip: Search by date (e.g. 2024-06-20, 20/06/2024) or time (e.g. 14:30)</small>
       </div>
 
       <div className="row">
         <div className="col-sm-12">
           <div className="card">
-            <div className="card-header pb-0">
-              <h3>User Audit Trail</h3>
-              <p className="text-green">Search User to view their history.</p>
+            <div className="card-header pb-0 d-flex justify-content-between align-items-center" style={{gap: '0.5rem', background: 'rgba(245,245,245,0.95)', borderBottom: '1px solid #e0e0e0'}}>
+              <h3 className="mb-0" style={{fontWeight: 700, fontSize: '1.35em', color: '#222'}}>User Audit Trail</h3>
+              <div className="d-flex align-items-center" style={{gap: '0.5rem'}}>
+                <button
+                  className="btn btn-info btn-sm"
+                  onClick={() => {
+                    const userToShow = lastUsernameRef.current
+                    if (!userToShow) {
+                      alert('Please search for a user first to view their file sending history')
+                      return
+                    }
+                    fileSendingHistoryModalRef.current?.show(userToShow)
+                  }}
+                  title="View file sending history for selected user"
+                  disabled={!lastUsernameRef.current}
+                  style={{visibility: 'hidden'}}
+                >
+                  📋 File Sending History
+                </button>
+                <div style={{background: 'rgba(255,255,255,0.85)', borderRadius: 6, padding: '2px 12px', border: '1px solid #e0e0e0'}}>
+                  <label htmlFor="audit-rows-per-page" className="form-label mb-0" style={{fontWeight: 600, fontSize: '1em', color: '#222'}}>Rows</label>
+                  <select id="audit-rows-per-page" value={rowsPerPage} onChange={handleRowsPerPageChange} style={{width: 56, height: 30, fontSize: '1em', padding: '0 6px', borderRadius: 4, border: '1px solid #bbb', color: '#222', background: '#fff'}}>
+                    {[5, 10, 20, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </div>
+              </div>
             </div>
+            <div className="px-3 pt-1 pb-0"><p className="text-green mb-0" style={{fontSize: '0.98em'}}>Search User to view their history.</p></div>
             <div className="card-body">
+              <div className="d-flex justify-content-end align-items-center mb-2">
+                <span style={{color:'#222', fontWeight:600, fontSize:'1em'}}>Page {page} of {totalPages}</span>
+                <button className="btn btn-sm btn-light ms-2" disabled={page === 1} onClick={() => handlePageChange(page - 1)}>&lt;</button>
+                <button className="btn btn-sm btn-light ms-1" disabled={page === totalPages} onClick={() => handlePageChange(page + 1)}>&gt;</button>
+              </div>
               <div className="table-responsive theme-scrollbar">
                 <table className="display table" id="audit-log-table">
                   <thead>
                     <tr>
+                      <th>ID</th>
                       <th>Name</th>
                       <th>Department</th>
                       <th>Branch</th>
@@ -160,13 +235,14 @@ export default function AuditTrail() {
                   </thead>
                   <tbody id="audit-log-tbody">
                     {loading && (
-                      <tr><td colSpan={8}>Loading...</td></tr>
+                      <tr><td colSpan={9}>Loading...</td></tr>
                     )}
-                    {!loading && logs.length === 0 && (
-                      <tr><td colSpan={8}>No records</td></tr>
+                    {!loading && paginatedLogs.length === 0 && (
+                      <tr><td colSpan={9}>No records</td></tr>
                     )}
-                    {!loading && logs.map((log, idx) => (
+                    {!loading && paginatedLogs.map((log, idx) => (
                       <tr key={idx}>
+                        <td>{(page - 1) * rowsPerPage + idx + 1}</td>
                         <td>{log.name || 'N/A'}</td>
                         <td>{log.department || 'N/A'}</td>
                         <td>{log.branch || 'N/A'}</td>

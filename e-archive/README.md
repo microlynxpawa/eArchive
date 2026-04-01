@@ -76,6 +76,8 @@ if we are on c:\ drive but project is on a different drive we first E: to switch
 
 # PM2 Commands
 
+pm2 serve "w:\Mycrolynxe\e-archive\client\dist" 4500 --name e-archive-client --spa
+
 ```bash
 # Install PM2
 npm install -g pm2

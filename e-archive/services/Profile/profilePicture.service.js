@@ -20,15 +20,18 @@ async function storeProfilePicture(userId, file) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
   const filePath = path.join(uploadDir, uniqueFilename);
-  // const filePath = `profile-pictures/${uniqueFilename}`;
-  // Move file to destination
+  
+  // Copy file to destination (works across drives, unlike renameSync)
   try {
-    fs.renameSync(file.path, filePath);
+    fs.copyFileSync(file.path, filePath);
+    // Delete the temporary file after successful copy
+    fs.unlinkSync(file.path);
   } catch (err) {
     throw new Error('Failed to move file: ' + err.message);
   }
 
-  return filePath;
+  // Return only the filename, not the full path, so it can be accessed via /profile-pictures/{filename}
+  return uniqueFilename;
 }
 
 module.exports = storeProfilePicture;

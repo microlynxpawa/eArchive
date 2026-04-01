@@ -6,18 +6,7 @@ export default defineConfig({
   plugins: [react()],
   root: '.',
   server: {
-    port: 5173,
-    proxy: {
-      '/admin': {
-        target: 'http://localhost:4801',
-        changeOrigin: true,
-        secure: false
-      },
-      '/file-content': {
-        target: 'http://localhost:4801',
-        changeOrigin: true,
-        secure: false
-      }
-    }
+    host: true, // Listen on all network interfaces
+    port: 4500,
   }
 })

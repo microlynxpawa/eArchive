@@ -5,6 +5,8 @@ export default function Departments(){
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [filtered, setFiltered] = useState([])
+  const [page, setPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState({ id:null, name:'', description:'' })
@@ -26,6 +28,7 @@ export default function Departments(){
     const q = search.trim().toLowerCase()
     if(!q) return setFiltered(groups)
     setFiltered(groups.filter(g => (g.name||'').toLowerCase().includes(q) || (g.description||'').toLowerCase().includes(q)))
+    setPage(1)
   }, [search, groups])
 
   useEffect(()=>{
@@ -45,10 +48,16 @@ export default function Departments(){
   }
 
   const openCreate = ()=>{ setForm({ id:null, name:'', description:'' }); setModalOpen(true) }
-  const openEdit = (rec)=>{ setForm({ id:rec.id, name:rec.name||'', description:rec.description||'' }); setModalOpen(true) }
+  const openEdit = (rec)=>{
+    const formData = { id:rec.id, name:rec.name||'', description:rec.description||'' };
+    console.log('Editing Department:', formData);
+    setForm(formData);
+    setModalOpen(true);
+  }
   const closeModal = ()=> setModalOpen(false)
 
   const handleSave = async ()=>{
+    console.log('Submitting Department Form:', form);
     if(!(form.name||'').trim()) return showToast('Category name is required','error')
     if(!(form.description||'').trim()) return showToast('Category description is required','error')
     const fd = new FormData(); fd.append('catName', form.name); fd.append('catDescription', form.description); fd.append('btnAction', form.id? 'Update':'Create'); fd.append('updateRecord', form.id||'')
@@ -76,14 +85,31 @@ export default function Departments(){
     }catch(e){ console.error(e); showToast('Delete failed','error') }
   }
 
+  // Pagination logic
+  const totalRows = filtered.length
+  const totalPages = Math.ceil(totalRows / rowsPerPage) || 1
+  const paginatedRows = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
+  const handleRowsPerPageChange = (e) => {
+    setRowsPerPage(Number(e.target.value))
+    setPage(1)
+  }
+  const handlePageChange = (newPage) => {
+    setPage(newPage)
+  }
+
   return (
     <div className="container-fluid">
       <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5>Departments</h5>
-          <div>
-            <button className="btn btn-primary me-2" onClick={openCreate}>Add group</button>
-            <input className="form-control d-inline-block" style={{width:240}} placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
+        <div className="card-header d-flex justify-content-between align-items-center" style={{gap: '0.5rem', background: 'rgba(245,245,245,0.95)', borderBottom: '1px solid #e0e0e0'}}>
+          <h5 className="mb-0" style={{fontWeight: 700, fontSize: '1.2em', color: '#222'}}>Departments</h5>
+          <div className="d-flex align-items-center" style={{gap: '0.5rem', background: 'rgba(255,255,255,0.85)', borderRadius: 6, padding: '2px 12px', border: '1px solid #e0e0e0'}}>
+            <label htmlFor="departments-rows-per-page" className="form-label mb-0" style={{fontWeight: 600, fontSize: '1em', color: '#222'}}>Rows</label>
+            <select id="departments-rows-per-page" value={rowsPerPage} onChange={handleRowsPerPageChange} style={{width: 56, height: 30, fontSize: '1em', padding: '0 6px', borderRadius: 4, border: '1px solid #bbb', color: '#222', background: '#fff'}}>
+              {[5, 10, 20, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            <button className="btn btn-primary ms-2" onClick={openCreate}>Add group</button>
+            <input className="form-control d-inline-block ms-2" style={{width:120}} placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
           </div>
         </div>
         <div className="card-body">
@@ -91,6 +117,11 @@ export default function Departments(){
             <span style={{color:'#1a73e8',fontSize:'1.02em'}}>
               Tip: Use <b>Ctrl +</b> or <b>Ctrl -</b> to zoom in or out and see more content at once.
             </span>
+          </div>
+          <div className="d-flex justify-content-end align-items-center mb-2">
+            <span style={{color:'#222', fontWeight:600, fontSize:'1em'}}>Page {page} of {totalPages}</span>
+            <button className="btn btn-sm btn-light ms-2" disabled={page === 1} onClick={() => handlePageChange(page - 1)}>&lt;</button>
+            <button className="btn btn-sm btn-light ms-1" disabled={page === totalPages} onClick={() => handlePageChange(page + 1)}>&gt;</button>
           </div>
           <div className="table-responsive theme-scrollbar">
             <table className="table table-striped">
@@ -106,8 +137,8 @@ export default function Departments(){
               </thead>
               <tbody>
                 {loading && <tr><td colSpan={6}>Loading...</td></tr>}
-                {!loading && filtered.length===0 && <tr><td colSpan={6}>No records</td></tr>}
-                {!loading && filtered.map(r=> (
+                {!loading && paginatedRows.length===0 && <tr><td colSpan={6}>No records</td></tr>}
+                {!loading && paginatedRows.map(r=> (
                   <tr key={r.id}>
                     <td>{r.id}</td>
                     <td>{r.name}</td>
