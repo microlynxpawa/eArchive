@@ -1,44 +1,39 @@
-// Service File: fileService.js
-const fs = require("fs");
-const Path = require("path");
 const mime = require("mime");
 const File = require("../../model/file");
 const AuditLog = require("../../model/auditLogs");
+const { getProvider } = require("../../storage/storageProvider");
 
 /**
- * Fetch file content logic.
- * @param {string} fileName - The name of the file to retrieve.
- * @returns {Promise<{ fullPath: string, mimeType: string }>} - Object containing the full path and MIME type of the file.
+ * Returns the cloud storage key and MIME type for a file.
+ * The caller is responsible for streaming the file to the response.
+ *
+ * @param {string} fileName
+ * @param {number} userId
+ * @returns {Promise<{ cloudKey: string, mimeType: string }>}
  */
 const getFileContentLogic = async (fileName, userId) => {
-  if (!fileName) {
-    throw new Error("File name is missing");
-  }
+  if (!fileName) throw new Error("File name is missing");
 
-  // Query the database for the file's path
   const fileRecord = await File.findOne({ where: { fileName } });
+  if (!fileRecord) throw new Error("File not found in the database");
 
-  if (!fileRecord) {
-    throw new Error("File not found in the database");
+  const prefix = (fileRecord.filePath || "").replace(/\\/g, "/").replace(/\/?$/, "/");
+  const cloudKey = prefix + fileName;
+
+  const provider = await getProvider();
+  if (!(await provider.exists(cloudKey))) {
+    throw new Error("File not found on storage");
   }
 
-  const fullPath = Path.join(fileRecord.filePath, fileName); // Combine path and file name
+  const mimeType = mime.getType(fileName) || "application/octet-stream";
 
-  if (!fs.existsSync(fullPath)) {
-    throw new Error("File not found on the server");
-  }
-
-  // Get the MIME type of the file
-  const mimeType = mime.getType(fullPath);
-
-  // Update audit log
   const userLogs = await AuditLog.findOne({
-    where: { userId: userId },
-    order: [["createdAt", "DESC"]], // Ensures the latest record is selected
+    where: { userId },
+    order: [["createdAt", "DESC"]],
   });
-  await userLogs.update({ viewed: true });
+  if (userLogs) await userLogs.update({ viewed: true });
 
-  return { fullPath, mimeType };
+  return { cloudKey, mimeType };
 };
 
 module.exports = getFileContentLogic;

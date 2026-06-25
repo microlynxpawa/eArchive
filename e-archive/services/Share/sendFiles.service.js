@@ -1,105 +1,55 @@
-const fs = require('fs');
-const Path = require('path');
 const User = require("../../model/user");
 const File = require("../../model/file");
-const recordFileSending = require('./recordFileSending.service');
+const recordFileSending = require("./recordFileSending.service");
+const { getProvider } = require("../../storage/storageProvider");
+const { toCloudKey } = require("../../util/directory");
 
-// Service Function to Send Files by Username
 const sendFilesToUsers = async (usernames, files, senderContext = {}) => {
-  console.log("[sendFilesToUsers] Called with usernames:", usernames);
-  console.log("[sendFilesToUsers] Called with files:", files);
-  console.log("[sendFilesToUsers] Sender context:", senderContext);
-
   if (!usernames || !files || !Array.isArray(files)) {
-    console.error("[sendFilesToUsers] Invalid input: usernames or files missing/invalid");
     throw new Error("Usernames and files (array) are required.");
   }
 
   const missingFiles = [];
-  const filePaths = []; // Collect file paths for history recording
+  const sourceKeys = [];
+  const provider = await getProvider();
 
   for (const file of files) {
-    console.log(`[sendFilesToUsers] Processing file: ${file}`);
-
-    // Fetch file record from the database
     const fileRecord = await File.findOne({ where: { fileName: file } });
     if (!fileRecord) {
       missingFiles.push(file);
-      console.warn(`[sendFilesToUsers] File not found in database: ${file}`);
+      console.warn(`[sendFilesToUsers] File not found in DB: ${file}`);
       continue;
     }
-    console.log(`[sendFilesToUsers] Found file record in DB:`, fileRecord);
 
-    // Construct the full path of the file
-    const sourceFilePath = Path.join(fileRecord.filePath, file);
-    console.log(`[sendFilesToUsers] Source file path for ${file}: ${sourceFilePath}`);
+    const sourceKey = toCloudKey(fileRecord.filePath) + file;
+    sourceKeys.push(sourceKey);
 
-    if (!fs.existsSync(sourceFilePath)) {
-      missingFiles.push(file);
-      console.warn(`[sendFilesToUsers] File does not exist at source location: ${sourceFilePath}`);
-      continue;
-    }
-    console.log(`[sendFilesToUsers] File exists on disk: ${sourceFilePath}`);
-
-    // Collect file path for history
-    filePaths.push(sourceFilePath);
-
-    // Iterate through usernames and copy the file to each user's folder
     for (const username of usernames) {
-      console.log(`[sendFilesToUsers] Processing username: ${username}`);
-
       const user = await User.findOne({ where: { username } });
-      if (!user) {
-        console.warn(`[sendFilesToUsers] User not found for username: ${username}`);
+      if (!user || !user.folderPath) {
+        console.warn(`[sendFilesToUsers] User/folderPath missing for: ${username}`);
         continue;
       }
-      console.log(`[sendFilesToUsers] Found user:`, user);
 
-      if (!user.folderPath) {
-        console.warn(`[sendFilesToUsers] folderPath is missing for user with username: ${username}`);
-        continue;
-      }
-      console.log(`[sendFilesToUsers] User folderPath: ${user.folderPath}`);
-
-      // Define target file path
-      const targetFilePath = Path.join(user.folderPath, file);
-      console.log(`[sendFilesToUsers] Target file path for ${username}: ${targetFilePath}`);
+      const destPrefix = toCloudKey(user.folderPath);
+      const destKey = destPrefix + file;
 
       try {
-        // Ensure the target directory exists
-        fs.mkdirSync(user.folderPath, { recursive: true });
-        console.log(`[sendFilesToUsers] Ensured directory exists: ${user.folderPath}`);
-
-        // Copy the file
-        fs.copyFileSync(sourceFilePath, targetFilePath);
-        console.log(`[sendFilesToUsers] Successfully copied file: ${file} to ${username}'s folder.`);
-
-        // Create a new File record for the recipient
+        await provider.copy(sourceKey, destKey);
         await File.create({
           userId: user.id,
           fileName: fileRecord.fileName,
-          filePath: targetFilePath,
+          filePath: destPrefix,
           department: fileRecord.department,
-          branchName: fileRecord.branchName,
-          sentFrom: sourceFilePath
+          ranchName: fileRecord.ranchName,
+          sentFrom: sourceKey,
         });
       } catch (err) {
-        console.error(
-          `[sendFilesToUsers] Error copying file ${file} to ${username}'s folder:`,
-          err
-        );
+        console.error(`[sendFilesToUsers] Error copying ${file} to ${username}:`, err);
       }
     }
   }
 
-  if (missingFiles.length > 0) {
-    console.warn(`[sendFilesToUsers] The following files were missing or not processed: ${JSON.stringify(missingFiles)}`);
-  } else {
-    console.log("[sendFilesToUsers] All files processed successfully.");
-  }
-
-  // Record the file sending in history (with sender info from context if available)
-  // This will be called from the controller which has access to the current user
   if (senderContext.senderId && senderContext.senderUsername) {
     try {
       await recordFileSending(
@@ -108,15 +58,13 @@ const sendFilesToUsers = async (usernames, files, senderContext = {}) => {
         usernames,
         files,
         senderContext.batchName || null,
-        filePaths // Pass collected file paths
+        sourceKeys
       );
-      console.log("[sendFilesToUsers] File sending history recorded successfully");
     } catch (err) {
-      console.error("[sendFilesToUsers] Error recording file sending history:", err);
-      // Don't fail the operation if history recording fails
+      console.error("[sendFilesToUsers] Error recording send history:", err);
     }
   }
-  
+
   return { missingFiles };
 };
 

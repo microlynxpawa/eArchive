@@ -1,18 +1,19 @@
 import React, { useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { 
-  FiGrid, 
-  FiArrowLeft, 
-  FiArrowRight, 
-  FiHome, 
-  FiFile, 
-  FiFilePlus, 
-  FiActivity, 
-  FiPrinter, 
-  FiSend, 
-  FiSliders, 
-  FiUsers, 
-  FiGitBranch 
+import {
+  FiGrid,
+  FiArrowLeft,
+  FiArrowRight,
+  FiHome,
+  FiFile,
+  FiFilePlus,
+  FiActivity,
+  FiPrinter,
+  FiSend,
+  FiSliders,
+  FiUsers,
+  FiGitBranch,
+  FiCloud,
 } from 'react-icons/fi'
 
 export default function Sidebar({ auths = {}, onToggleSidebar }) {
@@ -60,6 +61,12 @@ export default function Sidebar({ auths = {}, onToggleSidebar }) {
     e.preventDefault()
     e.stopPropagation()
     window.dispatchEvent(new CustomEvent('open-access-control'))
+  }
+
+  const openStorageSettings = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    window.dispatchEvent(new CustomEvent('open-storage-settings'))
   }
 
   useEffect(() => {

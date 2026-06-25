@@ -4,6 +4,7 @@ const User = require("../model/user");
 const AuditLog = require("../model/auditLogs");
 const BranchDepartment = require("../model/branch-department")
 const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
+const { getProvider } = require("../storage/storageProvider");
 
 const {
   askQuestion,
@@ -35,6 +36,7 @@ const deleteFiles = require("../services/Delete/deleteFile.service");
 const handleDeleteDepartment = require("../services/Branch/removeDepartment.service")
 const AdminActions = require("../model/adminActions"); // Import the admin-actions model
 const { getFileSendingHistory, getFilesSentByUser, getFileSendingHistoryByReceiver } = require("../services/Share/getFileSendingHistory.service");
+const { getActiveProvider, setActiveProvider } = require("../services/Settings/storageSettings.service");
 
 const DashboardLayout = "dashboard/master";
 
@@ -475,14 +477,17 @@ const fileContent = async (req, res) => {
   const { fileName } = req.query;
   const userId = req.session.user;
   try {
-    const { fullPath, mimeType } = await getFileContentLogic(fileName, userId);
-
-    // Serve the file as binary data
-    res.contentType(mimeType);
-    res.sendFile(fullPath);
+    const { cloudKey, mimeType } = await getFileContentLogic(fileName, userId);
+    const provider = await getProvider();
+    res.setHeader("Content-Type", mimeType);
+    provider.getReadStream(cloudKey).pipe(res);
   } catch (error) {
     console.error(error);
-    res.status(error.message.includes("missing") || error.message.includes("not found") ? 404 : 500).send(error.message);
+    const status =
+      error.message.includes("missing") || error.message.includes("not found")
+        ? 404
+        : 500;
+    res.status(status).send(error.message);
   }
 };
 
@@ -833,6 +838,93 @@ const getFilesReceivedController = async (req, res) => {
   }
 };
 
+const getStorageSettings = async (req, res) => {
+  try {
+    const activeProvider = await getActiveProvider();
+    res.json({ statusCode: 200, activeProvider });
+  } catch (err) {
+    res.status(500).json({ statusCode: 500, message: err.message });
+  }
+};
+
+const { getSystemMetrics, getPerUserBreakdown, getUploadTrend, getStorageInfo } = require('../services/SuperAdmin/analytics.service');
+
+function resolvePeriod(period, from, to) {
+  const now = new Date();
+  if (period === 'today') {
+    const start = new Date(now); start.setHours(0, 0, 0, 0);
+    const end = new Date(now); end.setHours(23, 59, 59, 999);
+    return [start, end];
+  }
+  if (period === 'week') {
+    const start = new Date(now);
+    start.setDate(now.getDate() - now.getDay());
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(now); end.setHours(23, 59, 59, 999);
+    return [start, end];
+  }
+  if (period === 'month') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now); end.setHours(23, 59, 59, 999);
+    return [start, end];
+  }
+  // custom
+  const start = from ? new Date(from) : new Date(0);
+  const end = to ? new Date(new Date(to).setHours(23, 59, 59, 999)) : new Date();
+  return [start, end];
+}
+
+const superAdminDashboard = async (req, res) => {
+  try {
+    const auths = res.locals.auths;
+    if (!auths || !auths.is_super_admin) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    const { period = 'month', from, to } = req.query;
+    const [start, end] = resolvePeriod(period, from, to);
+    const [metrics, perUser, uploadTrend] = await Promise.all([
+      getSystemMetrics(start, end),
+      getPerUserBreakdown(start, end),
+      getUploadTrend(start, end),
+    ]);
+    res.json({ metrics, perUser, uploadTrend });
+  } catch (err) {
+    console.error('[superAdminDashboard]', err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const storageInfo = async (req, res) => {
+  try {
+    const auths = res.locals.auths;
+    if (!auths || !auths.is_super_admin) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    const info = await getStorageInfo();
+    res.json(info);
+  } catch (err) {
+    console.error('[storageInfo]', err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const updateStorageSettings = async (req, res) => {
+  const userId = req.session.user;
+  try {
+    // Admin-only check
+    const Authorizations = require("../model/authorizations");
+    const auth = await Authorizations.findOne({ where: { userId } });
+    if (!auth || !auth.is_admin) {
+      return res.status(403).json({ statusCode: 403, message: "Admin access required." });
+    }
+    const { provider } = req.body;
+    await setActiveProvider(provider, userId);
+    res.json({ statusCode: 200, message: `Storage provider updated to ${provider}` });
+  } catch (err) {
+    res.status(400).json({ statusCode: 400, message: err.message });
+  }
+};
+
 module.exports = {
   // COMMENTED OUT - EJS rendering functions (kept for reference, not exported)
   // login,
@@ -884,4 +976,8 @@ module.exports = {
   getFileSendingHistoryController,
   getUserFileSendingHistoryController,
   getFilesReceivedController,
+  getStorageSettings,
+  updateStorageSettings,
+  superAdminDashboard,
+  storageInfo,
 };

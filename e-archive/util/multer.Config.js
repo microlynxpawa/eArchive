@@ -1,20 +1,9 @@
-const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
+const multer = require("multer");
 
-// Ensure the temporary folder exists
-const tempDir = path.join(__dirname, 'eArchiiveUploads/temporary');
-if (!fs.existsSync(tempDir)) {
-  fs.mkdirSync(tempDir, { recursive: true });
+// Always use memory storage so services can hand off the buffer
+// to the active storage provider (local or S3).
+function getUploadMiddleware() {
+  return multer({ storage: multer.memoryStorage() });
 }
 
-const storage = multer.diskStorage({
-  destination: tempDir,
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-
-const uploading = multer({ storage });
-
-module.exports = uploading;
+module.exports = { getUploadMiddleware };

@@ -7,6 +7,7 @@ import AccessControl from './AccessControl'
 import DisplayDepartmentsModal from './DisplayDepartmentsModal'
 import ScanModalOptions from './ScanModalOptions'
 import BreadCrumbs from './BreadCrumbs'
+import StorageSettingsModal from './StorageSettingsModal'
 
 export default function Layout() {
   const navigate = useNavigate()
@@ -94,6 +95,7 @@ export default function Layout() {
       <AccessControl />
       <DisplayDepartmentsModal />
       <ScanModalOptions />
+      <StorageSettingsModal />
     </div>
   )
 }

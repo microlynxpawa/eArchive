@@ -38,12 +38,18 @@ const {
   getFileSendingHistoryController,
   getUserFileSendingHistoryController,
   getFilesReceivedController,
+  getStorageSettings,
+  updateStorageSettings,
+  superAdminDashboard,
+  storageInfo,
 } = require("../controllers/adminController");
 const routeDectector = require("../middleware/routeDectector");
 const authUser  = require('../middleware/authMiddleware');
 const rememberMeMiddleware = require('../middleware/rememberMeMiddleware');
 const passAuths = require("../middleware/passAuths");
-const uploading = require("../util/multer.Config");
+const { getUploadMiddleware } = require("../util/multer.Config");
+const { getProvider } = require("../storage/storageProvider");
+const path = require("path");
 
 const app = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -115,9 +121,9 @@ app.post("/remove-branch", removeBranch);
 app.post('/user-management', upload.none(),  createUserManagement);
 app.post('/remove-user', upload.none(), removeUser);
 app.post('/update-password', upload.none(), updatePassword);
-app.post("/uploadFile", uploading.single('file'), uploadFile);
+app.post("/uploadFile", getUploadMiddleware().single('file'), uploadFile);
 app.post("/searchUsers/permissions", accessControl);
-app.post("/upload-profile-picture", uploading.single('profilePicture'), uploadProfilePicture);
+app.post("/upload-profile-picture", getUploadMiddleware().single('profilePicture'), uploadProfilePicture);
 app.post('/sendFilesToUsers', sendFilesToUsersController);
 app.delete('/delete-file', deleteFile);
 app.delete('/delete-dep', removeDep);
@@ -125,10 +131,37 @@ app.delete('/delete-dep', removeDep);
 // Route for multiple file uploads
 app.post('/uploadMultipleFiles', upload.array('files'), multipleFilesUpload);
 
+// Storage provider settings
+app.get('/storage-settings', getStorageSettings);
+app.put('/storage-settings', updateStorageSettings);
+
+// Super admin analytics
+app.get('/super-dashboard', superAdminDashboard);
+app.get('/storage-info', storageInfo);
+
 // Admin message management routes
 app.post('/message', createAdminMessage);
 app.put('/message/:id', updateAdminMessage);
 app.delete('/message/:id', deleteAdminMessage);
+
+// Proxy profile pictures through the active storage provider
+app.get("/profile-picture", async (req, res) => {
+  const { key } = req.query;
+  if (!key) return res.status(400).json({ message: "key is required" });
+  try {
+    const provider = await getProvider();
+    if (provider.type === "local") {
+      const absPath = path.join(process.env.FOLDER || "", key);
+      return res.sendFile(absPath);
+    }
+    // For S3: stream directly
+    res.setHeader("Cache-Control", "private, max-age=3600");
+    provider.getReadStream(key).pipe(res);
+  } catch (err) {
+    console.error("[profile-picture]", err.message);
+    res.status(404).json({ message: "Profile picture not found" });
+  }
+});
 
 async function getUserPermissions(req, res,next){
   const userSessionId = req.session.user;

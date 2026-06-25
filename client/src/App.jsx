@@ -10,6 +10,7 @@ import UserManagement from './pages/UserManagement.jsx'
 import Departments from './pages/Departments.jsx'
 import Branches from './pages/Branches.jsx'
 import EditProfile from './pages/EditProfile.jsx'
+import SuperAdminDashboard from './pages/SuperAdminDashboard.jsx'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
               <Route path="user-group" element={<Departments />} />
               <Route path="branches" element={<Branches />} />
               <Route path="edit-profile" element={<EditProfile />} />
+              <Route path="super-dashboard" element={<SuperAdminDashboard />} />
             </Route>
 
             {/* Fallback */}

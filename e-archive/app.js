@@ -20,7 +20,49 @@ const logger = require("./logger"); // <-- Add this line to initialize logger an
 // Start daily backup scheduler (runs backup immediately and then every 24 hours)
 require("./services/Backup/backupScheduler.js");
 
-const DEFAULT_PATH = process.env.FOLDER ;
+const DEFAULT_PATH = process.env.FOLDER;
+
+// Converts absolute filePath / folderPath values in DB to relative forward-slash keys.
+// Runs once on startup; idempotent (skips already-relative paths).
+async function migrateFilePathsToRelative() {
+  if (!DEFAULT_PATH) return;
+  const File = require("./model/file");
+  const User = require("./model/user");
+
+  const normalise = (absPath) => {
+    let rel = absPath.replace(DEFAULT_PATH, "");
+    rel = rel.replace(/\\/g, "/").replace(/^\/+/, "");
+    if (rel && !rel.endsWith("/")) rel += "/";
+    return rel;
+  };
+
+  const files = await File.findAll({ attributes: ["id", "filePath", "sentFrom", "movedFrom"] });
+  for (const file of files) {
+    const updates = {};
+    if (file.filePath && path.isAbsolute(file.filePath)) updates.filePath = normalise(file.filePath);
+    if (file.sentFrom && path.isAbsolute(file.sentFrom)) updates.sentFrom = normalise(file.sentFrom);
+    if (file.movedFrom && path.isAbsolute(file.movedFrom)) updates.movedFrom = normalise(file.movedFrom);
+    if (Object.keys(updates).length > 0) await file.update(updates);
+  }
+
+  const users = await User.findAll();
+  for (const user of users) {
+    const updates = {};
+    if (user.folderPath && path.isAbsolute(user.folderPath)) {
+      updates.folderPath = normalise(user.folderPath);
+    }
+    // Ensure profilePicturePath has the profile-pictures/ prefix
+    if (
+      user.profilePicturePath &&
+      !user.profilePicturePath.startsWith("profile-pictures/")
+    ) {
+      updates.profilePicturePath = "profile-pictures/" + user.profilePicturePath;
+    }
+    if (Object.keys(updates).length > 0) await user.update(updates);
+  }
+
+  console.log("[Startup] filePath/folderPath migration complete.");
+}
 
 // Define the default static folder for uploads during upload process
 const CleanUp_PATH = path.resolve(
@@ -37,6 +79,7 @@ require("./model/auditLogs");
 require("./model/authorizations");
 require("./model/branch-department");
 require("./model/file");
+require("./model/systemSettings");
 defineAssociations();
 
 // create express app
@@ -72,9 +115,7 @@ app.use(cors({ origin: CLIENT_ORIGINS, credentials: true }));
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
-app.use('/profile-pictures', express.static(process.env.Profile_Pictures));
-app.use(express.static(DEFAULT_PATH));
-app.use(express.static(CleanUp_PATH));
+// Local-mode static serving is applied conditionally after DB is ready (see startServer)
 
 
 app.use(ejsLayout);
@@ -102,6 +143,26 @@ const startServer = async () => {
   } catch (err) {
     console.error('[DB Sync] Failed to sync database (server will still start):', err.message);
   }
+
+  // Seed SystemSettings row (singleton — only one row ever exists)
+  const SystemSettings = require("./model/systemSettings");
+  const settingsCount = await SystemSettings.count();
+  if (settingsCount === 0) {
+    await SystemSettings.create({ activeProvider: "local" });
+    console.log("[Startup] SystemSettings seeded with default provider: local");
+  }
+
+  // One-time migration: convert absolute filePath / folderPath values to relative forward-slash keys
+  await migrateFilePathsToRelative();
+
+  // Apply local-mode static file serving only when local storage is active
+  const { getProvider } = require("./storage/storageProvider");
+  const activeProvider = await getProvider();
+  if (activeProvider.type === "local") {
+    app.use("/profile-pictures", express.static(process.env.Profile_Pictures));
+    app.use(express.static(DEFAULT_PATH));
+  }
+
   createDefaultDirectory();
   // cleanTransformedUsers();
   // await hashTransformedUserPasswords();

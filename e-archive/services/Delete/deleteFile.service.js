@@ -1,47 +1,52 @@
-const fs = require('fs');
-const Path = require('path');
-const File = require('../../model/file');
-const AuditLog = require('../../model/auditLogs')
+const Path = require("path");
+const File = require("../../model/file");
+const AuditLog = require("../../model/auditLogs");
+const { getProvider } = require("../../storage/storageProvider");
+const { toCloudKey } = require("../../util/directory");
 
-// Service Function to Delete Files
+/**
+ * Delete files by name (preferred) or by full path (legacy — filename extracted automatically).
+ * @param {string[]} files - Array of file names or legacy absolute paths
+ * @param {number} userId
+ */
 const deleteFiles = async (files, userId) => {
   if (!files || !Array.isArray(files)) {
-    throw new Error('Files (array) are required.');
+    throw new Error("Files (array) are required.");
   }
 
   const deletedFiles = [];
   const missingFiles = [];
   const errors = [];
 
-  for (const filePath of files) {
+  const provider = await getProvider();
+
+  for (const fileInput of files) {
     try {
-      // Extract fileName from the path
-      const fileName = Path.basename(filePath);
-      // Fetch file record from the database
+      // Accept both file names and legacy absolute paths
+      const fileName = Path.basename(fileInput);
+
       const fileRecord = await File.findOne({ where: { fileName } });
-
-      // Always attempt to delete the file from the filesystem if it exists
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        deletedFiles.push(filePath);
-      } else {
-        missingFiles.push(filePath);
-        console.warn(`File does not exist at path: ${filePath}`);
+      if (!fileRecord) {
+        missingFiles.push(fileName);
+        console.warn(`[deleteFiles] No DB record found for: ${fileName}`);
+        continue;
       }
 
-      // If a DB record exists, delete it
-      if (fileRecord) {
-        // Update audit log  
-        const userLogs = await AuditLog.findOne({
-          where: { userId: userId },
-          order: [['createdAt', 'DESC']]
-        });
-        if (userLogs) await userLogs.update({deleted : true});
-        await File.destroy({ where: { fileName } });
-      }
+      const cloudKey = toCloudKey(fileRecord.filePath) + fileName;
+
+      await provider.delete(cloudKey);
+      deletedFiles.push(fileName);
+
+      const userLogs = await AuditLog.findOne({
+        where: { userId },
+        order: [["createdAt", "DESC"]],
+      });
+      if (userLogs) await userLogs.update({ deleted: true });
+
+      await File.destroy({ where: { fileName } });
     } catch (err) {
-      console.error(`Error deleting file ${filePath}:`, err);
-      errors.push({ file: filePath, error: err.message });
+      console.error(`[deleteFiles] Error deleting ${fileInput}:`, err);
+      errors.push({ file: fileInput, error: err.message });
     }
   }
 

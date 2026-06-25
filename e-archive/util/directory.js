@@ -242,6 +242,11 @@ const slugify = (text) => {
   return text.trim().toLocaleLowerCase().replaceAll(" ", "-");
 };
 
+// Normalise a relative storage prefix to forward slashes with a trailing slash.
+// Use wherever a filePath/folderPath must be used as a cloud key prefix.
+const toCloudKey = (prefix) =>
+  (prefix || "").replace(/\\/g, "/").replace(/\/?$/, "/");
+
 
 /**
  * Moves all files from oldDirectoryPath to newDirectoryPath, updates DB records for filePath, department, ranchName, and sets movedFrom.
@@ -569,6 +574,7 @@ module.exports = {
   getDefaultFolders,
   slugify,
   moveFilesAndDeleteOldDirectory,
+  toCloudKey,
   importUsers,
   importAuthorizations,
   cleanTransformedUsers,

@@ -1,4 +1,3 @@
-
 const File = require("../../model/file");
 const Auths = require("../../model/authorizations");
 const User = require("../../model/user");
@@ -6,35 +5,28 @@ const ArchiveCategory = require("../../model/archiveCategory");
 const Branch = require("../../model/branch");
 
 /**
- * Always build folder structure from the database (File table).
- * @param {string} basePath - Not used, kept for compatibility.
- * @param {number} userId
- * @returns {Promise<object>} Folder structure object
+ * Build folder structure from the File table.
+ * filePath is now a relative forward-slash prefix (e.g. "BranchA/DeptB/user1/").
  */
 async function buildFolderStructure(_basePath, userId) {
-  // Get user and their permissions, including userGroup (department) and branch info
-  const user = await User.findOne({ 
+  const user = await User.findOne({
     where: { id: userId },
     include: [
-      { model: ArchiveCategory, attributes: ['id', 'name'] },
-      { model: Branch, attributes: ['id', 'name'] }
-    ]
+      { model: ArchiveCategory, attributes: ["id", "name"] },
+      { model: Branch, attributes: ["id", "name"] },
+    ],
   });
-  const auth = await Auths.findOne({ where: { userId: userId } });
+  const auth = await Auths.findOne({ where: { userId } });
   if (!user || !auth) throw new Error("User or authorization data not found");
-  
-  // Get user department and branch
+
   const userDepartment = user.archive_category ? user.archive_category.name : null;
   const userBranch = user.branch ? user.branch.name : null;
-  const userBranchId = user.branchId;
 
-  // Fetch all files from DB
   const files = await File.findAll();
   const structure = {};
 
-  // Helper to insert file into nested structure
   function insertFile(relPath, fileName) {
-    const parts = relPath.split(/\\|\//).filter(Boolean);
+    const parts = relPath.replace(/\\/g, "/").split("/").filter(Boolean);
     let current = structure;
     for (const part of parts) {
       if (!current[part]) current[part] = {};
@@ -44,44 +36,33 @@ async function buildFolderStructure(_basePath, userId) {
     current.files.push(fileName);
   }
 
-  
-  // Build structure based on permissions
-  let filesInserted = 0;
   for (const file of files) {
-    // Extract branch name from file path
-    // Path format: C:\e-archiveUploads\[BRANCH]\[DEPARTMENT]\...
-    // The branch is the first folder after e-archiveUploads
-    let fileBranch = null;
-    const pathMatch = file.filePath.match(/e-archiveUploads[\\\/]([^\\\/]+)/);
-    if (pathMatch && pathMatch[1]) {
-      fileBranch = pathMatch[1];
+    // Normalise filePath to relative forward-slash
+    let relPath = (file.filePath || "").replace(/\\/g, "/");
+
+    // Strip absolute FOLDER prefix if migration hasn't run yet
+    const folderEnv = (process.env.FOLDER || "").replace(/\\/g, "/").replace(/\/+$/, "");
+    if (folderEnv && relPath.startsWith(folderEnv)) {
+      relPath = relPath.slice(folderEnv.length).replace(/^\/+/, "");
     }
 
-    // Remove base path from filePath for structure building
-    let relPath = file.filePath;
-    if (relPath.startsWith(process.env.FOLDER)) {
-      relPath = relPath.replace(process.env.FOLDER, '').replace(/^\\|\//, '');
-    }
+    // Extract branch: first path component
+    const parts = relPath.split("/").filter(Boolean);
+    const fileBranch = parts[0] || null;
 
-    // Only include files user is allowed to see
     if (auth.canViewBranchFiles) {
-      // Branch-level: show all files
       insertFile(relPath, file.fileName);
-      filesInserted++;
     } else if (auth.canViewDepartmentFiles) {
-      // Department-level: only files in user's department AND user's branch
       if (file.department === userDepartment && fileBranch === userBranch) {
         insertFile(relPath, file.fileName);
-        filesInserted++;
       }
     } else if (auth.canViewOwnFiles) {
-      // User-level: only files owned by user
       if (file.userId === userId) {
         insertFile(relPath, file.fileName);
-        filesInserted++;
       }
     }
   }
+
   return structure;
 }
 

@@ -262,21 +262,18 @@ export default function Gallery() {
   }
 
   // Handle deleting files from history
-  const handleDeleteFile = async (fileNames, filePaths) => {
+  const handleDeleteFile = async (fileNames) => {
     try {
       const fileList = Array.isArray(fileNames) ? fileNames : [fileNames]
-      // Call the delete endpoint for each file
-      for (let i = 0; i < fileList.length; i++) {
-        const response = await fetch('/admin/deleteFile', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileName: fileList[i] })
-        })
-        
-        if (!response.ok) {
-          throw new Error(`Failed to delete ${fileList[i]}`)
-        }
+      const response = await fetch('/admin/delete-file', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files: fileList }),
+      })
+      if (!response.ok) {
+        const j = await response.json().catch(() => null)
+        throw new Error(j?.error || `Failed to delete files`)
       }
       
       alertModalRef.current?.show({
@@ -417,10 +414,7 @@ export default function Gallery() {
       cb.className = 'file-checkbox'
       cb.setAttribute('data-file', fileName)
       cb.style.display = 'none'
-      // Normalize path: replace forward slashes with backslashes, remove leading/trailing slashes
-      const normalizedParent = parentKey ? parentKey.replace(/^[/\\]+|[/\\]+$/g, '').replace(/\//g, '\\') : ''
-      const fullPath = normalizedParent ? `C:\\e-archiveUploads\\${normalizedParent}\\${fileName}` : `C:\\e-archiveUploads\\${fileName}`
-      cb.setAttribute('data-fullpath', fullPath)
+      // data-fullpath removed: delete endpoint now accepts file names, not absolute paths
 
 
       // Use a small inline SVG file icon to avoid relying on FontAwesome
@@ -712,7 +706,7 @@ export default function Gallery() {
           }
 
           // Confirm delete
-          const filePaths = getSelectedFilePaths()
+          const filePaths = getSelectedFileNames()
           if (filePaths.length === 0) {
             if (window.Swal && window.Swal.fire) {
               await window.Swal.fire('No Files Selected', 'Please select at least one file to delete.', 'warning')

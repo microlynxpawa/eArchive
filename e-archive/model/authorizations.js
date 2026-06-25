@@ -52,6 +52,10 @@ const authorizations = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    is_super_admin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   { timestamps: true }
 );

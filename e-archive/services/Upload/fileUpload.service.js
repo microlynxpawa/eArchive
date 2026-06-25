@@ -1,24 +1,15 @@
-// Service File: services/fileService.js
-const fs = require("fs");
 const Path = require("path");
 const ArchiveCategory = require("../../model/archiveCategory");
 const branch = require("../../model/branch");
 const User = require("../../model/user");
 const File = require("../../model/file");
-const AuditLog = require("../../model/auditLogs")
-const {
-  ensureDirectoryExists,
-  ensureUniqueFileName,
-} = require("../../util/directory");
+const AuditLog = require("../../model/auditLogs");
+const { ensureUniqueFileName, toCloudKey } = require("../../util/directory");
+const { getProvider } = require("../../storage/storageProvider");
 
-const DEFAULT_PATH = process.env.FOLDER || "C:\\e-archiveUploads";
+const uploadFileLogic = async (file, fileName, userId) => {
+  if (!file) throw new Error("No file uploaded");
 
-const uploadFileLogic = async (file, fileName, userId, askQuestion) => {
-  if (!file) {
-    throw new Error("No file uploaded");
-  }
-
-  // Fetch the user with associated branch and category
   const user = await User.findOne({
     where: { id: userId },
     include: [
@@ -26,62 +17,39 @@ const uploadFileLogic = async (file, fileName, userId, askQuestion) => {
       { model: ArchiveCategory, attributes: ["name"] },
     ],
   });
+  if (!user) throw new Error("User not found");
 
-  if (!user) {
-    throw new Error("User not found");
+  let folderPrefix = user.folderPath;
+  if (!folderPrefix) {
+    // Build a relative forward-slash prefix (cloud key format)
+    const branchName = user.branch.dataValues.name;
+    const catName = user.archive_category.dataValues.name;
+    folderPrefix = `${branchName}/${catName}/${user.username}/`;
+    await user.update({ folderPath: folderPrefix });
   }
+  folderPrefix = toCloudKey(folderPrefix);
 
-  let folderPath = user.folderPath;
-
-  if (!folderPath) {
-    // Create a new folder path
-    folderPath = Path.join(
-      DEFAULT_PATH,
-      user.branch.dataValues.name,
-      user.archive_category.dataValues.name,
-      user.username
-    );
-  
-    // Ensure the directory exists
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, { recursive: true });
-    }
-  
-    // Update the user's folderPath in the database
-    await user.update({ folderPath: folderPath });
-    console.log("Folder created successfully:", folderPath);
-  }
-  
-  // If folderPath already exists or has been created, save the file directly
-  saveFileLogic(file, folderPath, fileName, user);
-  
-  const userLogs = await AuditLog.findOne({
-    where: { userId: userId },
-    order: [['createdAt', 'DESC']] // Ensures the latest record is selected
-  });
-  await userLogs.update({uploaded : true});
-
-  return {
-    message: "File uploaded successfully",
-    path: folderPath,
-  };
-};
-
-const saveFileLogic = (file, folderPath, fileName, user) => {
-  ensureDirectoryExists(folderPath);
   const uniqueFilename = ensureUniqueFileName(fileName);
-  const destinationPath = Path.join(folderPath, uniqueFilename);
-  fs.copyFileSync(file.path, destinationPath);
+  const cloudKey = folderPrefix + uniqueFilename;
 
-  const fileData = {
+  const provider = await getProvider();
+  await provider.upload(file.buffer, cloudKey, file.mimetype);
+
+  await File.create({
     userId: user.id,
     fileName: uniqueFilename,
-    filePath: folderPath,
+    filePath: folderPrefix,
     department: user.archive_category.dataValues.name,
-    branchName: user.branch.dataValues.name,
-  };
+    ranchName: user.branch.dataValues.name,
+  });
 
-  File.create(fileData);
+  const userLogs = await AuditLog.findOne({
+    where: { userId },
+    order: [["createdAt", "DESC"]],
+  });
+  if (userLogs) await userLogs.update({ uploaded: true });
+
+  return { message: "File uploaded successfully", path: folderPrefix };
 };
 
 module.exports = uploadFileLogic;
