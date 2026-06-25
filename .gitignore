@@ -29,3 +29,9 @@ util/eArchiiveUploads/*
 client/dist
 BackupService/bin
 BackupService/obj
+e-archive/error.log
+/CLAUDE.md
+/.claude/
+docs/
+issues.md
+README.md
