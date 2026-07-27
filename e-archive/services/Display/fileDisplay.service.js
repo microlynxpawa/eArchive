@@ -22,7 +22,17 @@ async function buildFolderStructure(_basePath, userId) {
   const userDepartment = user.archive_category ? user.archive_category.name : null;
   const userBranch = user.branch ? user.branch.name : null;
 
-  const files = await File.findAll();
+  // Restrict the query before building the tree. Loading every file for a
+  // regular user becomes very expensive as the archive grows, and it avoids
+  // relying on a strict comparison between a numeric DB id and a session id.
+  const fileWhere = {};
+  if (!auth.canViewBranchFiles && auth.canViewDepartmentFiles) {
+    fileWhere.department = userDepartment;
+  } else if (!auth.canViewBranchFiles && !auth.canViewDepartmentFiles && auth.canViewOwnFiles) {
+    fileWhere.userId = user.id;
+  }
+
+  const files = await File.findAll({ where: fileWhere });
   const structure = {};
 
   function insertFile(relPath, fileName) {
@@ -57,7 +67,7 @@ async function buildFolderStructure(_basePath, userId) {
         insertFile(relPath, file.fileName);
       }
     } else if (auth.canViewOwnFiles) {
-      if (file.userId === userId) {
+      if (Number(file.userId) === Number(user.id)) {
         insertFile(relPath, file.fileName);
       }
     }
