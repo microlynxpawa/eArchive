@@ -2,6 +2,7 @@
 // Daily backup: backs up MySQL database and (local mode only) FOLDER directory.
 
 const fs = require("fs");
+const fsp = require("fs/promises");
 const path = require("path");
 const { exec } = require("child_process");
 
@@ -33,21 +34,25 @@ function backupDatabase(destFolder) {
   });
 }
 
-function copyFolder(src, dest, depth = 0) {
-  if (!fs.existsSync(src)) {
+// Async so the copy yields the event loop between files — a synchronous walk of a
+// large archive blocks every incoming request until it finishes.
+async function copyFolder(src, dest, depth = 0) {
+  try {
+    await fsp.access(src);
+  } catch {
     console.error(`[Backup] Source folder does not exist: ${src}`);
     return;
   }
-  if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-  const entries = fs.readdirSync(src, { withFileTypes: true });
+  await fsp.mkdir(dest, { recursive: true });
+  const entries = await fsp.readdir(src, { withFileTypes: true });
   for (const entry of entries) {
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if (entry.isDirectory()) {
-      copyFolder(srcPath, destPath, depth + 1);
+      await copyFolder(srcPath, destPath, depth + 1);
     } else {
       try {
-        fs.copyFileSync(srcPath, destPath);
+        await fsp.copyFile(srcPath, destPath);
       } catch (err) {
         if (err.code === "ENOSPC") {
           const e = new Error("Backup destination disk is full — backup aborted.");
@@ -87,7 +92,7 @@ async function runBackup() {
         console.error("[Backup] FOLDER env var is empty — skipping file backup.");
       } else {
         const folderCopyDest = path.join(todayFolder, path.basename(FOLDER));
-        copyFolder(FOLDER, folderCopyDest);
+        await copyFolder(FOLDER, folderCopyDest);
       }
     } else {
       console.log(

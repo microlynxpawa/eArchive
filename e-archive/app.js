@@ -17,8 +17,8 @@ const fs = require("fs");
 
 const logger = require("./logger"); // <-- Add this line to initialize logger and patch console.error
 
-// Start daily backup scheduler (runs backup immediately and then every 24 hours)
-require("./services/Backup/backupScheduler.js");
+// Daily backup scheduler — started after the server is listening (see startServer)
+const { startScheduler } = require("./services/Backup/backupScheduler.js");
 
 const DEFAULT_PATH = process.env.FOLDER;
 
@@ -84,12 +84,23 @@ defineAssociations();
 
 // create express app
 const app = express();
+
+// Set HTTPS=true when served behind TLS (nginx). Leave unset for local HTTP dev:
+// a secure cookie is never sent over plain HTTP, which would break sign-in.
+const HTTPS_MODE = process.env.HTTPS === "true";
+if (HTTPS_MODE) app.set("trust proxy", 1);
+
 app.use(
   session({
     secret: SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
+    cookie: {
+      secure: HTTPS_MODE,
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    },
   })
 );
 
@@ -100,8 +111,9 @@ const CLIENT_ORIGINS = [
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  // Allow localhost:4500 or any origin from port 4500 (for network access via IP)
-  if (origin && (CLIENT_ORIGINS.includes(origin) || origin.match(/^http:\/\/[\d.]+:4500$/))) {
+  // Allow localhost:4500, or any http/https origin addressed by IP (LAN access).
+  // Behind nginx the app is same-origin and no CORS header is needed at all.
+  if (origin && (CLIENT_ORIGINS.includes(origin) || origin.match(/^https?:\/\/[\d.]+(:\d+)?$/))) {
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
@@ -137,12 +149,11 @@ app.use("/admin", adminRoute);
 
 
 const startServer = async () => {
-   await dbConnect.authenticate();
-  try {
-    await dbConnect.sync({ alter: true });
-  } catch (err) {
-    console.error('[DB Sync] Failed to sync database (server will still start):', err.message);
-  }
+  await dbConnect.authenticate();
+
+  // NOTE: sequelize.sync({ alter: true }) used to run here on every boot. It
+  // rewrote the live schema on each restart and dominated startup time, so it
+  // has been removed. Apply model changes to the database deliberately instead.
 
   // Seed SystemSettings row (singleton — only one row ever exists)
   const SystemSettings = require("./model/systemSettings");
@@ -171,6 +182,8 @@ const startServer = async () => {
   // exportUserCredentials();
   app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
+    // Kick off the backup scheduler only once the server is accepting requests
+    startScheduler();
     // console.log(envPaths);
     
   });
