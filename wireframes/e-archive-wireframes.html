@@ -21,6 +21,28 @@
         /* login keeps the existing brand background */
         .wf-login-bg{min-height:100vh;background:url("assets/images/login/login_bg.jpg") center center / cover no-repeat}
         .wf-login-bg .card{box-shadow:0 10px 30px rgba(0,0,0,.25)}
+        /* split panes with draggable resizers, as the current page has */
+        .wf-split{display:flex;align-items:flex-start;gap:16px}
+        /* folder panel: fixed width, scrolls on its own */
+        .wf-pane-left{flex:0 0 320px;width:320px;height:560px;overflow-y:auto;overflow-x:hidden;
+            border:1px solid #dee2e6;border-radius:6px;padding:10px}
+        .wf-pane-right{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
+        .wf-viewer{border:1px solid #dee2e6;border-radius:6px;display:flex;flex-direction:column;
+            height:420px;position:relative;overflow:hidden;background:#fff}
+        .wf-viewer-head{display:flex;align-items:center;gap:4px;padding:6px 10px;border-bottom:1px solid #dee2e6;background:#f8f9fa;font-size:.8125rem}
+        .wf-viewer-body{flex:1 1 auto;overflow:auto;display:flex;align-items:center;justify-content:center;background:#f1f3fa}
+        .wf-actions-bar{margin-top:10px}
+        .wf-file.wf-selected{background:#e3ebff;border-radius:4px}
+        /* tree: mirrors the current gallery structure */
+        .wf-tree{font-size:.875rem}
+        .wf-children{margin-left:18px;padding-left:10px;border-left:1px dashed rgba(0,0,0,.12)}
+        .wf-row{display:flex;align-items:center;padding:5px 6px;border-radius:4px;min-width:0}
+        .wf-row:hover{background:#f1f3fa}
+        .wf-caret{width:16px;color:#98a6ad;flex:none}
+        .wf-name{min-width:0;flex:1 1 auto}
+        .wf-actions{margin-left:auto;padding-left:12px;flex:none;visibility:hidden}
+        .wf-row:hover .wf-actions{visibility:visible}
+        .wf-node:not(.wf-open) > .wf-children{display:none}
         /* marks a deliberate change from the current app */
         .wf-new{outline:1px dashed #0acf97;outline-offset:3px}
     </style>
@@ -1023,12 +1045,1023 @@
 <!-- ==================================================================== -->
 <!-- Wireframe harness                                                     -->
 <!-- ==================================================================== -->
+<!-- PAGE 4 — FILES                                                        -->
+<!-- Mirrors the current page: split panels, inline preview, mode-based    -->
+<!-- selection. Only the styling and a few affordances change.             -->
+<!-- API: GET    /admin/file-structure                                     -->
+<!--      GET    /admin/file-content?fileName=  (preview and download)     -->
+<!--      DELETE /admin/delete-file                                        -->
+<!--      GET    /admin/file-sending-history                               -->
+<!-- ==================================================================== -->
+<div class="wf-page" id="page-files">
+<div class="wrapper">
+
+    <div class="leftside-menu">
+        <a href="#" class="logo text-center logo-light">
+            <span class="logo-lg"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="22"></span>
+            <span class="logo-sm"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="18"></span>
+        </a>
+        <div class="h-100" data-simplebar>
+            <ul class="side-nav">
+                <li class="side-nav-title side-nav-item">Main</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-view-dashboard-outline"></i><span> Dashboard </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link active"><i class="mdi mdi-folder-outline"></i><span> Files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-cloud-upload-outline"></i><span> Upload </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-send-outline"></i><span> Send files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-scanner"></i><span> Scan </span></a></li>
+                <li class="side-nav-title side-nav-item">Administration</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-account-multiple-outline"></i><span> Users </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-shield-key-outline"></i><span> Access control </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-domain"></i><span> Branches </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-sitemap-outline"></i><span> Departments </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-history"></i><span> Audit trail </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-database-cog-outline"></i><span> Storage </span></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="content-page">
+        <div class="content">
+
+            <div class="navbar-custom">
+                <ul class="list-unstyled topbar-menu float-end mb-0">
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button">
+                            <i class="dripicons-bell noti-icon"></i><span class="noti-icon-badge"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
+                            <div class="dropdown-item noti-title"><h5 class="m-0">Messages</h5></div>
+                            <a href="#" class="dropdown-item notify-item">
+                                <div class="notify-icon bg-primary"><i class="mdi mdi-bullhorn-outline"></i></div>
+                                <p class="notify-details">Scheduled maintenance this Saturday from 6pm.</p>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button">
+                            <span class="account-user-avatar"><img src="assets/images/users/avatar-1.jpg" alt="user" class="rounded-circle"></span>
+                            <span>
+                                <span class="account-user-name">Akosua Mensah</span>
+                                <span class="account-position">Finance · Head Office</span>
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-account-circle me-1"></i><span>My profile</span></a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-logout me-1"></i><span>Sign out</span></a>
+                        </div>
+                    </li>
+                </ul>
+                <button class="button-menu-mobile open-left"><i class="mdi mdi-menu"></i></button>
+            </div>
+
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="#">e-Archive</a></li>
+                                    <li class="breadcrumb-item active">Files</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">Files</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <!-- ============ SEARCH ROW: three separate searches ============ -->
+                                <div class="d-flex flex-wrap align-items-end gap-2 mb-3">
+
+                                    <div>
+                                        <label class="form-label font-12 text-muted mb-1 d-block">Search by file name</label>
+                                        <div class="input-group input-group-sm" style="width:250px">
+                                            <input type="text" class="form-control" placeholder="e.g. Payroll">
+                                            <button class="btn btn-primary" type="button" title="Search"><i class="mdi mdi-magnify"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label font-12 text-muted mb-1 d-block">Search by date</label>
+                                        <div class="input-group input-group-sm" style="width:195px">
+                                            <!-- native picker; converted to d-m-yyyy before it reaches the API -->
+                                            <input type="date" class="form-control">
+                                            <button class="btn btn-primary" type="button" title="Search"><i class="mdi mdi-magnify"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label font-12 text-muted mb-1 d-block">Search by person</label>
+                                        <button class="btn btn-sm btn-light border" type="button" style="width:200px"
+                                                data-bs-toggle="modal" data-bs-target="#wf-userpick">
+                                            <i class="mdi mdi-folder-account-outline me-1"></i>Find a user&rsquo;s files
+                                        </button>
+                                    </div>
+
+                                    <!-- pushed right: sending history (currently a hidden button) -->
+                                    <div class="ms-auto">
+                                        <button class="btn btn-sm btn-light border" type="button"
+                                                data-bs-toggle="modal" data-bs-target="#wf-history">
+                                            <i class="mdi mdi-history me-1"></i>Sending history
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Result summary. Only one renders, depending on which search ran. -->
+                                <!-- (a) file name search resolves to individual files -->
+                                <div class="alert alert-info py-2 px-3 d-flex align-items-center mb-2" role="alert">
+                                    <i class="mdi mdi-file-search-outline me-2"></i>
+                                    <span class="flex-grow-1"><strong>3 files</strong> match <strong>&ldquo;Payroll&rdquo;</strong>. Each one is highlighted below.</span>
+                                    <a href="#" class="me-3" data-bs-toggle="modal" data-bs-target="#wf-matched">View as list</a>
+                                    <a href="#" class="text-muted"><i class="mdi mdi-close"></i> Clear</a>
+                                </div>
+                                <!-- (b) date search opens the folders holding matches -->
+                                <div class="alert alert-info py-2 px-3 d-flex align-items-center mb-2 d-none" role="alert">
+                                    <i class="mdi mdi-calendar-search me-2"></i>
+                                    <span class="flex-grow-1">Files dated <strong>12 April 2026</strong> were found in <strong>2 folders</strong>. Those folders are open below.</span>
+                                    <a href="#" class="text-muted"><i class="mdi mdi-close"></i> Clear</a>
+                                </div>
+                                <!-- (c) person search opens that user's folder -->
+                                <div class="alert alert-info py-2 px-3 d-flex align-items-center mb-2 d-none" role="alert">
+                                    <i class="mdi mdi-folder-account-outline me-2"></i>
+                                    <span class="flex-grow-1">Opened the folder for <strong>Kwame Osei</strong> (kwame.osei).</span>
+                                    <a href="#" class="text-muted"><i class="mdi mdi-close"></i> Clear</a>
+                                </div>
+
+                                <!-- ============ SPLIT PANELS ============ -->
+                                <div class="wf-split">
+
+                                    <!-- LEFT: folder tree -->
+                                    <div class="wf-pane-left">
+                                        <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                                            <span class="text-muted font-12">
+                                                <i class="mdi mdi-eye-outline me-1"></i>Your branch
+                                            </span>
+                                            <!-- replaces RevealFoldersButton; folders only, label flips -->
+                                            <button class="btn btn-sm btn-link text-muted p-0" onclick="wfToggleAll(this)">
+                                                <i class="mdi mdi-unfold-more-horizontal me-1"></i>Expand all folders
+                                            </button>
+                                        </div>
+
+                                        <div class="wf-tree">
+                                        <div class="wf-node wf-open">
+                                            <div class="wf-row" role="button">
+                                                <i class="mdi mdi-chevron-down wf-caret"></i>
+                                                <i class="mdi mdi-domain text-muted me-1"></i>
+                                                <span class="fw-bold">Head Office</span>
+                                            </div>
+                                            <div class="wf-children">
+                                                <div class="wf-node wf-open">
+                                                    <div class="wf-row" role="button">
+                                                        <i class="mdi mdi-chevron-down wf-caret"></i>
+                                                        <i class="mdi mdi-sitemap-outline text-muted me-1"></i>
+                                                        <span class="fw-bold">Finance</span>
+                                                    </div>
+                                                    <div class="wf-children">
+                                                        <div class="wf-node wf-open">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-down wf-caret"></i>
+                                                                <i class="mdi mdi-folder-open text-warning me-1"></i>
+                                                                <span class="fw-bold">akosua.mensah</span>
+                                                                <span class="badge bg-light text-dark ms-2">20</span>
+                                                            </div>
+                                                            <div class="wf-children">
+                                                                <div class="wf-node wf-open" data-kind="batch">
+                                                                    <div class="wf-row" role="button">
+                                                                        <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                        <i class="mdi mdi-chevron-down wf-caret"></i>
+                                                                        <i class="mdi mdi-folder-zip-outline text-warning me-1"></i>
+                                                                        <span class="fw-bold text-truncate" title="Q1-2026-Payroll">Q1-2026-Payroll</span>
+                                                                        <span class="badge bg-light text-dark ms-2">3</span>
+                                                                    </div>
+                                                                    <div class="wf-children">
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Payroll-March.pdf">Payroll-March.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Payroll-February.pdf">Payroll-February.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Payroll-January.pdf">Payroll-January.pdf</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="wf-node" data-kind="batch">
+                                                                    <div class="wf-row" role="button">
+                                                                        <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                        <i class="mdi mdi-folder-zip-outline text-warning me-1"></i>
+                                                                        <span class="fw-bold text-truncate" title="Q2-2026-Payroll">Q2-2026-Payroll</span>
+                                                                        <span class="badge bg-light text-dark ms-2">3</span>
+                                                                    </div>
+                                                                    <div class="wf-children">
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Payroll-June.pdf">Payroll-June.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Payroll-May.pdf">Payroll-May.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Payroll-April.pdf">Payroll-April.pdf</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="wf-node" data-kind="batch">
+                                                                    <div class="wf-row" role="button">
+                                                                        <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                        <i class="mdi mdi-folder-zip-outline text-warning me-1"></i>
+                                                                        <span class="fw-bold text-truncate" title="Supplier-Invoices-August">Supplier-Invoices-August</span>
+                                                                        <span class="badge bg-light text-dark ms-2">6</span>
+                                                                    </div>
+                                                                    <div class="wf-children">
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Invoice-9021-Ashanti-Supplies.pdf">Invoice-9021-Ashanti-Supplies.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Invoice-9014-Ghana-Water.pdf">Invoice-9014-Ghana-Water.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Invoice-9008-ECG-Power.pdf">Invoice-9008-ECG-Power.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Invoice-8997-Office-Depot.pdf">Invoice-8997-Office-Depot.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Invoice-8981-Vodafone-Business.pdf">Invoice-8981-Vodafone-Business.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Invoice-8842-Printing.pdf">Invoice-8842-Printing.pdf</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="wf-node" data-kind="batch">
+                                                                    <div class="wf-row" role="button">
+                                                                        <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                        <i class="mdi mdi-folder-outline text-muted me-1"></i>
+                                                                        <span class="fw-bold text-truncate" title="Single Uploads">Single Uploads</span>
+                                                                        <span class="badge bg-light text-dark ms-2">8</span>
+                                                                    </div>
+                                                                    <div class="wf-children">
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Bank-Reconciliation-Statement-December-2025.pdf">Bank-Reconciliation-Statement-December-2025.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-excel-box text-success me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="VAT-Return-Q4-2025.xlsx">VAT-Return-Q4-2025.xlsx</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-excel-box text-success me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Petty-Cash-Log.xlsx">Petty-Cash-Log.xlsx</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-word-box text-primary me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Audit-Response-Letter.docx">Audit-Response-Letter.docx</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-excel-box text-success me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Fixed-Asset-Register-2026.xlsx">Fixed-Asset-Register-2026.xlsx</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Cheque-Book-Requisition.pdf">Cheque-Book-Requisition.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Tax-Clearance-Certificate.pdf">Tax-Clearance-Certificate.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-excel-box text-success me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Budget-Variance-Analysis-February.xlsx">Budget-Variance-Analysis-February.xlsx</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="wf-node wf-open">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-down wf-caret"></i>
+                                                                <i class="mdi mdi-folder-open text-warning me-1"></i>
+                                                                <span class="fw-bold">kwame.osei</span>
+                                                                <span class="badge bg-light text-dark ms-2">14</span>
+                                                            </div>
+                                                            <div class="wf-children">
+                                                                <div class="wf-node" data-kind="batch">
+                                                                    <div class="wf-row" role="button">
+                                                                        <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                        <i class="mdi mdi-folder-zip-outline text-warning me-1"></i>
+                                                                        <span class="fw-bold text-truncate" title="Reconciliations-2026">Reconciliations-2026</span>
+                                                                        <span class="badge bg-light text-dark ms-2">3</span>
+                                                                    </div>
+                                                                    <div class="wf-children">
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-excel-box text-success me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Recon-June.xlsx">Recon-June.xlsx</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-excel-box text-success me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Recon-May.xlsx">Recon-May.xlsx</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-excel-box text-success me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Recon-April.xlsx">Recon-April.xlsx</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="wf-node wf-open" data-kind="batch">
+                                                                    <div class="wf-row" role="button">
+                                                                        <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                        <i class="mdi mdi-chevron-down wf-caret"></i>
+                                                                        <i class="mdi mdi-folder-outline text-muted me-1"></i>
+                                                                        <span class="fw-bold text-truncate" title="Single Uploads">Single Uploads</span>
+                                                                        <span class="badge bg-light text-dark ms-2">2</span>
+                                                                    </div>
+                                                                    <div class="wf-children">
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Supplier-Invoice-8842.pdf">Supplier-Invoice-8842.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-word-box text-primary me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Vendor-Agreement.docx">Vendor-Agreement.docx</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="wf-node">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                <i class="mdi mdi-folder text-warning me-1"></i>
+                                                                <span class="fw-bold">abena.nyarko</span>
+                                                                <span class="badge bg-light text-dark ms-2">31</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="wf-node">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                <i class="mdi mdi-folder text-warning me-1"></i>
+                                                                <span class="fw-bold">kofi.owusu</span>
+                                                                <span class="badge bg-light text-dark ms-2">9</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="wf-node">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                <i class="mdi mdi-folder text-warning me-1"></i>
+                                                                <span class="fw-bold">esi.mensimah</span>
+                                                                <span class="badge bg-light text-dark ms-2">47</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="wf-node">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                <i class="mdi mdi-folder text-warning me-1"></i>
+                                                                <span class="fw-bold">nana.agyeman</span>
+                                                                <span class="badge bg-light text-dark ms-2">12</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="wf-node">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                <i class="mdi mdi-folder text-warning me-1"></i>
+                                                                <span class="fw-bold">adwoa.frimpong</span>
+                                                                <span class="badge bg-light text-dark ms-2">6</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="wf-node wf-open">
+                                                    <div class="wf-row" role="button">
+                                                        <i class="mdi mdi-chevron-down wf-caret"></i>
+                                                        <i class="mdi mdi-sitemap-outline text-muted me-1"></i>
+                                                        <span class="fw-bold">Human Resources</span>
+                                                    </div>
+                                                    <div class="wf-children">
+                                                        <div class="wf-node wf-open">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-down wf-caret"></i>
+                                                                <i class="mdi mdi-folder-open text-warning me-1"></i>
+                                                                <span class="fw-bold">ama.boateng</span>
+                                                                <span class="badge bg-light text-dark ms-2">18</span>
+                                                            </div>
+                                                            <div class="wf-children">
+                                                                <div class="wf-node wf-open" data-kind="batch">
+                                                                    <div class="wf-row" role="button">
+                                                                        <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                        <i class="mdi mdi-chevron-down wf-caret"></i>
+                                                                        <i class="mdi mdi-folder-zip-outline text-warning me-1"></i>
+                                                                        <span class="fw-bold text-truncate" title="New-Hires-2026">New-Hires-2026</span>
+                                                                        <span class="badge bg-light text-dark ms-2">3</span>
+                                                                    </div>
+                                                                    <div class="wf-children">
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-word-box text-primary me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Contract-Amendment-Kofi-Owusu.docx">Contract-Amendment-Kofi-Owusu.docx</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-word-box text-primary me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Contract-Amendment-Efua-Asante.docx">Contract-Amendment-Efua-Asante.docx</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Staff-Handbook-Revision-4-Final-Approved-Version.pdf">Staff-Handbook-Revision-4-Final-Approved-Version.pdf</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="wf-node" data-kind="batch">
+                                                                    <div class="wf-row" role="button">
+                                                                        <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                        <i class="mdi mdi-folder-outline text-muted me-1"></i>
+                                                                        <span class="fw-bold text-truncate" title="Single Uploads">Single Uploads</span>
+                                                                        <span class="badge bg-light text-dark ms-2">3</span>
+                                                                    </div>
+                                                                    <div class="wf-children">
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-excel-box text-success me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Leave-Schedule-2026.xlsx">Leave-Schedule-2026.xlsx</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Disciplinary-Procedure.pdf">Disciplinary-Procedure.pdf</a>
+                                                                        </div>
+                                                                        <div class="wf-row wf-file">
+                                                                            <input class="form-check-input wf-check me-2" type="checkbox">
+                                                                            <i class="mdi mdi-file-word-box text-primary me-1"></i>
+                                                                            <a href="#" class="wf-name text-body text-truncate" title="Recruitment-Plan-Q3.docx">Recruitment-Plan-Q3.docx</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="wf-node">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                <i class="mdi mdi-folder text-warning me-1"></i>
+                                                                <span class="fw-bold">yaa.serwaa</span>
+                                                                <span class="badge bg-light text-dark ms-2">22</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="wf-node">
+                                                            <div class="wf-row" role="button">
+                                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                                <i class="mdi mdi-folder text-warning me-1"></i>
+                                                                <span class="fw-bold">kojo.antwi</span>
+                                                                <span class="badge bg-light text-dark ms-2">5</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="wf-node">
+                                                    <div class="wf-row" role="button">
+                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                        <i class="mdi mdi-sitemap-outline text-muted me-1"></i>
+                                                        <span class="fw-bold">Legal</span>
+                                                    </div>
+                                                </div>
+                                                <div class="wf-node">
+                                                    <div class="wf-row" role="button">
+                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                        <i class="mdi mdi-sitemap-outline text-muted me-1"></i>
+                                                        <span class="fw-bold">Operations</span>
+                                                    </div>
+                                                </div>
+                                                <div class="wf-node">
+                                                    <div class="wf-row" role="button">
+                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                        <i class="mdi mdi-sitemap-outline text-muted me-1"></i>
+                                                        <span class="fw-bold">Procurement</span>
+                                                    </div>
+                                                </div>
+                                                <div class="wf-node">
+                                                    <div class="wf-row" role="button">
+                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                        <i class="mdi mdi-sitemap-outline text-muted me-1"></i>
+                                                        <span class="fw-bold">Audit</span>
+                                                    </div>
+                                                </div>
+                                                <div class="wf-node">
+                                                    <div class="wf-row" role="button">
+                                                        <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                        <i class="mdi mdi-sitemap-outline text-muted me-1"></i>
+                                                        <span class="fw-bold">Records</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="wf-node">
+                                            <div class="wf-row" role="button">
+                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                <i class="mdi mdi-domain text-muted me-1"></i>
+                                                <span class="fw-bold">Kumasi Branch</span>
+                                            </div>
+                                        </div>
+                                        <div class="wf-node">
+                                            <div class="wf-row" role="button">
+                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                <i class="mdi mdi-domain text-muted me-1"></i>
+                                                <span class="fw-bold">Takoradi Branch</span>
+                                            </div>
+                                        </div>
+                                        <div class="wf-node">
+                                            <div class="wf-row" role="button">
+                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                <i class="mdi mdi-domain text-muted me-1"></i>
+                                                <span class="fw-bold">Tamale Branch</span>
+                                            </div>
+                                        </div>
+                                        <div class="wf-node">
+                                            <div class="wf-row" role="button">
+                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                <i class="mdi mdi-domain text-muted me-1"></i>
+                                                <span class="fw-bold">Cape Coast Branch</span>
+                                            </div>
+                                        </div>
+                                        <div class="wf-node">
+                                            <div class="wf-row" role="button">
+                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                <i class="mdi mdi-domain text-muted me-1"></i>
+                                                <span class="fw-bold">Sunyani Branch</span>
+                                            </div>
+                                        </div>
+                                        <div class="wf-node">
+                                            <div class="wf-row" role="button">
+                                                <i class="mdi mdi-chevron-right wf-caret"></i>
+                                                <i class="mdi mdi-domain text-muted me-1"></i>
+                                                <span class="fw-bold">Ho Branch</span>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+
+
+                                    <!-- RIGHT: preview + actions -->
+                                    <div class="wf-pane-right">
+
+                                        <div class="wf-viewer">
+                                            <div class="wf-viewer-head">
+                                                <span class="text-truncate fw-bold">Payroll-March.pdf</span>
+                                                <span class="text-muted font-12 ms-2 text-truncate">Q1-2026-Payroll</span>
+                                                <span class="ms-auto">
+                                                    <button class="btn btn-sm btn-light py-0 px-1" title="Download"><i class="mdi mdi-download-outline"></i></button>
+                                                    <button class="btn btn-sm btn-light py-0 px-1" title="Open full screen" data-bs-toggle="modal" data-bs-target="#wf-preview"><i class="mdi mdi-fullscreen"></i></button>
+                                                </span>
+                                            </div>
+
+                                            <div class="wf-viewer-body">
+                                                <div class="text-center text-muted">
+                                                    <i class="mdi mdi-file-pdf-box text-danger" style="font-size:44px"></i>
+                                                    <p class="mb-0 mt-1 font-13">PDF renders here</p>
+                                                    <p class="font-12 mb-0">object data="/admin/file-content?fileName=..."</p>
+                                                    <p class="font-12 mb-0 text-black-50">Images render as img, anything else as escaped text</p>
+                                                </div>
+
+                                                <!-- resting state, before a file is chosen -->
+                                                <div class="text-center text-muted d-none">
+                                                    <i class="mdi mdi-file-eye-outline" style="font-size:40px"></i>
+                                                    <p class="mb-0 mt-1">Select a file to preview its content here.</p>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- ---- ACTION BAR: mode based, exactly as today ---- -->
+                                        <div class="wf-actions-bar">
+
+                                            <!-- resting state -->
+                                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                                <!-- visible: view_upload -->
+                                                <button class="btn btn-sm btn-primary"><i class="mdi mdi-send-outline me-1"></i>Pick &amp; Send</button>
+                                                <!-- visible: is_admin only -->
+                                                <button class="btn btn-sm btn-light"><i class="mdi mdi-trash-can-outline me-1"></i>Delete</button>
+                                            </div>
+
+                                            <!-- Pick & Send mode -->
+                                            <div class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-2 border-top">
+                                                <span class="badge bg-primary-lighten text-primary">Pick &amp; Send mode</span>
+                                                <button class="btn btn-sm btn-danger"><i class="mdi mdi-close me-1"></i>Cancel file sending</button>
+                                                <button class="btn btn-sm btn-success"><i class="mdi mdi-send me-1"></i>Send</button>
+                                                <span class="text-success font-13">Please select a file.</span>
+                                            </div>
+
+                                            <!-- Delete mode -->
+                                            <div class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-2 border-top">
+                                                <span class="badge bg-danger-lighten text-danger">Delete mode</span>
+                                                <button class="btn btn-sm btn-secondary"><i class="mdi mdi-close me-1"></i>Cancel Delete</button>
+                                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#wf-delete"><i class="mdi mdi-trash-can-outline me-1"></i>Delete selected</button>
+                                                <span class="text-success font-13">Select file(s) to delete.</span>
+                                            </div>
+
+                                            <p class="text-muted font-12 mb-0 mt-2">
+                                                Checkboxes appear only in these two modes, as they do today. Clicking a folder while a
+                                                mode is active ticks or unticks everything inside it.
+                                            </p>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6"><script>document.write(new Date().getFullYear())</script> © e-Archive</div>
+                    <div class="col-md-6"><div class="text-md-end footer-links d-none d-md-block"><span class="text-muted">Head Office · Finance</span></div></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- ---- FULL SCREEN PREVIEW: same as today, reached from the viewer ---- -->
+<div class="modal fade" id="wf-preview" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <div class="text-truncate">
+                    <h5 class="modal-title text-truncate mb-0">Payroll-March.pdf</h5>
+                    <span class="font-12 text-muted">Q1-2026-Payroll · Finance · Head Office</span>
+                </div>
+                <div class="ms-auto me-2">
+                    <button class="btn btn-sm btn-light"><i class="mdi mdi-download-outline me-1"></i>Download</button>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light p-0 d-flex align-items-center justify-content-center">
+                <div class="text-center text-muted">
+                    <i class="mdi mdi-file-pdf-box text-danger" style="font-size:64px"></i>
+                    <p class="mb-0 mt-2">Full screen preview</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ---- ALERT: replaces the current AlertModal ---- -->
+<div class="modal fade" id="wf-alert" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <i class="mdi mdi-alert-circle-outline text-warning" style="font-size:40px"></i>
+                <h5 class="mt-2">Invalid format</h5>
+                <p class="text-muted mb-3">Enter the date as day-month-year, for example 12-4-2026.</p>
+                <button class="btn btn-sm btn-light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ---- DELETE CONFIRM ---- -->
+<div class="modal fade" id="wf-delete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete 1 file?</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0"><strong>Payroll-March.pdf</strong> will be permanently removed from the archive. This cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger">Delete file</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<!-- ---- TOAST: replaces showToast() for send / delete results ---- -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:2050">
+    <div class="toast show align-items-center text-white bg-success border-0 mb-2" role="alert">
+        <div class="d-flex">
+            <div class="toast-body"><i class="mdi mdi-check-circle-outline me-1"></i>Files sent successfully</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+    <div class="toast show align-items-center text-white bg-danger border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body"><i class="mdi mdi-alert-circle-outline me-1"></i>Failed to send files</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<!-- ---- SENDING HISTORY: replaces FileSendingHistoryModal ---- -->
+<div class="modal fade" id="wf-history" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <h4 class="modal-title mb-0">Sending history</h4>
+                    <span class="font-13 text-muted">Files you have sent</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="px-3 pt-2 pb-2 border-bottom d-flex flex-wrap align-items-center gap-2">
+                <!-- visible only when canSearchOthers (is_admin / supervision_right) -->
+                <button class="btn btn-sm btn-light border" data-bs-toggle="modal" data-bs-target="#wf-userpick">
+                    <i class="mdi mdi-account-search-outline me-1"></i>View another user&rsquo;s history
+                </button>
+
+                <!-- shown once another user is being viewed -->
+                <span class="badge bg-primary-lighten text-primary p-1 px-2">
+                    Viewing: kwame.osei
+                    <a href="#" class="text-primary ms-1" title="Back to my history"><i class="mdi mdi-close"></i></a>
+                </span>
+
+                <div class="ms-auto d-flex align-items-center">
+                    <span class="font-13 text-muted me-1">Show</span>
+                    <select class="form-select form-select-sm" style="width:80px">
+                        <option>50</option>
+                        <option>100</option>
+                        <option>250</option>
+                        <option>500</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-body p-2">
+
+                <div class="accordion custom-accordion" id="wf-histacc">
+
+                    <!-- group: batch name when present -->
+                    <div class="card mb-1 shadow-none border">
+                        <div class="card-header p-2" id="wf-h1">
+                            <h5 class="m-0">
+                                <a class="custom-accordion-title d-flex align-items-center" data-bs-toggle="collapse" href="#wf-c1" aria-expanded="true">
+                                    <i class="mdi mdi-folder-zip-outline text-warning me-2 font-18"></i>
+                                    <span class="flex-grow-1">Q1-2026-Payroll</span>
+                                    <span class="badge bg-light text-dark me-2">2 sends</span>
+                                    <i class="mdi mdi-chevron-down accordion-arrow"></i>
+                                </a>
+                            </h5>
+                        </div>
+                        <div id="wf-c1" class="collapse show" data-bs-parent="#wf-histacc">
+                            <div class="card-body p-2 pt-0">
+
+                                <div class="border rounded p-2 mb-1">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <img src="assets/images/users/avatar-2.jpg" class="rounded-circle me-2" height="24" alt="">
+                                        <span class="fw-bold">Kwame Osei</span>
+                                        <span class="text-muted font-12 ms-2">3 files</span>
+                                        <span class="text-muted font-12 ms-auto">3 Sep 2026, 14:22</span>
+                                    </div>
+                                    <div class="ps-4">
+                                        <div class="d-flex align-items-center py-1">
+                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                            <span class="text-truncate flex-grow-1">Payroll-January.pdf</span>
+                                            <a href="#" class="text-muted me-2 font-13" data-bs-dismiss="modal" title="Show in tree"><i class="mdi mdi-target me-1"></i>Show in tree</a>
+                                            <a href="#" class="text-danger font-13" title="Delete"><i class="mdi mdi-trash-can-outline"></i></a>
+                                        </div>
+                                        <div class="d-flex align-items-center py-1">
+                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                            <span class="text-truncate flex-grow-1">Payroll-February.pdf</span>
+                                            <a href="#" class="text-muted me-2 font-13" data-bs-dismiss="modal" title="Show in tree"><i class="mdi mdi-target me-1"></i>Show in tree</a>
+                                            <a href="#" class="text-danger font-13" title="Delete"><i class="mdi mdi-trash-can-outline"></i></a>
+                                        </div>
+                                        <div class="d-flex align-items-center py-1">
+                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                            <span class="text-truncate flex-grow-1">Payroll-March.pdf</span>
+                                            <a href="#" class="text-muted me-2 font-13" data-bs-dismiss="modal" title="Show in tree"><i class="mdi mdi-target me-1"></i>Show in tree</a>
+                                            <a href="#" class="text-danger font-13" title="Delete"><i class="mdi mdi-trash-can-outline"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border rounded p-2">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <img src="assets/images/users/avatar-4.jpg" class="rounded-circle me-2" height="24" alt="">
+                                        <span class="fw-bold">Ama Boateng</span>
+                                        <span class="text-muted font-12 ms-2">1 file</span>
+                                        <span class="text-muted font-12 ms-auto">2 Sep 2026, 10:04</span>
+                                    </div>
+                                    <div class="ps-4">
+                                        <div class="d-flex align-items-center py-1">
+                                            <i class="mdi mdi-file-pdf-box text-danger me-1"></i>
+                                            <span class="text-truncate flex-grow-1">Payroll-March.pdf</span>
+                                            <a href="#" class="text-muted me-2 font-13" data-bs-dismiss="modal" title="Show in tree"><i class="mdi mdi-target me-1"></i>Show in tree</a>
+                                            <a href="#" class="text-danger font-13" title="Delete"><i class="mdi mdi-trash-can-outline"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- group: falls back to "Sent to <user>" when there is no batch name -->
+                    <div class="card mb-1 shadow-none border">
+                        <div class="card-header p-2" id="wf-h2">
+                            <h5 class="m-0">
+                                <a class="custom-accordion-title d-flex align-items-center collapsed" data-bs-toggle="collapse" href="#wf-c2" aria-expanded="false">
+                                    <i class="mdi mdi-account-arrow-right-outline text-muted me-2 font-18"></i>
+                                    <span class="flex-grow-1">Sent to yaw.darko</span>
+                                    <span class="badge bg-light text-dark me-2">1 send</span>
+                                    <i class="mdi mdi-chevron-down accordion-arrow"></i>
+                                </a>
+                            </h5>
+                        </div>
+                        <div id="wf-c2" class="collapse" data-bs-parent="#wf-histacc">
+                            <div class="card-body p-2 pt-0">
+                                <div class="border rounded p-2">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <div class="avatar-sm me-2" style="height:1.5rem;width:1.5rem">
+                                            <span class="avatar-title bg-primary-lighten text-primary rounded-circle font-12">YD</span>
+                                        </div>
+                                        <span class="fw-bold">Yaw Darko</span>
+                                        <span class="text-muted font-12 ms-2">1 file</span>
+                                        <span class="text-muted font-12 ms-auto">28 Aug 2026, 16:40</span>
+                                    </div>
+                                    <div class="ps-4">
+                                        <div class="d-flex align-items-center py-1">
+                                            <i class="mdi mdi-file-excel-box text-success me-1"></i>
+                                            <span class="text-truncate flex-grow-1">VAT-Return.xlsx</span>
+                                            <a href="#" class="text-muted me-2 font-13" data-bs-dismiss="modal" title="Show in tree"><i class="mdi mdi-target me-1"></i>Show in tree</a>
+                                            <a href="#" class="text-danger font-13" title="Delete"><i class="mdi mdi-trash-can-outline"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- empty state -->
+                <div class="text-center py-5 d-none">
+                    <i class="mdi mdi-send-outline text-muted" style="font-size:36px"></i>
+                    <h5 class="mt-2 mb-1">Nothing sent yet</h5>
+                    <p class="text-muted mb-0">Files you send to colleagues will be listed here.</p>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <span class="text-muted font-13 me-auto">Grouped by batch name, or by recipient when a send had no batch.</span>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ---- MATCHED FILES: the existing search results list ---- -->
+<div class="modal fade" id="wf-matched" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Files matching &ldquo;Payroll&rdquo; <span class="badge bg-primary ms-1">3</span></h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <table class="table table-centered table-hover mb-0">
+                    <tbody>
+                        <tr>
+                            <td style="width:44px"><i class="mdi mdi-file-pdf-box text-danger font-18"></i></td>
+                            <td>
+                                <span class="fw-bold d-block">Payroll-January.pdf</span>
+                                <span class="font-12 text-muted">Head Office / Finance / akosua.mensah / Q1-2026-Payroll</span>
+                            </td>
+                            <td class="text-end" style="width:150px">
+                                <a href="#" class="btn btn-sm btn-light" data-bs-dismiss="modal"><i class="mdi mdi-target me-1"></i>Show in tree</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="mdi mdi-file-pdf-box text-danger font-18"></i></td>
+                            <td>
+                                <span class="fw-bold d-block">Payroll-February.pdf</span>
+                                <span class="font-12 text-muted">Head Office / Finance / akosua.mensah / Q1-2026-Payroll</span>
+                            </td>
+                            <td class="text-end">
+                                <a href="#" class="btn btn-sm btn-light" data-bs-dismiss="modal"><i class="mdi mdi-target me-1"></i>Show in tree</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="mdi mdi-file-pdf-box text-danger font-18"></i></td>
+                            <td>
+                                <span class="fw-bold d-block">Payroll-March.pdf</span>
+                                <span class="font-12 text-muted">Head Office / Finance / akosua.mensah / Q1-2026-Payroll</span>
+                            </td>
+                            <td class="text-end">
+                                <a href="#" class="btn btn-sm btn-light" data-bs-dismiss="modal"><i class="mdi mdi-target me-1"></i>Show in tree</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <span class="text-muted font-13 me-auto">All matches are highlighted in the tree behind this list.</span>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ---- USER PICKER: opened by the User search mode ---- -->
+<div class="modal fade" id="wf-userpick" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Open a user folder</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="app-search mb-2">
+                    <div class="position-relative">
+                        <input type="text" class="form-control" placeholder="Search by name, username or email...">
+                        <span class="mdi mdi-magnify search-icon"></span>
+                    </div>
+                </div>
+                <div class="border rounded" style="max-height:280px;overflow-y:auto">
+                    <a href="#" class="d-flex align-items-center p-2 border-bottom text-body" data-bs-dismiss="modal">
+                        <img src="assets/images/users/avatar-2.jpg" class="rounded-circle me-2" height="32" alt="">
+                        <div><span class="fw-bold d-block">Kwame Osei</span><span class="font-12 text-muted">kwame.osei · Finance · Head Office</span></div>
+                    </a>
+                    <a href="#" class="d-flex align-items-center p-2 text-body" data-bs-dismiss="modal">
+                        <img src="assets/images/users/avatar-4.jpg" class="rounded-circle me-2" height="32" alt="">
+                        <div><span class="fw-bold d-block">Ama Boateng</span><span class="font-12 text-muted">ama.boateng · Human Resources · Head Office</span></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- ==================================================================== -->
+<!-- Wireframe harness                                                     -->
+<!-- ==================================================================== -->
 <div id="wf-bar">
     <strong>e-Archive wireframes</strong>
     <select id="wf-select">
         <option value="page-login">1. Login</option>
         <option value="page-dashboard">2. Dashboard</option>
         <option value="page-send">3. Send files</option>
+        <option value="page-files">4. Files</option>
     </select>
     <span class="wf-tag">Hyper saas</span>
     <span class="wf-note">Dashed green outline = new, not in the current app. All data shown comes from existing endpoints.</span>
@@ -1048,6 +2081,26 @@
             window.scrollTo(0, 0);
         }
         sel.addEventListener('change', function () { show(this.value); });
+        window.wfToggleAll = function (btn) {
+            var tree = btn.closest(".card-body").querySelector(".wf-tree");
+            if (!tree) return;
+            var expanding = btn.getAttribute("data-state") !== "expanded";
+            // folders only - batch groups stay as the user left them, so expanding
+            // the structure never dumps thousands of files on screen
+            var folders = tree.querySelectorAll('.wf-node:not([data-kind="batch"])');
+            folders.forEach(function (n) {
+                n.classList.toggle("wf-open", expanding);
+                var caret = n.querySelector(":scope > .wf-row > .wf-caret");
+                if (caret) {
+                    caret.classList.toggle("mdi-chevron-down", expanding);
+                    caret.classList.toggle("mdi-chevron-right", !expanding);
+                }
+            });
+            btn.setAttribute("data-state", expanding ? "expanded" : "collapsed");
+            btn.innerHTML = expanding
+                ? '<i class="mdi mdi-unfold-less-horizontal me-1"></i>Collapse all folders'
+                : '<i class="mdi mdi-unfold-more-horizontal me-1"></i>Expand all folders';
+        };
         window.wfStep = function (t) { var a = document.querySelector('a[href="' + t + '"]'); if (a && window.bootstrap) { new bootstrap.Tab(a).show(); } };
         show(sel.value);
     })();
