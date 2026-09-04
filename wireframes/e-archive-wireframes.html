@@ -2525,7 +2525,7 @@
                                             </div>
                                             <div class="d-inline-block app-search">
                                                 <div class="position-relative">
-                                                    <input type="text" class="form-control form-control-sm" placeholder="Search users...">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="Name, username, email, branch or department">
                                                     <span class="mdi mdi-magnify search-icon"></span>
                                                 </div>
                                             </div>
@@ -2544,6 +2544,7 @@
                                                 <th>Private email</th>
                                                 <th>Branch</th>
                                                 <th>Department</th>
+                                                <!-- derived client-side from the permissions JSON on each user record -->
                                                 <th>Access</th>
                                                 <th>Created on</th>
                                                 <th style="width:90px" class="text-end">Action</th>
@@ -2630,7 +2631,8 @@
                                                 <td>Kumasi Branch</td>
                                                 <td>Records</td>
                                                 <td>
-                                                    <span class="badge bg-light text-muted">Disabled</span>
+                                                    <span class="badge bg-secondary-lighten text-secondary">Standard</span>
+                                                    <span class="text-muted font-12 ms-1">3</span>
                                                 </td>
                                                 <td class="text-muted">07 Aug 2025</td>
                                                 <td class="text-end">
@@ -2685,6 +2687,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
+                <!-- title is "Create user" when adding, "Edit user" when editing -->
                 <h4 class="modal-title">Edit user</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
