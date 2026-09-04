@@ -3507,6 +3507,453 @@
 </div>
 
 <!-- ==================================================================== -->
+<!-- PAGE 9 — AUDIT TRAIL                                                  -->
+<!-- The log is per user: pick someone first, then their sessions load.    -->
+<!-- API: GET /admin/getUser/:username   -> resolves the user id           -->
+<!--      GET /admin/audit-log/:userId   -> that user's sessions           -->
+<!-- ==================================================================== -->
+<div class="wf-page" id="page-audit">
+<div class="wrapper">
+
+    <div class="leftside-menu">
+        <a href="#" class="logo text-center logo-light">
+            <span class="logo-lg"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="22"></span>
+            <span class="logo-sm"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="18"></span>
+        </a>
+        <div class="h-100" data-simplebar>
+            <ul class="side-nav">
+                <li class="side-nav-title side-nav-item">Main</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-view-dashboard-outline"></i><span> Dashboard </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-folder-outline"></i><span> Files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-cloud-upload-outline"></i><span> Upload </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-send-outline"></i><span> Send files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-scanner"></i><span> Scan </span></a></li>
+                <li class="side-nav-title side-nav-item">Administration</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-account-multiple-outline"></i><span> Users </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-shield-key-outline"></i><span> Access control </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-domain"></i><span> Branches </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-sitemap-outline"></i><span> Departments </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link active"><i class="mdi mdi-history"></i><span> Audit trail </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-database-cog-outline"></i><span> Storage </span></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="content-page">
+        <div class="content">
+
+            <div class="navbar-custom">
+                <ul class="list-unstyled topbar-menu float-end mb-0">
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button">
+                            <i class="dripicons-bell noti-icon"></i><span class="noti-icon-badge"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
+                            <div class="dropdown-item noti-title"><h5 class="m-0">Messages</h5></div>
+                            <a href="#" class="dropdown-item notify-item">
+                                <div class="notify-icon bg-primary"><i class="mdi mdi-bullhorn-outline"></i></div>
+                                <p class="notify-details">Scheduled maintenance this Saturday from 6pm.</p>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button">
+                            <span class="account-user-avatar"><img src="assets/images/users/avatar-1.jpg" alt="user" class="rounded-circle"></span>
+                            <span>
+                                <span class="account-user-name">Akosua Mensah</span>
+                                <span class="account-position">Finance · Head Office</span>
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-account-circle me-1"></i><span>My profile</span></a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-logout me-1"></i><span>Sign out</span></a>
+                        </div>
+                    </li>
+                </ul>
+                <button class="button-menu-mobile open-left"><i class="mdi mdi-menu"></i></button>
+            </div>
+
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="#">e-Archive</a></li>
+                                    <li class="breadcrumb-item active">Audit trail</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">Audit trail</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <p class="text-muted mb-3">
+                                    Sign-in history is shown one person at a time. Choose someone to see their sessions.
+                                </p>
+
+                                <div class="d-flex flex-wrap align-items-end gap-2 mb-3">
+                                    <div>
+                                        <label class="form-label font-12 text-muted mb-1 d-block">Type a username</label>
+                                        <div class="input-group input-group-sm" style="width:280px">
+                                            <input type="text" class="form-control" value="akosua-mensah-head-office" placeholder="e.g. akosua-mensah-head-office">
+                                            <button class="btn btn-primary" type="button"><i class="mdi mdi-magnify"></i></button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="form-label font-12 text-muted mb-1 d-block">Or pick from the list</label>
+                                        <button class="btn btn-sm btn-light border" style="width:190px" data-bs-toggle="modal" data-bs-target="#wf-userpick">
+                                            <i class="mdi mdi-account-search-outline me-1"></i>Choose a user
+                                        </button>
+                                    </div>
+                                    <div class="ms-auto d-flex align-items-center">
+                                        <label class="me-1 mb-0 font-13 text-muted">Rows</label>
+                                        <select class="form-select form-select-sm" style="width:72px">
+                                            <option>10</option><option>25</option><option>50</option><option>100</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- whose log is on screen -->
+                                <div class="d-flex align-items-center bg-light-lighten border rounded p-2 mb-2">
+                                    <img src="assets/images/users/avatar-1.jpg" class="rounded-circle me-2" height="34" alt="">
+                                    <div class="flex-grow-1">
+                                        <span class="fw-bold d-block">Akosua Mensah</span>
+                                        <span class="font-12 text-muted">akosua-mensah-head-office · Finance · Head Office</span>
+                                    </div>
+                                    <span class="text-muted font-13 me-2">5 sessions</span>
+                                    <button class="btn btn-sm btn-link text-muted p-0">Clear</button>
+                                </div>
+
+                                <!-- what the three flags mean -->
+                                <p class="text-muted font-12 mb-2">
+                                    <i class="mdi mdi-information-outline me-1"></i>
+                                    Viewed, uploaded and deleted show whether the action happened <strong>at least once</strong> during
+                                    that session. They are not counts.
+                                </p>
+
+                                <div class="table-responsive">
+                                    <table class="table table-centered table-nowrap table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Department</th>
+                                                <th>Branch</th>
+                                                <th>Signed in</th>
+                                                <th>Signed out</th>
+                                                <th>Viewed</th>
+                                                <th>Uploaded</th>
+                                                <th>Deleted</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Akosua Mensah</td>
+                                                <td class="text-muted">Finance</td>
+                                                <td class="text-muted">Head Office</td>
+                                                <td class="text-muted">03 Sep 2026, 07:58</td>
+                                                <td class="text-muted">03 Sep 2026, 16:41</td>
+                                                <td><span class="badge bg-success-lighten text-success"><i class="mdi mdi-check me-1"></i>Yes</span></td>
+                                                <td><span class="badge bg-success-lighten text-success"><i class="mdi mdi-check me-1"></i>Yes</span></td>
+                                                <td><span class="badge bg-light text-muted"><i class="mdi mdi-minus me-1"></i>No</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Akosua Mensah</td>
+                                                <td class="text-muted">Finance</td>
+                                                <td class="text-muted">Head Office</td>
+                                                <td class="text-muted">02 Sep 2026, 08:12</td>
+                                                <td class="text-muted">02 Sep 2026, 17:03</td>
+                                                <td><span class="badge bg-success-lighten text-success"><i class="mdi mdi-check me-1"></i>Yes</span></td>
+                                                <td><span class="badge bg-light text-muted"><i class="mdi mdi-minus me-1"></i>No</span></td>
+                                                <td><span class="badge bg-light text-muted"><i class="mdi mdi-minus me-1"></i>No</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Akosua Mensah</td>
+                                                <td class="text-muted">Finance</td>
+                                                <td class="text-muted">Head Office</td>
+                                                <td class="text-muted">01 Sep 2026, 09:30</td>
+                                                <td class="text-muted"><span class="badge bg-info-lighten text-info">Still signed in</span></td>
+                                                <td><span class="badge bg-light text-muted"><i class="mdi mdi-minus me-1"></i>No</span></td>
+                                                <td><span class="badge bg-light text-muted"><i class="mdi mdi-minus me-1"></i>No</span></td>
+                                                <td><span class="badge bg-light text-muted"><i class="mdi mdi-minus me-1"></i>No</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Akosua Mensah</td>
+                                                <td class="text-muted">Finance</td>
+                                                <td class="text-muted">Head Office</td>
+                                                <td class="text-muted">29 Aug 2026, 07:45</td>
+                                                <td class="text-muted">29 Aug 2026, 15:58</td>
+                                                <td><span class="badge bg-success-lighten text-success"><i class="mdi mdi-check me-1"></i>Yes</span></td>
+                                                <td><span class="badge bg-success-lighten text-success"><i class="mdi mdi-check me-1"></i>Yes</span></td>
+                                                <td><span class="badge bg-success-lighten text-success"><i class="mdi mdi-check me-1"></i>Yes</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Akosua Mensah</td>
+                                                <td class="text-muted">Finance</td>
+                                                <td class="text-muted">Head Office</td>
+                                                <td class="text-muted">28 Aug 2026, 08:02</td>
+                                                <td class="text-muted">28 Aug 2026, 16:20</td>
+                                                <td><span class="badge bg-light text-muted"><i class="mdi mdi-minus me-1"></i>No</span></td>
+                                                <td><span class="badge bg-success-lighten text-success"><i class="mdi mdi-check me-1"></i>Yes</span></td>
+                                                <td><span class="badge bg-light text-muted"><i class="mdi mdi-minus me-1"></i>No</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- nothing chosen yet: the resting state of this page -->
+                                <div class="text-center py-5 d-none">
+                                    <i class="mdi mdi-account-search-outline text-muted" style="font-size:38px"></i>
+                                    <h5 class="mt-2 mb-1">Choose a user to begin</h5>
+                                    <p class="text-muted mb-0">Their sign-in history will appear here.</p>
+                                </div>
+
+                                <!-- chosen, but no sessions -->
+                                <div class="text-center py-5 d-none">
+                                    <i class="mdi mdi-history text-muted" style="font-size:38px"></i>
+                                    <h5 class="mt-2 mb-1">No sessions recorded</h5>
+                                    <p class="text-muted mb-0">This person has not signed in yet.</p>
+                                </div>
+
+                                <div class="text-center py-4 d-none">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+
+                                <div class="alert alert-danger d-none" role="alert">
+                                    <i class="mdi mdi-alert-circle-outline me-1"></i>
+                                    User not found, or the log could not be loaded.
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="text-muted font-13">Showing 1 to 5 of 5 sessions</span>
+                                    <div>
+                                        <span class="text-muted font-13 me-2">Page 1 of 1</span>
+                                        <button class="btn btn-sm btn-light" disabled><i class="mdi mdi-chevron-left"></i></button>
+                                        <button class="btn btn-sm btn-light" disabled><i class="mdi mdi-chevron-right"></i></button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6"><script>document.write(new Date().getFullYear())</script> © e-Archive</div>
+                    <div class="col-md-6"><div class="text-md-end footer-links d-none d-md-block"><span class="text-muted">Head Office · Finance</span></div></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+</div>
+
+<!-- ==================================================================== -->
+<!-- PAGE 10 — MY PROFILE                                                  -->
+<!-- API: GET  /admin/dashboard-data                                       -->
+<!--      POST /admin/upload-profile-picture                               -->
+<!--      POST /admin/update-password  fd: oldPass, newPass                -->
+<!-- ==================================================================== -->
+<div class="wf-page" id="page-profile">
+<div class="wrapper">
+
+    <div class="leftside-menu">
+        <a href="#" class="logo text-center logo-light">
+            <span class="logo-lg"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="22"></span>
+            <span class="logo-sm"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="18"></span>
+        </a>
+        <div class="h-100" data-simplebar>
+            <ul class="side-nav">
+                <li class="side-nav-title side-nav-item">Main</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-view-dashboard-outline"></i><span> Dashboard </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-folder-outline"></i><span> Files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-cloud-upload-outline"></i><span> Upload </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-send-outline"></i><span> Send files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-scanner"></i><span> Scan </span></a></li>
+                <li class="side-nav-title side-nav-item">Administration</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-account-multiple-outline"></i><span> Users </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-shield-key-outline"></i><span> Access control </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-domain"></i><span> Branches </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-sitemap-outline"></i><span> Departments </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-history"></i><span> Audit trail </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-database-cog-outline"></i><span> Storage </span></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="content-page">
+        <div class="content">
+
+            <div class="navbar-custom">
+                <ul class="list-unstyled topbar-menu float-end mb-0">
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button">
+                            <i class="dripicons-bell noti-icon"></i><span class="noti-icon-badge"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
+                            <div class="dropdown-item noti-title"><h5 class="m-0">Messages</h5></div>
+                            <a href="#" class="dropdown-item notify-item">
+                                <div class="notify-icon bg-primary"><i class="mdi mdi-bullhorn-outline"></i></div>
+                                <p class="notify-details">Scheduled maintenance this Saturday from 6pm.</p>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button">
+                            <span class="account-user-avatar"><img src="assets/images/users/avatar-1.jpg" alt="user" class="rounded-circle"></span>
+                            <span>
+                                <span class="account-user-name">Akosua Mensah</span>
+                                <span class="account-position">Finance · Head Office</span>
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-account-circle me-1"></i><span>My profile</span></a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-logout me-1"></i><span>Sign out</span></a>
+                        </div>
+                    </li>
+                </ul>
+                <button class="button-menu-mobile open-left"><i class="mdi mdi-menu"></i></button>
+            </div>
+
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="#">e-Archive</a></li>
+                                    <li class="breadcrumb-item active">My profile</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">My profile</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <img src="assets/images/users/avatar-1.jpg" class="rounded-circle avatar-xl img-thumbnail mb-2" alt="profile">
+                                <h4 class="mb-0">Akosua Mensah</h4>
+                                <p class="text-muted">Finance · Head Office</p>
+
+                                <button class="btn btn-sm btn-light">
+                                    <i class="mdi mdi-camera-outline me-1"></i>Change picture
+                                </button>
+                                <button class="btn btn-sm btn-light d-none" disabled>
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>Uploading&hellip;
+                                </button>
+                                <p class="text-muted font-12 mt-2 mb-0">JPG or PNG</p>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Account details</h5>
+                                <p class="text-muted font-13">
+                                    These are set by an administrator. Ask them if something needs changing.
+                                </p>
+
+                                <label class="form-label">Username</label>
+                                <input class="form-control mb-2" value="akosua-mensah-head-office" readonly disabled>
+
+                                <label class="form-label">Work email</label>
+                                <input class="form-control mb-2" value="akosua.mensah@company.com" readonly disabled>
+
+                                <label class="form-label">Private email</label>
+                                <input class="form-control mb-2" value="akosua.m@gmail.com" readonly disabled>
+
+                                <label class="form-label">Branch</label>
+                                <input class="form-control mb-0" value="Head Office" readonly disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title mb-1">Change password</h5>
+                                <p class="text-muted font-13 mb-3">All three fields are required.</p>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Current password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="password" class="form-control" placeholder="Your current password">
+                                            <div class="input-group-text" data-password="false"><span class="password-eye"></span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">New password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="password" class="form-control" placeholder="Choose a new password">
+                                            <div class="input-group-text" data-password="false"><span class="password-eye"></span></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Confirm new password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="password" class="form-control" placeholder="Repeat the new password">
+                                            <div class="input-group-text" data-password="false"><span class="password-eye"></span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-danger py-2 px-3 mt-2 mb-0 d-none">
+                                    <i class="mdi mdi-alert-circle-outline me-1"></i>The new passwords do not match.
+                                </div>
+                                <div class="alert alert-success py-2 px-3 mt-2 mb-0 d-none">
+                                    <i class="mdi mdi-check-circle-outline me-1"></i>Password updated.
+                                </div>
+
+                                <div class="mt-3">
+                                    <button class="btn btn-primary">Update password</button>
+                                    <button class="btn btn-primary d-none" disabled>
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>Updating&hellip;
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6"><script>document.write(new Date().getFullYear())</script> © e-Archive</div>
+                    <div class="col-md-6"><div class="text-md-end footer-links d-none d-md-block"><span class="text-muted">Head Office · Finance</span></div></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+</div>
+
+<!-- ==================================================================== -->
 <div id="wf-bar">
     <strong>e-Archive wireframes</strong>
     <select id="wf-select">
@@ -3518,6 +3965,8 @@
         <option value="page-users">6. Users</option>
         <option value="page-departments">7. Departments</option>
         <option value="page-branches">8. Branches</option>
+        <option value="page-audit">9. Audit trail</option>
+        <option value="page-profile">10. My profile</option>
     </select>
     <span class="wf-tag">Hyper saas</span>
     <span class="wf-note">Dashed green outline = new, not in the current app. All data shown comes from existing endpoints.</span>
