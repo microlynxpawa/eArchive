@@ -18,6 +18,9 @@
         body{padding-bottom:38px}
         .wf-page{display:none}
         .wf-page.wf-active{display:block}
+        /* login keeps the existing brand background */
+        .wf-login-bg{min-height:100vh;background:url("assets/images/login/login_bg.jpg") center center / cover no-repeat}
+        .wf-login-bg .card{box-shadow:0 10px 30px rgba(0,0,0,.25)}
         /* marks a deliberate change from the current app */
         .wf-new{outline:1px dashed #0acf97;outline-offset:3px}
     </style>
@@ -31,14 +34,13 @@
 <!--      POST /admin/forgot-password {username}                           -->
 <!-- ==================================================================== -->
 <div class="wf-page wf-active" id="page-login">
-    <div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5" style="min-height:100vh;background:#f5f6f8">
+    <div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5 wf-login-bg">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-xxl-4 col-lg-5">
                     <div class="card">
-                        <div class="card-header pt-4 pb-4 text-center bg-primary">
-                            <span class="text-white h4 mb-0 d-block">e-Archive</span>
-                            <span class="text-white-50 font-13">Document Management</span>
+                        <div class="card-header pt-4 pb-4 text-center bg-white border-bottom">
+                            <img src="assets/images/logo/logo.png" alt="xCore eArchive" height="32">
                         </div>
 
                         <div class="card-body p-4">
@@ -133,8 +135,8 @@
     <!-- ========== SIDEBAR ========== -->
     <div class="leftside-menu">
         <a href="#" class="logo text-center logo-light">
-            <span class="logo-lg"><span class="text-white h5">e-Archive</span></span>
-            <span class="logo-sm"><span class="text-white h5">eA</span></span>
+            <span class="logo-lg"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="22"></span>
+            <span class="logo-sm"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="18"></span>
         </a>
 
         <div class="h-100" id="leftside-menu-container" data-simplebar>
@@ -485,6 +487,540 @@
 
 
 <!-- ==================================================================== -->
+<!-- PAGE 3 — SEND FILES                                                   -->
+<!-- API: GET  /admin/file-structure                                       -->
+<!--      GET  /admin/retrieve-users  |  GET /admin/searchUsers            -->
+<!--      POST /admin/sendFilesToUsers { users:[username], files:[name] }  -->
+<!--      GET  /admin/file-sending-history?scope=sent|received&limit=      -->
+<!-- ==================================================================== -->
+<div class="wf-page" id="page-send">
+<div class="wrapper">
+
+    <div class="leftside-menu">
+        <a href="#" class="logo text-center logo-light">
+            <span class="logo-lg"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="22"></span>
+            <span class="logo-sm"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="18"></span>
+        </a>
+        <div class="h-100" data-simplebar>
+            <ul class="side-nav">
+                <li class="side-nav-title side-nav-item">Main</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-view-dashboard-outline"></i><span> Dashboard </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-folder-outline"></i><span> Files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-cloud-upload-outline"></i><span> Upload </span></a></li>
+                <!-- visible: view_upload -->
+                <li class="side-nav-item"><a href="#" class="side-nav-link active"><i class="mdi mdi-send-outline"></i><span> Send files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-scanner"></i><span> Scan </span></a></li>
+                <li class="side-nav-title side-nav-item">Administration</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-account-multiple-outline"></i><span> Users </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-shield-key-outline"></i><span> Access control </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-domain"></i><span> Branches </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-sitemap-outline"></i><span> Departments </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-history"></i><span> Audit trail </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-database-cog-outline"></i><span> Storage </span></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="content-page">
+        <div class="content">
+
+            <div class="navbar-custom">
+                <ul class="list-unstyled topbar-menu float-end mb-0">
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button">
+                            <i class="dripicons-bell noti-icon"></i><span class="noti-icon-badge"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
+                            <div class="dropdown-item noti-title"><h5 class="m-0">Messages</h5></div>
+                            <a href="#" class="dropdown-item notify-item">
+                                <div class="notify-icon bg-primary"><i class="mdi mdi-bullhorn-outline"></i></div>
+                                <p class="notify-details">Scheduled maintenance this Saturday from 6pm.</p>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button">
+                            <span class="account-user-avatar"><img src="assets/images/users/avatar-1.jpg" alt="user" class="rounded-circle"></span>
+                            <span>
+                                <span class="account-user-name">Akosua Mensah</span>
+                                <span class="account-position">Finance · Head Office</span>
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-account-circle me-1"></i><span>My profile</span></a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-logout me-1"></i><span>Sign out</span></a>
+                        </div>
+                    </li>
+                </ul>
+                <button class="button-menu-mobile open-left"><i class="mdi mdi-menu"></i></button>
+            </div>
+
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="#">e-Archive</a></li>
+                                    <li class="breadcrumb-item active">Send files</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">Send files</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Send / History switch -->
+                <ul class="nav nav-tabs nav-bordered mb-3">
+                    <li class="nav-item">
+                        <a href="#wf-send-new" data-bs-toggle="tab" class="nav-link active">
+                            <i class="mdi mdi-send-outline me-1"></i>New send
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#wf-send-history" data-bs-toggle="tab" class="nav-link">
+                            <i class="mdi mdi-history me-1"></i>History
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content p-0">
+
+                    <!-- ============ NEW SEND ============ -->
+                    <div class="tab-pane show active" id="wf-send-new">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <ul class="nav nav-pills nav-justified form-wizard-header mb-4">
+                                    <li class="nav-item">
+                                        <a href="#wf-step1" data-bs-toggle="tab" class="nav-link rounded-0 pt-2 pb-2 active">
+                                            <i class="mdi mdi-file-multiple-outline me-1"></i>
+                                            <span class="d-none d-sm-inline">1. Choose files</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#wf-step2" data-bs-toggle="tab" class="nav-link rounded-0 pt-2 pb-2">
+                                            <i class="mdi mdi-account-multiple-outline me-1"></i>
+                                            <span class="d-none d-sm-inline">2. Choose recipients</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#wf-step3" data-bs-toggle="tab" class="nav-link rounded-0 pt-2 pb-2">
+                                            <i class="mdi mdi-check-circle-outline me-1"></i>
+                                            <span class="d-none d-sm-inline">3. Review and send</span>
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content b-0 mb-0">
+
+                                    <!-- STEP 1 -->
+                                    <div class="tab-pane show active" id="wf-step1">
+                                        <div class="row">
+                                            <!-- browse -->
+                                            <div class="col-lg-7">
+                                                <div class="app-search mb-2">
+                                                    <div class="position-relative">
+                                                        <input type="text" class="form-control" placeholder="Search your files...">
+                                                        <span class="mdi mdi-magnify search-icon"></span>
+                                                    </div>
+                                                </div>
+
+                                                <ol class="breadcrumb bg-light-lighten p-2 mb-2">
+                                                    <li class="breadcrumb-item"><a href="#">Head Office</a></li>
+                                                    <li class="breadcrumb-item"><a href="#">Finance</a></li>
+                                                    <li class="breadcrumb-item active">akosua.mensah</li>
+                                                </ol>
+
+                                                <div class="border rounded" style="max-height:360px;overflow-y:auto">
+                                                    <!-- batch folder -->
+                                                    <div class="d-flex align-items-center p-2 border-bottom bg-light-lighten">
+                                                        <i class="mdi mdi-chevron-down me-1 text-muted"></i>
+                                                        <div class="avatar-sm me-2" style="height:1.8rem;width:1.8rem">
+                                                            <span class="avatar-title bg-warning-lighten text-warning rounded"><i class="mdi mdi-folder-zip-outline"></i></span>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <span class="fw-bold">Q1-2026-Payroll</span>
+                                                            <span class="text-muted font-12 ms-1">3 files</span>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" title="Select all in batch">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-flex align-items-center p-2 border-bottom ps-4">
+                                                        <div class="avatar-sm me-2" style="height:1.8rem;width:1.8rem">
+                                                            <span class="avatar-title bg-danger-lighten text-danger rounded"><i class="mdi mdi-file-pdf-box"></i></span>
+                                                        </div>
+                                                        <div class="flex-grow-1 text-truncate">
+                                                            <span>Payroll-January</span>
+                                                            <span class="text-muted font-12 ms-1">PDF</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" checked></div>
+                                                    </div>
+
+                                                    <div class="d-flex align-items-center p-2 border-bottom ps-4">
+                                                        <div class="avatar-sm me-2" style="height:1.8rem;width:1.8rem">
+                                                            <span class="avatar-title bg-danger-lighten text-danger rounded"><i class="mdi mdi-file-pdf-box"></i></span>
+                                                        </div>
+                                                        <div class="flex-grow-1 text-truncate">
+                                                            <span>Payroll-February</span>
+                                                            <span class="text-muted font-12 ms-1">PDF</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" checked></div>
+                                                    </div>
+
+                                                    <div class="d-flex align-items-center p-2 border-bottom ps-4">
+                                                        <div class="avatar-sm me-2" style="height:1.8rem;width:1.8rem">
+                                                            <span class="avatar-title bg-danger-lighten text-danger rounded"><i class="mdi mdi-file-pdf-box"></i></span>
+                                                        </div>
+                                                        <div class="flex-grow-1 text-truncate">
+                                                            <span>Payroll-March</span>
+                                                            <span class="text-muted font-12 ms-1">PDF</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox"></div>
+                                                    </div>
+
+                                                    <!-- single uploads -->
+                                                    <div class="d-flex align-items-center p-2 border-bottom bg-light-lighten">
+                                                        <i class="mdi mdi-chevron-down me-1 text-muted"></i>
+                                                        <div class="avatar-sm me-2" style="height:1.8rem;width:1.8rem">
+                                                            <span class="avatar-title bg-light text-secondary rounded"><i class="mdi mdi-folder-outline"></i></span>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <span class="fw-bold">Single uploads</span>
+                                                            <span class="text-muted font-12 ms-1">2 files</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox"></div>
+                                                    </div>
+
+                                                    <div class="d-flex align-items-center p-2 border-bottom ps-4">
+                                                        <div class="avatar-sm me-2" style="height:1.8rem;width:1.8rem">
+                                                            <span class="avatar-title bg-danger-lighten text-danger rounded"><i class="mdi mdi-file-pdf-box"></i></span>
+                                                        </div>
+                                                        <div class="flex-grow-1 text-truncate" title="Bank-Reconciliation-Statement-December-2025.pdf">
+                                                            <span>Bank-Reconciliation-Statement-December-2025</span>
+                                                            <span class="text-muted font-12 ms-1">PDF</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox"></div>
+                                                    </div>
+
+                                                    <div class="d-flex align-items-center p-2 ps-4">
+                                                        <div class="avatar-sm me-2" style="height:1.8rem;width:1.8rem">
+                                                            <span class="avatar-title bg-success-lighten text-success rounded"><i class="mdi mdi-file-excel-box"></i></span>
+                                                        </div>
+                                                        <div class="flex-grow-1 text-truncate">
+                                                            <span>VAT-Return</span>
+                                                            <span class="text-muted font-12 ms-1">XLSX</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- selection basket -->
+                                            <div class="col-lg-5">
+                                                <div class="card shadow-none border h-100 mb-0">
+                                                    <div class="card-body">
+                                                        <h5 class="mt-0 mb-2">
+                                                            Selected files
+                                                            <span class="badge bg-primary rounded-pill float-end">2</span>
+                                                        </h5>
+                                                        <p class="text-muted font-13">These files will be copied into each recipient's folder.</p>
+
+                                                        <div class="d-flex align-items-center border rounded p-2 mb-2">
+                                                            <div class="avatar-sm me-2" style="height:1.8rem;width:1.8rem">
+                                                                <span class="avatar-title bg-danger-lighten text-danger rounded"><i class="mdi mdi-file-pdf-box"></i></span>
+                                                            </div>
+                                                            <div class="flex-grow-1 text-truncate">
+                                                                <span class="d-block">Payroll-January.pdf</span>
+                                                                <span class="font-12 text-muted">Q1-2026-Payroll</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                                                        </div>
+
+                                                        <div class="d-flex align-items-center border rounded p-2 mb-2">
+                                                            <div class="avatar-sm me-2" style="height:1.8rem;width:1.8rem">
+                                                                <span class="avatar-title bg-danger-lighten text-danger rounded"><i class="mdi mdi-file-pdf-box"></i></span>
+                                                            </div>
+                                                            <div class="flex-grow-1 text-truncate">
+                                                                <span class="d-block">Payroll-February.pdf</span>
+                                                                <span class="font-12 text-muted">Q1-2026-Payroll</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                                                        </div>
+
+                                                        <!-- empty state -->
+                                                        <div class="text-center py-4 d-none">
+                                                            <i class="mdi mdi-file-outline text-muted" style="font-size:32px"></i>
+                                                            <h5 class="mt-2 mb-1">No files selected</h5>
+                                                            <p class="text-muted font-13 mb-0">Tick files on the left to add them here.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mt-3 pt-3 border-top">
+                                            <button class="btn btn-light" disabled><i class="mdi mdi-arrow-left me-1"></i>Back</button>
+                                            <button class="btn btn-primary" onclick="wfStep('#wf-step2')">Choose recipients<i class="mdi mdi-arrow-right ms-1"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEP 2 -->
+                                    <div class="tab-pane" id="wf-step2">
+                                        <div class="row">
+                                            <div class="col-lg-7">
+                                                <div class="app-search mb-2">
+                                                    <div class="position-relative">
+                                                        <input type="text" class="form-control" placeholder="Search by name, username or email...">
+                                                        <span class="mdi mdi-magnify search-icon"></span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- quick filters, all client-side on retrieve-users -->
+                                                <div class="mb-2">
+                                                    <span class="badge bg-primary p-1 px-2 me-1" role="button">My department</span>
+                                                    <span class="badge bg-light text-dark p-1 px-2 me-1" role="button">My branch</span>
+                                                    <span class="badge bg-light text-dark p-1 px-2" role="button">Everyone</span>
+                                                </div>
+
+                                                <div class="border rounded" style="max-height:340px;overflow-y:auto">
+                                                    <div class="d-flex align-items-center p-2 border-bottom">
+                                                        <img src="assets/images/users/avatar-2.jpg" class="rounded-circle me-2" height="34" alt="">
+                                                        <div class="flex-grow-1">
+                                                            <span class="fw-bold d-block">Kwame Osei</span>
+                                                            <span class="font-12 text-muted">kwame.osei · Finance · Head Office</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" checked></div>
+                                                    </div>
+                                                    <div class="d-flex align-items-center p-2 border-bottom">
+                                                        <img src="assets/images/users/avatar-4.jpg" class="rounded-circle me-2" height="34" alt="">
+                                                        <div class="flex-grow-1">
+                                                            <span class="fw-bold d-block">Ama Boateng</span>
+                                                            <span class="font-12 text-muted">ama.boateng · Human Resources · Head Office</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" checked></div>
+                                                    </div>
+                                                    <div class="d-flex align-items-center p-2 border-bottom">
+                                                        <div class="avatar-sm me-2" style="height:2.1rem;width:2.1rem">
+                                                            <span class="avatar-title bg-primary-lighten text-primary rounded-circle">YD</span>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <span class="fw-bold d-block">Yaw Darko</span>
+                                                            <span class="font-12 text-muted">yaw.darko · Records · Kumasi Branch</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox"></div>
+                                                    </div>
+                                                    <div class="d-flex align-items-center p-2">
+                                                        <div class="avatar-sm me-2" style="height:2.1rem;width:2.1rem">
+                                                            <span class="avatar-title bg-primary-lighten text-primary rounded-circle">EA</span>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <span class="fw-bold d-block">Efua Asante</span>
+                                                            <span class="font-12 text-muted">efua.asante · Legal · Takoradi Branch</span>
+                                                        </div>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-5">
+                                                <div class="card shadow-none border h-100 mb-0">
+                                                    <div class="card-body">
+                                                        <h5 class="mt-0 mb-2">
+                                                            Recipients
+                                                            <span class="badge bg-primary rounded-pill float-end">2</span>
+                                                        </h5>
+                                                        <p class="text-muted font-13">Each recipient gets their own copy in their folder.</p>
+
+                                                        <div class="d-flex align-items-center border rounded p-2 mb-2">
+                                                            <img src="assets/images/users/avatar-2.jpg" class="rounded-circle me-2" height="30" alt="">
+                                                            <div class="flex-grow-1 text-truncate">
+                                                                <span class="d-block">Kwame Osei</span>
+                                                                <span class="font-12 text-muted">Finance · Head Office</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                                                        </div>
+
+                                                        <div class="d-flex align-items-center border rounded p-2 mb-2">
+                                                            <img src="assets/images/users/avatar-4.jpg" class="rounded-circle me-2" height="30" alt="">
+                                                            <div class="flex-grow-1 text-truncate">
+                                                                <span class="d-block">Ama Boateng</span>
+                                                                <span class="font-12 text-muted">Human Resources · Head Office</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mt-3 pt-3 border-top">
+                                            <button class="btn btn-light" onclick="wfStep('#wf-step1')"><i class="mdi mdi-arrow-left me-1"></i>Back</button>
+                                            <button class="btn btn-primary" onclick="wfStep('#wf-step3')">Review<i class="mdi mdi-arrow-right ms-1"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEP 3 -->
+                                    <div class="tab-pane" id="wf-step3">
+                                        <div class="row">
+                                            <div class="col-lg-8 offset-lg-2">
+
+                                                <div class="text-center mb-3">
+                                                    <div class="avatar-lg m-auto">
+                                                        <span class="avatar-title bg-primary-lighten text-primary rounded-circle">
+                                                            <i class="mdi mdi-send-check-outline" style="font-size:26px"></i>
+                                                        </span>
+                                                    </div>
+                                                    <h4 class="mt-2">Send 2 files to 2 people</h4>
+                                                    <p class="text-muted">A copy of each file is placed in each recipient's folder. This cannot be undone from here.</p>
+                                                </div>
+
+                                                <div class="card shadow-none border mb-2">
+                                                    <div class="card-body py-2">
+                                                        <h5 class="mt-0 mb-2 font-14">Files
+                                                            <a href="#" class="float-end font-13 fw-normal" onclick="wfStep('#wf-step1');return false">Change</a>
+                                                        </h5>
+                                                        <p class="mb-1"><i class="mdi mdi-file-pdf-box text-danger me-1"></i>Payroll-January.pdf</p>
+                                                        <p class="mb-0"><i class="mdi mdi-file-pdf-box text-danger me-1"></i>Payroll-February.pdf</p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card shadow-none border mb-3">
+                                                    <div class="card-body py-2">
+                                                        <h5 class="mt-0 mb-2 font-14">Recipients
+                                                            <a href="#" class="float-end font-13 fw-normal" onclick="wfStep('#wf-step2');return false">Change</a>
+                                                        </h5>
+                                                        <p class="mb-1"><i class="mdi mdi-account-outline me-1"></i>Kwame Osei <span class="text-muted font-12">(kwame.osei)</span></p>
+                                                        <p class="mb-0"><i class="mdi mdi-account-outline me-1"></i>Ama Boateng <span class="text-muted font-12">(ama.boateng)</span></p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- email_notification permission decides whether this shows -->
+                                                <div class="alert alert-info" role="alert">
+                                                    <i class="mdi mdi-email-outline me-1"></i>
+                                                    Recipients with email notifications enabled will also be emailed.
+                                                </div>
+
+                                                <div class="d-flex justify-content-between mt-3 pt-3 border-top">
+                                                    <button class="btn btn-light" onclick="wfStep('#wf-step2')"><i class="mdi mdi-arrow-left me-1"></i>Back</button>
+                                                    <button class="btn btn-primary"><i class="mdi mdi-send me-1"></i>Send files</button>
+                                                </div>
+
+                                                <!-- result states, shown here for reference -->
+                                                <div class="alert alert-success mt-3 mb-0">
+                                                    <i class="mdi mdi-check-circle-outline me-1"></i>
+                                                    <strong>Sent.</strong> 2 files delivered to 2 people.
+                                                </div>
+
+                                                <div class="alert alert-warning mt-2 mb-0 wf-new">
+                                                    <i class="mdi mdi-alert-outline me-1"></i>
+                                                    <strong>Partly sent.</strong> These files could not be found and were skipped:
+                                                    <ul class="mb-0 mt-1">
+                                                        <li>Payroll-March.pdf</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ HISTORY ============ -->
+                    <div class="tab-pane" id="wf-send-history">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <input type="radio" class="btn-check" name="wf-scope" id="wf-scope-sent" checked>
+                                        <label class="btn btn-outline-primary" for="wf-scope-sent">Sent by me</label>
+                                        <input type="radio" class="btn-check" name="wf-scope" id="wf-scope-recv">
+                                        <label class="btn btn-outline-primary" for="wf-scope-recv">Received</label>
+                                    </div>
+                                    <div class="app-search">
+                                        <div class="position-relative">
+                                            <input type="text" class="form-control form-control-sm" placeholder="Search...">
+                                            <span class="mdi mdi-magnify search-icon"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-centered table-nowrap mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Recipient</th>
+                                                <th>Files</th>
+                                                <th>Batch</th>
+                                                <th>Sent</th>
+                                                <th style="width:80px"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <img src="assets/images/users/avatar-2.jpg" class="rounded-circle me-1" height="24" alt="">
+                                                    Kwame Osei
+                                                </td>
+                                                <td><span class="badge bg-primary-lighten text-primary">3 files</span></td>
+                                                <td>Q1-2026-Payroll</td>
+                                                <td class="text-muted">3 Sep 2026, 14:22</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted" title="View files"><i class="mdi mdi-eye-outline"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <img src="assets/images/users/avatar-4.jpg" class="rounded-circle me-1" height="24" alt="">
+                                                    Ama Boateng
+                                                </td>
+                                                <td><span class="badge bg-primary-lighten text-primary">1 file</span></td>
+                                                <td class="text-muted">—</td>
+                                                <td class="text-muted">1 Sep 2026, 09:05</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted" title="View files"><i class="mdi mdi-eye-outline"></i></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- empty state -->
+                                <div class="text-center py-5 d-none">
+                                    <i class="mdi mdi-send-outline text-muted" style="font-size:36px"></i>
+                                    <h5 class="mt-2 mb-1">You have not sent any files yet</h5>
+                                    <p class="text-muted mb-3">Files you send to colleagues will be listed here.</p>
+                                    <button class="btn btn-primary btn-sm"><i class="mdi mdi-send-outline me-1"></i>Send files</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6"><script>document.write(new Date().getFullYear())</script> © e-Archive</div>
+                    <div class="col-md-6"><div class="text-md-end footer-links d-none d-md-block"><span class="text-muted">Head Office · Finance</span></div></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+</div>
+
+
+<!-- ==================================================================== -->
 <!-- Wireframe harness                                                     -->
 <!-- ==================================================================== -->
 <div id="wf-bar">
@@ -492,6 +1028,7 @@
     <select id="wf-select">
         <option value="page-login">1. Login</option>
         <option value="page-dashboard">2. Dashboard</option>
+        <option value="page-send">3. Send files</option>
     </select>
     <span class="wf-tag">Hyper saas</span>
     <span class="wf-note">Dashed green outline = new, not in the current app. All data shown comes from existing endpoints.</span>
@@ -511,6 +1048,7 @@
             window.scrollTo(0, 0);
         }
         sel.addEventListener('change', function () { show(this.value); });
+        window.wfStep = function (t) { var a = document.querySelector('a[href="' + t + '"]'); if (a && window.bootstrap) { new bootstrap.Tab(a).show(); } };
         show(sel.value);
     })();
 </script>
