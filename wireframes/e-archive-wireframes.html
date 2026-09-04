@@ -2884,6 +2884,629 @@
 
 
 <!-- ==================================================================== -->
+<!-- PAGE 7 — DEPARTMENTS                                                  -->
+<!-- API: GET  /admin/retrieve-user-group                                  -->
+<!--      POST /admin/user-group        fd: catName, catDescription,       -->
+<!--                                        btnAction, updateRecord        -->
+<!--      POST /admin/remove-user-group fd: deleteRecord                   -->
+<!-- ==================================================================== -->
+<div class="wf-page" id="page-departments">
+<div class="wrapper">
+
+    <div class="leftside-menu">
+        <a href="#" class="logo text-center logo-light">
+            <span class="logo-lg"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="22"></span>
+            <span class="logo-sm"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="18"></span>
+        </a>
+        <div class="h-100" data-simplebar>
+            <ul class="side-nav">
+                <li class="side-nav-title side-nav-item">Main</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-view-dashboard-outline"></i><span> Dashboard </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-folder-outline"></i><span> Files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-cloud-upload-outline"></i><span> Upload </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-send-outline"></i><span> Send files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-scanner"></i><span> Scan </span></a></li>
+                <li class="side-nav-title side-nav-item">Administration</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-account-multiple-outline"></i><span> Users </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-shield-key-outline"></i><span> Access control </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-domain"></i><span> Branches </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link active"><i class="mdi mdi-sitemap-outline"></i><span> Departments </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-history"></i><span> Audit trail </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-database-cog-outline"></i><span> Storage </span></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="content-page">
+        <div class="content">
+
+            <div class="navbar-custom">
+                <ul class="list-unstyled topbar-menu float-end mb-0">
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button">
+                            <i class="dripicons-bell noti-icon"></i><span class="noti-icon-badge"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
+                            <div class="dropdown-item noti-title"><h5 class="m-0">Messages</h5></div>
+                            <a href="#" class="dropdown-item notify-item">
+                                <div class="notify-icon bg-primary"><i class="mdi mdi-bullhorn-outline"></i></div>
+                                <p class="notify-details">Scheduled maintenance this Saturday from 6pm.</p>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button">
+                            <span class="account-user-avatar"><img src="assets/images/users/avatar-1.jpg" alt="user" class="rounded-circle"></span>
+                            <span>
+                                <span class="account-user-name">Akosua Mensah</span>
+                                <span class="account-position">Finance · Head Office</span>
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-account-circle me-1"></i><span>My profile</span></a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-logout me-1"></i><span>Sign out</span></a>
+                        </div>
+                    </li>
+                </ul>
+                <button class="button-menu-mobile open-left"><i class="mdi mdi-menu"></i></button>
+            </div>
+
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="#">e-Archive</a></li>
+                                    <li class="breadcrumb-item active">Departments</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">Departments</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <p class="text-muted mb-3">
+                                    Departments group users and their files. Every user belongs to one.
+                                </p>
+
+                                <div class="row mb-2">
+                                    <div class="col-sm-5">
+                                        <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#wf-dep-modal">
+                                            <i class="mdi mdi-plus-circle me-1"></i>Add department
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <div class="text-sm-end">
+                                            <div class="d-inline-flex align-items-center me-2">
+                                                <label class="me-1 mb-0 font-13 text-muted">Rows</label>
+                                                <select class="form-select form-select-sm" style="width:72px">
+                                                    <option>10</option><option>25</option><option>50</option><option>100</option>
+                                                </select>
+                                            </div>
+                                            <div class="d-inline-block app-search">
+                                                <div class="position-relative">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="Search departments...">
+                                                    <span class="mdi mdi-magnify search-icon"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-centered table-nowrap table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width:40px">#</th>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>Created by</th>
+                                                <th>Created on</th>
+                                                <th style="width:90px" class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td class="fw-bold">Finance</td>
+                                                <td class="text-muted">Accounts payable and receivable, payroll, tax filings</td>
+                                                <td class="text-muted">admin</td>
+                                                <td class="text-muted">12 Jan 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-dep-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-dep-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td class="fw-bold">Human Resources</td>
+                                                <td class="text-muted">Contracts, leave records, disciplinary files</td>
+                                                <td class="text-muted">admin</td>
+                                                <td class="text-muted">12 Jan 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-dep-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-dep-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>3</td>
+                                                <td class="fw-bold">Records</td>
+                                                <td class="text-muted">Land titles, certificates and long term storage</td>
+                                                <td class="text-muted">kwame.osei</td>
+                                                <td class="text-muted">03 Feb 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-dep-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-dep-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>4</td>
+                                                <td class="fw-bold">Legal</td>
+                                                <td class="text-muted">Agreements, litigation and compliance documents</td>
+                                                <td class="text-muted">admin</td>
+                                                <td class="text-muted">19 Mar 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-dep-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-dep-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>5</td>
+                                                <td class="fw-bold">Operations</td>
+                                                <td class="text-muted">Daily operational reports and logistics paperwork</td>
+                                                <td class="text-muted">admin</td>
+                                                <td class="text-muted">02 Apr 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-dep-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-dep-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>6</td>
+                                                <td class="fw-bold">Procurement</td>
+                                                <td class="text-muted">Supplier invoices, tenders and purchase orders</td>
+                                                <td class="text-muted">kwame.osei</td>
+                                                <td class="text-muted">17 May 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-dep-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-dep-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>7</td>
+                                                <td class="fw-bold">Audit</td>
+                                                <td class="text-muted">Internal and external audit working papers</td>
+                                                <td class="text-muted">admin</td>
+                                                <td class="text-muted">28 Jun 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-dep-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-dep-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="text-center py-4 d-none">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                                <div class="text-center py-5 d-none">
+                                    <i class="mdi mdi-database-off-outline text-muted" style="font-size:34px"></i>
+                                    <h5 class="mt-2 mb-1">No departments yet</h5>
+                                    <p class="text-muted mb-0">Create one to start grouping users and files.</p>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="text-muted font-13">Showing 1 to 7 of 7 departments</span>
+                                    <div>
+                                        <span class="text-muted font-13 me-2">Page 1 of 1</span>
+                                        <button class="btn btn-sm btn-light" disabled><i class="mdi mdi-chevron-left"></i></button>
+                                        <button class="btn btn-sm btn-light" disabled><i class="mdi mdi-chevron-right"></i></button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6"><script>document.write(new Date().getFullYear())</script> © e-Archive</div>
+                    <div class="col-md-6"><div class="text-md-end footer-links d-none d-md-block"><span class="text-muted">Head Office · Finance</span></div></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- ---- CREATE / EDIT DEPARTMENT ---- -->
+<div class="modal fade" id="wf-dep-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- title is "Create department" when adding -->
+                <h4 class="modal-title">Edit department</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="wf-dep-name">Name</label>
+                    <input type="text" class="form-control" id="wf-dep-name" value="Finance" placeholder="e.g. Finance">
+                </div>
+                <div class="mb-0">
+                    <label class="form-label" for="wf-dep-desc">Description</label>
+                    <textarea class="form-control" id="wf-dep-desc" rows="3" placeholder="What this department keeps in the archive">Accounts payable and receivable, payroll, tax filings</textarea>
+                </div>
+                <div class="alert alert-danger py-2 px-3 mt-3 mb-0 d-none">
+                    <i class="mdi mdi-alert-circle-outline me-1"></i>Name and description are both required.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-primary d-none" disabled>
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>Saving&hellip;
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ---- DELETE DEPARTMENT ---- -->
+<div class="modal fade" id="wf-dep-delete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete department?</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0"><strong>Finance</strong> will be removed. Users assigned to it keep their files, but will need a new department.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger">Delete department</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ==================================================================== -->
+<!-- PAGE 8 — BRANCHES                                                     -->
+<!-- API: GET  /admin/retrieve-branches                                    -->
+<!--      GET  /admin/retrieve-user-group  (department options)            -->
+<!--      POST /admin/branches       fd: name, person, address, phone,     -->
+<!--            reg, email, departmentName, btnAction, updateRecord        -->
+<!--      POST /admin/remove-branch  fd: deleteRecord                      -->
+<!-- ==================================================================== -->
+<div class="wf-page" id="page-branches">
+<div class="wrapper">
+
+    <div class="leftside-menu">
+        <a href="#" class="logo text-center logo-light">
+            <span class="logo-lg"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="22"></span>
+            <span class="logo-sm"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="18"></span>
+        </a>
+        <div class="h-100" data-simplebar>
+            <ul class="side-nav">
+                <li class="side-nav-title side-nav-item">Main</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-view-dashboard-outline"></i><span> Dashboard </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-folder-outline"></i><span> Files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-cloud-upload-outline"></i><span> Upload </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-send-outline"></i><span> Send files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-scanner"></i><span> Scan </span></a></li>
+                <li class="side-nav-title side-nav-item">Administration</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-account-multiple-outline"></i><span> Users </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-shield-key-outline"></i><span> Access control </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link active"><i class="mdi mdi-domain"></i><span> Branches </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-sitemap-outline"></i><span> Departments </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-history"></i><span> Audit trail </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-database-cog-outline"></i><span> Storage </span></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="content-page">
+        <div class="content">
+
+            <div class="navbar-custom">
+                <ul class="list-unstyled topbar-menu float-end mb-0">
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button">
+                            <i class="dripicons-bell noti-icon"></i><span class="noti-icon-badge"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
+                            <div class="dropdown-item noti-title"><h5 class="m-0">Messages</h5></div>
+                            <a href="#" class="dropdown-item notify-item">
+                                <div class="notify-icon bg-primary"><i class="mdi mdi-bullhorn-outline"></i></div>
+                                <p class="notify-details">Scheduled maintenance this Saturday from 6pm.</p>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button">
+                            <span class="account-user-avatar"><img src="assets/images/users/avatar-1.jpg" alt="user" class="rounded-circle"></span>
+                            <span>
+                                <span class="account-user-name">Akosua Mensah</span>
+                                <span class="account-position">Finance · Head Office</span>
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-account-circle me-1"></i><span>My profile</span></a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-logout me-1"></i><span>Sign out</span></a>
+                        </div>
+                    </li>
+                </ul>
+                <button class="button-menu-mobile open-left"><i class="mdi mdi-menu"></i></button>
+            </div>
+
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="#">e-Archive</a></li>
+                                    <li class="breadcrumb-item active">Branches</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">Branches</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <p class="text-muted mb-3">
+                                    Branches are the top level of the archive. Every user belongs to one.
+                                </p>
+
+                                <div class="row mb-2">
+                                    <div class="col-sm-5">
+                                        <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#wf-br-modal">
+                                            <i class="mdi mdi-plus-circle me-1"></i>Add branch
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <div class="text-sm-end">
+                                            <div class="d-inline-flex align-items-center me-2">
+                                                <label class="me-1 mb-0 font-13 text-muted">Rows</label>
+                                                <select class="form-select form-select-sm" style="width:72px">
+                                                    <option>10</option><option>25</option><option>50</option><option>100</option>
+                                                </select>
+                                            </div>
+                                            <div class="d-inline-block app-search">
+                                                <div class="position-relative">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="Search branches...">
+                                                    <span class="mdi mdi-magnify search-icon"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-centered table-nowrap table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width:40px">#</th>
+                                                <th>Name</th>
+                                                <th>Contact person</th>
+                                                <th>Address</th>
+                                                <th>Email</th>
+                                                <th>Phone</th>
+                                                <th>Registration</th>
+                                                <th>Departments</th>
+                                                <th>Created on</th>
+                                                <th style="width:90px" class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td class="fw-bold">Head Office</td>
+                                                <td>Kwabena Ofori</td>
+                                                <td class="text-muted text-truncate" style="max-width:220px" title="12 Independence Avenue, Accra">12 Independence Avenue, Accra</td>
+                                                <td class="text-muted">headoffice@company.com</td>
+                                                <td class="text-muted">+233 30 267 1234</td>
+                                                <td class="text-muted">CS-4471-2019</td>
+                                                <td><span class="badge bg-secondary-lighten text-secondary">Finance</span></td>
+                                                <td class="text-muted">12 Jan 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-br-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-br-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td class="fw-bold">Kumasi Branch</td>
+                                                <td>Adwoa Frimpong</td>
+                                                <td class="text-muted text-truncate" style="max-width:220px" title="Plot 8, Harper Road, Adum, Kumasi">Plot 8, Harper Road, Adum, Kumasi</td>
+                                                <td class="text-muted">kumasi@company.com</td>
+                                                <td class="text-muted">+233 32 202 8811</td>
+                                                <td class="text-muted">CS-4472-2019</td>
+                                                <td><span class="badge bg-secondary-lighten text-secondary">Records</span></td>
+                                                <td class="text-muted">14 Feb 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-br-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-br-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>3</td>
+                                                <td class="fw-bold">Takoradi Branch</td>
+                                                <td>Nana Agyeman</td>
+                                                <td class="text-muted text-truncate" style="max-width:220px" title="Beach Road, Market Circle, Takoradi">Beach Road, Market Circle, Takoradi</td>
+                                                <td class="text-muted">takoradi@company.com</td>
+                                                <td class="text-muted">+233 31 202 4410</td>
+                                                <td class="text-muted">CS-4473-2020</td>
+                                                <td><span class="badge bg-secondary-lighten text-secondary">Legal</span></td>
+                                                <td class="text-muted">03 Mar 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-br-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-br-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>4</td>
+                                                <td class="fw-bold">Tamale Branch</td>
+                                                <td>Kojo Antwi</td>
+                                                <td class="text-muted text-truncate" style="max-width:220px" title="Bolgatanga Road, Tamale">Bolgatanga Road, Tamale</td>
+                                                <td class="text-muted">tamale@company.com</td>
+                                                <td class="text-muted">+233 37 202 7755</td>
+                                                <td class="text-muted">CS-4474-2021</td>
+                                                <td><span class="text-muted font-13">No departments</span></td>
+                                                <td class="text-muted">22 Jul 2025</td>
+                                                <td class="text-end">
+                                                    <a href="#" class="text-muted me-2" title="Edit" data-bs-toggle="modal" data-bs-target="#wf-br-modal"><i class="mdi mdi-square-edit-outline font-16"></i></a>
+                                                    <a href="#" class="text-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#wf-br-delete"><i class="mdi mdi-delete-outline font-16"></i></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="text-center py-4 d-none">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                                <div class="text-center py-5 d-none">
+                                    <i class="mdi mdi-database-off-outline text-muted" style="font-size:34px"></i>
+                                    <h5 class="mt-2 mb-1">No branches yet</h5>
+                                    <p class="text-muted mb-0">Create one to start organising the archive.</p>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="text-muted font-13">Showing 1 to 4 of 17 branches</span>
+                                    <div>
+                                        <span class="text-muted font-13 me-2">Page 1 of 1</span>
+                                        <button class="btn btn-sm btn-light" disabled><i class="mdi mdi-chevron-left"></i></button>
+                                        <button class="btn btn-sm btn-light" disabled><i class="mdi mdi-chevron-right"></i></button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6"><script>document.write(new Date().getFullYear())</script> © e-Archive</div>
+                    <div class="col-md-6"><div class="text-md-end footer-links d-none d-md-block"><span class="text-muted">Head Office · Finance</span></div></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- ---- CREATE / EDIT BRANCH ---- -->
+<div class="modal fade" id="wf-br-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- title is "Create branch" when adding -->
+                <h4 class="modal-title">Edit branch</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" value="Head Office" placeholder="e.g. Head Office">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Contact person</label>
+                        <input type="text" class="form-control" value="Kwabena Ofori" placeholder="e.g. Kwabena Ofori">
+                    </div>
+                    <div class="col-12 mb-2">
+                        <label class="form-label">Address</label>
+                        <input type="text" class="form-control" value="12 Independence Avenue, Accra" placeholder="Street, city">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" value="headoffice@company.com" placeholder="branch@company.com">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Phone number</label>
+                        <input type="text" class="form-control" value="+233 30 267 1234" placeholder="+233 ...">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Registration number</label>
+                        <input type="text" class="form-control" value="CS-4471-2019" placeholder="e.g. CS-4471-2019">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <!-- one department per branch, submitted as departmentName -->
+                        <label class="form-label">Department</label>
+                        <select class="form-select">
+                            <option value="">Select department</option>
+                            <option selected>Finance</option>
+                            <option>Human Resources</option>
+                            <option>Records</option>
+                            <option>Legal</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="alert alert-danger py-2 px-3 mt-2 mb-0 d-none">
+                    <i class="mdi mdi-alert-circle-outline me-1"></i>All fields are required, including the department.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-primary d-none" disabled>
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>Saving&hellip;
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ---- DELETE BRANCH ---- -->
+<div class="modal fade" id="wf-br-delete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete branch?</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0"><strong>Head Office</strong> will be removed. Users assigned to it will need a new branch.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger">Delete branch</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ==================================================================== -->
 <div id="wf-bar">
     <strong>e-Archive wireframes</strong>
     <select id="wf-select">
@@ -2893,6 +3516,8 @@
         <option value="page-files">4. Files</option>
         <option value="page-upload">5. Upload</option>
         <option value="page-users">6. Users</option>
+        <option value="page-departments">7. Departments</option>
+        <option value="page-branches">8. Branches</option>
     </select>
     <span class="wf-tag">Hyper saas</span>
     <span class="wf-note">Dashed green outline = new, not in the current app. All data shown comes from existing endpoints.</span>
