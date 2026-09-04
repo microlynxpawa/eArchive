@@ -21,7 +21,10 @@
         /* login keeps the existing brand background */
         .wf-login-bg{min-height:100vh;background:url("assets/images/login/login_bg.jpg") center center / cover no-repeat}
         .wf-login-bg .card{box-shadow:0 10px 30px rgba(0,0,0,.25)}
-        /* split panes with draggable resizers, as the current page has */
+        /* drop zone */
+        .wf-drop{border:2px dashed #ced4da;border-radius:6px;padding:28px 16px;background:#fafbfe;cursor:pointer}
+        .wf-drop:hover{border-color:#727cf5;background:#f5f7ff}
+        /* split panes */
         .wf-split{display:flex;align-items:flex-start;gap:16px}
         /* folder panel: fixed width, scrolls on its own */
         .wf-pane-left{flex:0 0 320px;width:320px;height:560px;overflow-y:auto;overflow-x:hidden;
@@ -2055,6 +2058,379 @@
 <!-- ==================================================================== -->
 <!-- Wireframe harness                                                     -->
 <!-- ==================================================================== -->
+<!-- PAGE 5 — UPLOAD                                                       -->
+<!-- API: POST /admin/uploadFile           fd: file, fileName              -->
+<!--      POST /admin/uploadMultipleFiles  fd: files[], customNames[i],    -->
+<!--                                           originalNames[i]           -->
+<!-- ==================================================================== -->
+<div class="wf-page" id="page-upload">
+<div class="wrapper">
+
+    <div class="leftside-menu">
+        <a href="#" class="logo text-center logo-light">
+            <span class="logo-lg"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="22"></span>
+            <span class="logo-sm"><img src="assets/images/logo/logo.png" alt="xCore eArchive" height="18"></span>
+        </a>
+        <div class="h-100" data-simplebar>
+            <ul class="side-nav">
+                <li class="side-nav-title side-nav-item">Main</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-view-dashboard-outline"></i><span> Dashboard </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-folder-outline"></i><span> Files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link active"><i class="mdi mdi-cloud-upload-outline"></i><span> Upload </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-send-outline"></i><span> Send files </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-scanner"></i><span> Scan </span></a></li>
+                <li class="side-nav-title side-nav-item">Administration</li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-account-multiple-outline"></i><span> Users </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-shield-key-outline"></i><span> Access control </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-domain"></i><span> Branches </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-sitemap-outline"></i><span> Departments </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-history"></i><span> Audit trail </span></a></li>
+                <li class="side-nav-item"><a href="#" class="side-nav-link"><i class="mdi mdi-database-cog-outline"></i><span> Storage </span></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="content-page">
+        <div class="content">
+
+            <div class="navbar-custom">
+                <ul class="list-unstyled topbar-menu float-end mb-0">
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button">
+                            <i class="dripicons-bell noti-icon"></i><span class="noti-icon-badge"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
+                            <div class="dropdown-item noti-title"><h5 class="m-0">Messages</h5></div>
+                            <a href="#" class="dropdown-item notify-item">
+                                <div class="notify-icon bg-primary"><i class="mdi mdi-bullhorn-outline"></i></div>
+                                <p class="notify-details">Scheduled maintenance this Saturday from 6pm.</p>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle nav-user arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button">
+                            <span class="account-user-avatar"><img src="assets/images/users/avatar-1.jpg" alt="user" class="rounded-circle"></span>
+                            <span>
+                                <span class="account-user-name">Akosua Mensah</span>
+                                <span class="account-position">Finance · Head Office</span>
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-account-circle me-1"></i><span>My profile</span></a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item notify-item"><i class="mdi mdi-logout me-1"></i><span>Sign out</span></a>
+                        </div>
+                    </li>
+                </ul>
+                <button class="button-menu-mobile open-left"><i class="mdi mdi-menu"></i></button>
+            </div>
+
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="#">e-Archive</a></li>
+                                    <li class="breadcrumb-item active">Upload</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">Upload</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <p class="text-muted mb-3">
+                                    Files are saved to your folder:
+                                    <strong>Head Office / Finance / akosua.mensah</strong>
+                                </p>
+
+                                <ul class="nav nav-tabs nav-bordered mb-3">
+                                    <li class="nav-item">
+                                        <a href="#wf-up-single" data-bs-toggle="tab" class="nav-link active">
+                                            <i class="mdi mdi-file-outline me-1"></i>Single upload
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#wf-up-multi" data-bs-toggle="tab" class="nav-link">
+                                            <i class="mdi mdi-file-multiple-outline me-1"></i>Multiple upload
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content p-0">
+
+                                    <!-- ============ SINGLE ============ -->
+                                    <div class="tab-pane show active" id="wf-up-single">
+                                        <div class="row">
+                                            <div class="col-lg-7">
+
+                                                <!-- drop zone: drag and drop, or click to browse -->
+                                                <div class="wf-drop text-center">
+                                                    <i class="mdi mdi-cloud-upload-outline text-muted" style="font-size:44px"></i>
+                                                    <h4 class="mt-1 mb-1">Drop a file here, or click to browse</h4>
+                                                    <span class="text-muted font-13">Accepted types: JPG, PNG, PDF</span>
+                                                </div>
+
+                                                <!-- selected file -->
+                                                <div class="card shadow-none border mt-2 mb-0">
+                                                    <div class="p-2">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-auto">
+                                                                <div class="avatar-sm">
+                                                                    <span class="avatar-title bg-danger-lighten text-danger rounded">
+                                                                        <i class="mdi mdi-file-pdf-box font-20"></i>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col ps-0">
+                                                                <span class="fw-bold d-block text-truncate">Bank-Reconciliation-December.pdf</span>
+                                                                <span class="font-12 text-muted">1.8 MB</span>
+                                                            </div>
+                                                            <div class="col-auto">
+                                                                <button class="btn btn-sm btn-link text-danger">
+                                                                    <i class="mdi mdi-close-circle-outline me-1"></i>Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- rejected type, shown for reference -->
+                                                <div class="alert alert-danger mt-2 mb-0 d-none">
+                                                    <i class="mdi mdi-alert-circle-outline me-1"></i>
+                                                    Unsupported file type. Allowed: JPG, PNG, PDF.
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-5">
+                                                <div class="card shadow-none border h-100 mb-0">
+                                                    <div class="card-body">
+                                                        <label class="form-label" for="wf-single-name">File name <span class="text-muted fw-normal">(optional)</span></label>
+                                                        <input type="text" class="form-control" id="wf-single-name" value="Bank-Reconciliation-December"
+                                                               placeholder="Leave blank to keep the original name">
+                                                        <p class="form-text mb-3">
+                                                            Saved as <strong>Bank-Reconciliation-December.pdf</strong>
+                                                        </p>
+
+                                                        <!-- upload progress -->
+                                                        <div class="mb-2 d-none">
+                                                            <div class="d-flex justify-content-between font-12 mb-1">
+                                                                <span>Uploading&hellip;</span><span>62%</span>
+                                                            </div>
+                                                            <div class="progress progress-sm">
+                                                                <div class="progress-bar" role="progressbar" style="width:62%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <button class="btn btn-success w-100">
+                                                            <i class="mdi mdi-cloud-upload-outline me-1"></i>Upload file
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ============ MULTIPLE ============ -->
+                                    <div class="tab-pane" id="wf-up-multi">
+
+                                        <div class="row">
+                                            <div class="col-lg-7">
+                                                <div class="wf-drop text-center">
+                                                    <i class="mdi mdi-cloud-upload-outline text-muted" style="font-size:44px"></i>
+                                                    <h4 class="mt-1 mb-1">Drop files here, or click to browse</h4>
+                                                    <span class="text-muted font-13">Accepted types: JPG, PNG, PDF</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-5">
+                                                <div class="card shadow-none border h-100 mb-0">
+                                                    <div class="card-body">
+                                                        <label class="form-label" for="wf-batch">
+                                                            Batch name <span class="text-muted fw-normal">(optional, groups the files together)</span>
+                                                        </label>
+                                                        <input type="text" class="form-control" id="wf-batch" maxlength="25" value="July Reports" placeholder="e.g. July Reports">
+                                                        <div class="d-flex justify-content-between">
+                                                            <span class="form-text">Cannot contain the _ character</span>
+                                                            <span class="form-text">12 / 25</span>
+                                                        </div>
+
+                                                        <!-- validation error, shown for reference -->
+                                                        <div class="text-danger font-13 mt-1 d-none">
+                                                            <i class="mdi mdi-alert-circle-outline me-1"></i>Batch name cannot contain the _ character.
+                                                        </div>
+
+                                                        <p class="form-text mt-2 mb-3">
+                                                            Files will be grouped under <strong>July Reports</strong> in the archive.
+                                                        </p>
+
+                                                        <!-- overall progress -->
+                                                        <div class="mb-2 d-none">
+                                                            <div class="d-flex justify-content-between font-12 mb-1">
+                                                                <span>Uploading 3 of 5&hellip;</span><span>60%</span>
+                                                            </div>
+                                                            <div class="progress progress-sm">
+                                                                <div class="progress-bar" role="progressbar" style="width:60%"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="d-flex gap-1">
+                                                            <button class="btn btn-success flex-grow-1">
+                                                                <i class="mdi mdi-cloud-upload-outline me-1"></i>Upload all
+                                                            </button>
+                                                            <button class="btn btn-light text-danger">Cancel all</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
+                                            <h5 class="mb-0">5 files selected</h5>
+                                            <span class="text-muted font-13">Rename any file before uploading</span>
+                                        </div>
+
+                                        <div class="row g-2">
+
+                                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                                <div class="card shadow-none border m-0">
+                                                    <div class="p-2">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <div class="avatar-sm me-2" style="height:2.2rem;width:2.2rem">
+                                                                <span class="avatar-title bg-danger-lighten text-danger rounded"><i class="mdi mdi-file-pdf-box"></i></span>
+                                                            </div>
+                                                            <div class="flex-grow-1 text-truncate">
+                                                                <span class="font-13 d-block text-truncate" title="Payroll-January-2026.pdf">Payroll-January-2026.pdf</span>
+                                                                <span class="font-12 text-muted">820 KB</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                                                        </div>
+                                                        <input type="text" class="form-control form-control-sm" value="Payroll-January-2026" placeholder="Custom name (optional)">
+                                                        <span class="font-12 text-muted d-block mt-1 text-truncate" title="Payroll-January-2026@July Reports.pdf">
+                                                            &rarr; Payroll-January-2026@July Reports.pdf
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                                <div class="card shadow-none border m-0">
+                                                    <div class="p-2">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <div class="avatar-sm me-2" style="height:2.2rem;width:2.2rem">
+                                                                <span class="avatar-title bg-danger-lighten text-danger rounded"><i class="mdi mdi-file-pdf-box"></i></span>
+                                                            </div>
+                                                            <div class="flex-grow-1 text-truncate">
+                                                                <span class="font-13 d-block text-truncate" title="Payroll-February-2026.pdf">Payroll-February-2026.pdf</span>
+                                                                <span class="font-12 text-muted">795 KB</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                                                        </div>
+                                                        <input type="text" class="form-control form-control-sm" value="Payroll-February-2026" placeholder="Custom name (optional)">
+                                                        <span class="font-12 text-muted d-block mt-1 text-truncate">&rarr; Payroll-February-2026@July Reports.pdf</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                                <div class="card shadow-none border m-0">
+                                                    <div class="p-2">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <div class="avatar-sm me-2" style="height:2.2rem;width:2.2rem">
+                                                                <img src="assets/images/small/small-1.jpg" class="rounded" style="width:100%;height:100%;object-fit:cover" alt="">
+                                                            </div>
+                                                            <div class="flex-grow-1 text-truncate">
+                                                                <span class="font-13 d-block text-truncate" title="Signed-Receipt-Scan.jpg">Signed-Receipt-Scan.jpg</span>
+                                                                <span class="font-12 text-muted">2.1 MB</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                                                        </div>
+                                                        <input type="text" class="form-control form-control-sm" value="Signed-Receipt-Scan" placeholder="Custom name (optional)">
+                                                        <span class="font-12 text-muted d-block mt-1 text-truncate">&rarr; Signed-Receipt-Scan@July Reports.jpg</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                                <div class="card shadow-none border m-0">
+                                                    <div class="p-2">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <div class="avatar-sm me-2" style="height:2.2rem;width:2.2rem">
+                                                                <span class="avatar-title bg-danger-lighten text-danger rounded"><i class="mdi mdi-file-pdf-box"></i></span>
+                                                            </div>
+                                                            <div class="flex-grow-1 text-truncate">
+                                                                <span class="font-13 d-block text-truncate" title="Bank-Reconciliation-Statement-December-2025.pdf">Bank-Reconciliation-Statement-December-2025.pdf</span>
+                                                                <span class="font-12 text-muted">1.8 MB</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                                                        </div>
+                                                        <input type="text" class="form-control form-control-sm" value="Bank-Reconciliation-Statement-December-2025" placeholder="Custom name (optional)">
+                                                        <span class="font-12 text-muted d-block mt-1 text-truncate" title="Bank-Reconciliation-Statement-December-2025@July Reports.pdf">&rarr; Bank-Reconciliation-Statement-December-2025@July Reports.pdf</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                                <div class="card shadow-none border m-0">
+                                                    <div class="p-2">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <div class="avatar-sm me-2" style="height:2.2rem;width:2.2rem">
+                                                                <img src="assets/images/small/small-2.jpg" class="rounded" style="width:100%;height:100%;object-fit:cover" alt="">
+                                                            </div>
+                                                            <div class="flex-grow-1 text-truncate">
+                                                                <span class="font-13 d-block text-truncate" title="Cheque-Stub-0041.png">Cheque-Stub-0041.png</span>
+                                                                <span class="font-12 text-muted">640 KB</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                                                        </div>
+                                                        <input type="text" class="form-control form-control-sm" value="Cheque-Stub-0041" placeholder="Custom name (optional)">
+                                                        <span class="font-12 text-muted d-block mt-1 text-truncate">&rarr; Cheque-Stub-0041@July Reports.png</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- nothing selected yet -->
+                                        <div class="text-center py-4 d-none">
+                                            <i class="mdi mdi-file-outline text-muted" style="font-size:34px"></i>
+                                            <h5 class="mt-2 mb-1">No files selected</h5>
+                                            <p class="text-muted mb-0">Choose files above to rename and upload them together.</p>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6"><script>document.write(new Date().getFullYear())</script> © e-Archive</div>
+                    <div class="col-md-6"><div class="text-md-end footer-links d-none d-md-block"><span class="text-muted">Head Office · Finance</span></div></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+</div>
+
+
+<!-- ==================================================================== -->
 <div id="wf-bar">
     <strong>e-Archive wireframes</strong>
     <select id="wf-select">
@@ -2062,6 +2438,7 @@
         <option value="page-dashboard">2. Dashboard</option>
         <option value="page-send">3. Send files</option>
         <option value="page-files">4. Files</option>
+        <option value="page-upload">5. Upload</option>
     </select>
     <span class="wf-tag">Hyper saas</span>
     <span class="wf-note">Dashed green outline = new, not in the current app. All data shown comes from existing endpoints.</span>
