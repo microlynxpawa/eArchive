@@ -4681,11 +4681,37 @@
         <option value="page-superadmin">11. Analytics (super admin)</option>
     </select>
     <span class="wf-tag">Hyper saas</span>
-    <span>Modals:</span>
-    <a href="#" class="text-white" data-bs-toggle="modal" data-bs-target="#wf-access">Access control</a>
-    <a href="#" class="text-white" data-bs-toggle="modal" data-bs-target="#wf-storage">Storage</a>
-    <a href="#" class="text-white" data-bs-toggle="modal" data-bs-target="#wf-scan">Scan</a>
-    <span class="wf-note">Dashed green outline = new, not in the current app. All data shown comes from existing endpoints.</span>
+    <label for="wf-modal-select">Modals</label>
+    <select id="wf-modal-select">
+        <option value="">Open a modal&hellip;</option>
+        <optgroup label="Sidebar">
+            <option value="wf-access">Access control</option>
+            <option value="wf-storage">Storage</option>
+            <option value="wf-scan">Scan</option>
+        </optgroup>
+        <optgroup label="Files">
+            <option value="wf-preview">File preview, full screen</option>
+            <option value="wf-matched">Matched files</option>
+            <option value="wf-history">Sending history</option>
+            <option value="wf-userpick">User picker</option>
+            <option value="wf-delete">Delete file</option>
+            <option value="wf-alert">Alert</option>
+        </optgroup>
+        <optgroup label="Users">
+            <option value="wf-user-modal">Create / edit user</option>
+            <option value="wf-user-delete">Delete user</option>
+        </optgroup>
+        <optgroup label="Departments and branches">
+            <option value="wf-dep-modal">Create / edit department</option>
+            <option value="wf-dep-delete">Delete department</option>
+            <option value="wf-br-modal">Create / edit branch</option>
+            <option value="wf-br-delete">Delete branch</option>
+        </optgroup>
+        <optgroup label="Login">
+            <option value="wf-forgot">Forgot password</option>
+        </optgroup>
+    </select>
+    <span class="wf-note">Dashed green = new. No API changes anywhere.</span>
 </div>
 
 <script src="assets/js/vendor.min.js"></script>
@@ -4702,6 +4728,17 @@
             window.scrollTo(0, 0);
         }
         sel.addEventListener('change', function () { show(this.value); });
+
+        var modalSel = document.getElementById('wf-modal-select');
+        if (modalSel) {
+            modalSel.addEventListener('change', function () {
+                var id = this.value;
+                this.selectedIndex = 0;
+                if (!id || !window.bootstrap) return;
+                var el = document.getElementById(id);
+                if (el) bootstrap.Modal.getOrCreateInstance(el).show();
+            });
+        }
         window.wfToggleAll = function (btn) {
             var tree = btn.closest(".card-body").querySelector(".wf-tree");
             if (!tree) return;
