@@ -4446,6 +4446,225 @@
 </div>
 
 <!-- ==================================================================== -->
+<!-- SHELL MODALS                                                          -->
+<!-- Opened from the sidebar. Available on every page.                     -->
+<!-- ==================================================================== -->
+
+<!-- ---- ACCESS CONTROL ---- -->
+<!-- API: GET  /admin/searchUsers?usernames=a,b,c                          -->
+<!--      POST /admin/searchUsers/permissions?usernames=a,b,c              -->
+<!--           body { admin, supervisor, personnel }                       -->
+<div class="modal fade" id="wf-access" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4 class="modal-title mb-0">Access control</h4>
+                    <span class="font-13 text-muted">Set the access level for several people at once</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- step 1: who -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0">Selected people <span class="badge bg-primary rounded-pill ms-1">3</span></h5>
+                    <button class="btn btn-sm btn-light border" data-bs-toggle="modal" data-bs-target="#wf-userpick">
+                        <i class="mdi mdi-account-plus-outline me-1"></i>Choose people
+                    </button>
+                </div>
+
+                <div class="border rounded mb-3">
+                    <div class="d-flex align-items-center p-2 border-bottom">
+                        <img src="assets/images/users/avatar-1.jpg" class="rounded-circle me-2" height="32" alt="">
+                        <div class="flex-grow-1">
+                            <span class="fw-bold d-block">Akosua Mensah</span>
+                            <span class="font-12 text-muted">akosua-mensah-head-office · Finance · Head Office</span>
+                        </div>
+                        <span class="badge bg-secondary-lighten text-secondary me-2">Personnel</span>
+                        <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                    </div>
+                    <div class="d-flex align-items-center p-2 border-bottom">
+                        <img src="assets/images/users/avatar-2.jpg" class="rounded-circle me-2" height="32" alt="">
+                        <div class="flex-grow-1">
+                            <span class="fw-bold d-block">Kwame Osei</span>
+                            <span class="font-12 text-muted">kwame-osei-head-office · Finance · Head Office</span>
+                        </div>
+                        <span class="badge bg-primary-lighten text-primary me-2">Admin</span>
+                        <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                    </div>
+                    <div class="d-flex align-items-center p-2">
+                        <img src="assets/images/users/avatar-4.jpg" class="rounded-circle me-2" height="32" alt="">
+                        <div class="flex-grow-1">
+                            <span class="fw-bold d-block">Ama Boateng</span>
+                            <span class="font-12 text-muted">ama-boateng-head-office · Human Resources · Head Office</span>
+                        </div>
+                        <span class="badge bg-info-lighten text-info me-2">Supervisor</span>
+                        <button class="btn btn-sm btn-link text-danger p-0"><i class="mdi mdi-close"></i></button>
+                    </div>
+                </div>
+
+                <!-- nobody chosen yet -->
+                <div class="text-center py-5 border rounded mb-3 d-none">
+                    <i class="mdi mdi-account-multiple-outline text-muted" style="font-size:36px"></i>
+                    <h5 class="mt-2 mb-1">No one selected</h5>
+                    <p class="text-muted mb-0">Choose the people whose access you want to change.</p>
+                </div>
+
+                <!-- step 2: which level. one only, as the current modal enforces -->
+                <h5 class="mb-1">New access level</h5>
+                <p class="text-muted font-13 mb-2">
+                    One level applies to everyone selected. Their current levels are shown above and will be replaced.
+                </p>
+
+                <div class="card shadow-none border mb-2">
+                    <div class="card-body py-2">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="wf-level" id="wf-lvl-personnel" checked>
+                            <label class="form-check-label" for="wf-lvl-personnel">
+                                <span class="fw-bold">Personnel</span>
+                                <span class="text-muted font-12 d-block">Scan, upload and view files. The everyday level.</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="wf-level" id="wf-lvl-supervisor">
+                            <label class="form-check-label" for="wf-lvl-supervisor">
+                                <span class="fw-bold">Supervisor</span>
+                                <span class="text-muted font-12 d-block">Everything Personnel can do, plus supervision rights.</span>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="wf-level" id="wf-lvl-admin">
+                            <label class="form-check-label" for="wf-lvl-admin">
+                                <span class="fw-bold">Admin</span>
+                                <span class="text-muted font-12 d-block">
+                                    Manage users, branches, departments and access. View the audit trail. Delete files.
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning py-2 px-3 mb-0">
+                    <i class="mdi mdi-alert-outline me-1"></i>
+                    This replaces the access level for all <strong>3</strong> selected people.
+                </div>
+
+                <div class="alert alert-danger py-2 px-3 mt-2 mb-0 d-none">
+                    <i class="mdi mdi-alert-circle-outline me-1"></i>Choose an access level first.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Apply to 3 people</button>
+                <button type="button" class="btn btn-primary d-none" disabled>
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>Applying&hellip;
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ---- STORAGE SETTINGS ---- -->
+<!-- API: GET /admin/storage-settings  -> { activeProvider }               -->
+<!--      PUT /admin/storage-settings  body { provider }                   -->
+<div class="modal fade" id="wf-storage" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4 class="modal-title mb-0">Storage</h4>
+                    <span class="font-13 text-muted">Where new files are written</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="card shadow-none border mb-2">
+                    <div class="card-body py-2">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="wf-provider" id="wf-prov-local" checked>
+                            <label class="form-check-label d-block" for="wf-prov-local">
+                                <span class="fw-bold">
+                                    <i class="mdi mdi-harddisk me-1"></i>Local disk
+                                    <span class="badge bg-success-lighten text-success ms-1">In use</span>
+                                </span>
+                                <span class="text-muted font-12 d-block">Files are written to this server.</span>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="wf-provider" id="wf-prov-s3">
+                            <label class="form-check-label d-block" for="wf-prov-s3">
+                                <span class="fw-bold"><i class="mdi mdi-cloud-outline me-1"></i>Amazon S3</span>
+                                <span class="text-muted font-12 d-block">Files are written to the configured S3 bucket.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- the warning that matters: nothing is migrated -->
+                <div class="alert alert-warning mb-0">
+                    <h5 class="alert-heading font-14"><i class="mdi mdi-alert-outline me-1"></i>Existing files are not moved</h5>
+                    <p class="mb-0 font-13">
+                        Switching only changes where <strong>new</strong> files go. Files already stored under the
+                        current provider stay there and will not be reachable until you switch back, or migrate
+                        them yourself.
+                    </p>
+                </div>
+
+                <div class="text-center py-4 d-none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <!-- disabled until the choice differs from the active provider -->
+                <button type="button" class="btn btn-primary" disabled>Switch storage</button>
+                <button type="button" class="btn btn-primary d-none" disabled>
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>Switching&hellip;
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ---- SCAN ---- -->
+<!-- No API and no scanning feature exists. See the ticket: this needs a   -->
+<!-- product decision. Shown here as an honest placeholder rather than an  -->
+<!-- upsell for something that cannot be bought.                           -->
+<div class="modal fade" id="wf-scan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Scan a document</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center py-4">
+                <div class="avatar-lg m-auto">
+                    <span class="avatar-title bg-primary-lighten text-primary rounded-circle">
+                        <i class="mdi mdi-scanner" style="font-size:28px"></i>
+                    </span>
+                </div>
+                <h5 class="mt-2 mb-1">Scanning is not available yet</h5>
+                <p class="text-muted mb-3">
+                    Scan your document with the office scanner, then upload the file here.
+                </p>
+                <button class="btn btn-primary"><i class="mdi mdi-cloud-upload-outline me-1"></i>Upload a scanned file</button>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================================================================== -->
 <div id="wf-bar">
     <strong>e-Archive wireframes</strong>
     <select id="wf-select">
@@ -4462,6 +4681,10 @@
         <option value="page-superadmin">11. Analytics (super admin)</option>
     </select>
     <span class="wf-tag">Hyper saas</span>
+    <span>Modals:</span>
+    <a href="#" class="text-white" data-bs-toggle="modal" data-bs-target="#wf-access">Access control</a>
+    <a href="#" class="text-white" data-bs-toggle="modal" data-bs-target="#wf-storage">Storage</a>
+    <a href="#" class="text-white" data-bs-toggle="modal" data-bs-target="#wf-scan">Scan</a>
     <span class="wf-note">Dashed green outline = new, not in the current app. All data shown comes from existing endpoints.</span>
 </div>
 
