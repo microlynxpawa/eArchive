@@ -1,1304 +1,1044 @@
-import React, { useEffect, useRef, useState, createContext } from 'react'
-import RevealFoldersButton from '../components/RevealFoldersButton'
-import AlertModal from '../components/AlertModal'
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import UserPickerModal from '../components/UserPickerModal'
 import FileSendingHistoryModal from '../components/FileSendingHistoryModal'
 
-export const AuthsContext = createContext()
+// FileSendingHistoryModal reads permissions from here to decide whether the
+// current user may look at someone else's history.
+export const AuthsContext = createContext({})
 
-const galleryCss = `
-/* inline styles ported from gallery.ejs (trimmed where appropriate) */
-/* ...existing code... */
-#full-screen-preview { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display:flex; justify-content:center; align-items:center; z-index:9999; }
-#preview-content { max-width:90%; max-height:90%; overflow:auto; background:white; padding:20px; border-radius:10px; }
-#close-preview { position:absolute; top:10px; right:10px; background:red; color:white; border:none; padding:10px; cursor:pointer; }
-.preview-image{ max-width:100%; height:auto }
-.preview-text{ font-size:16px; color:black }
-.folder-icon{ margin-right:5px }
-.file-icon{ margin-right:5px }
-.file-name{ cursor:pointer; color:var(--link-color); display:inline-block; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle; }
-.file-content{ border:1px solid var(--panel-border); height:300px; overflow-y:auto; padding:15px; background: var(--gallery-bg); color: var(--gallery-text) }
-.sub-items{ margin-left:20px; display:block }
-.file-name:hover{ text-decoration:underline }
-.folder-button{ all:unset; cursor:pointer }
-.folder-button:hover{ text-decoration:underline }
-.file-item{ display:flex; align-items:center; word-break:break-all; max-width:100%; gap:8px; padding:4px 0 }
-.folder-button{ display:block; width:100%; text-align:left; padding:6px 8px; border-radius:4px }
-.sub-items{ margin-left:18px; padding-left:8px; border-left:1px dashed rgba(0,0,0,0.06) }
-.file-checkbox{ margin-right:10px }
-#file-viewer, .box-shadow{ box-shadow:2px 2px 4px 4px rgba(0,0,0,0.06); padding:20px; border-radius:8px; background:var(--gallery-bg); color:var(--gallery-text); border:1px solid var(--panel-border) }
-#searchResultsModal{ position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:9999 }
-#filesModalContent{ background:white; padding:20px; border-radius:10px; max-height:80%; overflow-y:auto }
-#matchedFilesList{ list-style:none; padding:0 }
-#matchedFilesList li{ margin:5px 0 }
-/* Theme variables and dark-mode support */
-:root{ --gallery-bg: #ffffff; --gallery-text: #0b1220; --link-color: #0d6efd; --panel-border: #e6eef6 }
-/* Respect common dark-mode markers */
-.dark, [data-theme='dark'], body.dark { --gallery-bg: #0b1220; --gallery-text: #e6eef6; --link-color: #66b2ff; --panel-border: #23303b }
+/*
+ * Files
+ *
+ * Rebuilt on Hyper (Bootstrap 5) markup. Behaviour is unchanged from the
+ * previous implementation: a folder tree on the left, an inline preview on the
+ * right, and selection that only appears while Pick & Send or Delete is active.
+ *
+ */
 
-#folder-tree{ min-width:0; max-width:100%; overflow-x:auto }
-.box-shadow.col-4{ min-width:0; max-width:100%; overflow-x:auto }
-/* Truncate long batch and file names, show full on hover */
-.file-name, .folder-name {
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: inline-block;
-  vertical-align: middle;
-  /* No width expansion on hover, rely on tooltip */
+// ---------------------------------------------------------------- helpers
+
+// "name@batch.ext" -> "batch". Files with no @ belong to Single Uploads.
+function extractBatchName(filename) {
+  const at = filename.indexOf('@')
+  if (at === -1) return null
+  const lastDot = filename.lastIndexOf('.')
+  if (lastDot === -1 || lastDot < at) return filename.slice(at + 1)
+  return filename.slice(at + 1, lastDot)
 }
-.file-name:hover, .folder-name:hover {
-  background: #f5f5f5;
-  z-index: 2;
-  position: relative;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  /* No max-width change, prevents flicker */
+
+// The display name drops the batch suffix but keeps the extension.
+function displayName(filename) {
+  const at = filename.indexOf('@')
+  if (at === -1) return filename
+  const lastDot = filename.lastIndexOf('.')
+  if (lastDot === -1 || lastDot < at) return filename.slice(0, at)
+  return filename.slice(0, at) + filename.slice(lastDot)
 }
-`
+
+// Dates live in the filename as d-m-yyyy immediately before the extension.
+function extractDateFromFilename(filename) {
+  const m = filename.match(/[\s_\-.](\d{1,2})-(\d{1,2})-(\d{4})\./)
+  if (!m) return null
+  return new Date(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10))
+}
+
+function sortFilesByDateDesc(files) {
+  return files.slice().sort((a, b) => {
+    const da = extractDateFromFilename(a) || new Date(0)
+    const db = extractDateFromFilename(b) || new Date(0)
+    return db - da
+  })
+}
+
+// The API expects d-m-yyyy with no leading zeros; the picker gives yyyy-mm-dd.
+function isoToApiDate(iso) {
+  if (!iso) return null
+  const [y, m, d] = iso.split('-')
+  if (!y || !m || !d) return null
+  return `${Number(d)}-${Number(m)}-${y}`
+}
+
+function prettyDate(iso) {
+  if (!iso) return ''
+  const dt = new Date(iso + 'T00:00:00')
+  if (isNaN(dt)) return iso
+  return dt.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+const EXT_ICON = [
+  [/\.pdf$/i, 'mdi-file-pdf-box text-danger'],
+  [/\.(xlsx|xls|csv)$/i, 'mdi-file-excel-box text-success'],
+  [/\.(docx|doc)$/i, 'mdi-file-word-box text-primary'],
+  [/\.(jpe?g|png|gif|bmp|tiff?)$/i, 'mdi-file-image-box text-info'],
+  [/\.(txt|log|md)$/i, 'mdi-file-document-outline text-muted'],
+]
+
+function fileIcon(name) {
+  const hit = EXT_ICON.find(([re]) => re.test(name))
+  return hit ? hit[1] : 'mdi-file-outline text-muted'
+}
+
+/*
+ * The API returns nested objects keyed by folder name, with a `files` array at
+ * the levels that hold files. This turns that into a node list, grouping each
+ * level's files into batch folders.
+ */
+function buildNodes(obj, parentPath = '') {
+  if (!obj || typeof obj !== 'object') return []
+
+  const folders = Object.keys(obj)
+    .filter((k) => k !== 'files')
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => {
+      const path = parentPath ? `${parentPath}/${name}` : name
+      return {
+        kind: 'folder',
+        name,
+        path,
+        children: buildNodes(obj[name], path),
+      }
+    })
+
+  const files = Array.isArray(obj.files) ? obj.files : []
+  const batches = {}
+  files.forEach((f) => {
+    const key = extractBatchName(f) || '__single__'
+    if (!batches[key]) batches[key] = []
+    batches[key].push(f)
+  })
+
+  const batchNodes = Object.keys(batches)
+    .sort((a, b) => (a === '__single__' ? 1 : b === '__single__' ? -1 : a.localeCompare(b)))
+    .map((key) => ({
+      kind: 'batch',
+      name: key === '__single__' ? 'Single Uploads' : key,
+      isSingle: key === '__single__',
+      path: parentPath ? `${parentPath}/${key}` : key,
+      files: sortFilesByDateDesc(batches[key]),
+    }))
+
+  return [...folders, ...batchNodes]
+}
+
+function collectFolderPaths(nodes, acc = []) {
+  nodes.forEach((n) => {
+    if (n.kind === 'folder') {
+      acc.push(n.path)
+      collectFolderPaths(n.children || [], acc)
+    }
+  })
+  return acc
+}
+
+// Every ancestor path of a file, so a match can be revealed in the tree.
+function findFilePaths(nodes, fileName, trail = [], out = []) {
+  nodes.forEach((n) => {
+    if (n.kind === 'batch') {
+      if (n.files.includes(fileName)) out.push([...trail, n.path])
+    } else {
+      findFilePaths(n.children || [], fileName, [...trail, n.path], out)
+    }
+  })
+  return out
+}
+
+// ---------------------------------------------------------------- component
 
 export default function Gallery() {
-  const [userAuths, setUserAuths] = useState({})
-  const alertModalRef = useRef(null)
-  const userPickerModalRef = useRef(null)
-  const fileSendingHistoryModalRef = useRef(null)
-  const fileTreeRef = useRef(null)
+  const [auths, setAuths] = useState({})
+  const [structure, setStructure] = useState(null)
+  const [loadingTree, setLoadingTree] = useState(true)
+  const [treeError, setTreeError] = useState(false)
 
-  // Handle navigating to a file in the gallery from history modal
-  const handleNavigateToFile = (filePath, fileName) => {
-    
-    const searchAndHighlightFile = async () => {
-      try {
-        // First, try to find the file in currently visible items
-        const allFileItems = document.querySelectorAll('.file-item')
-        
-        for (let item of allFileItems) {
-          const fileNameElement = item.querySelector('.file-name')
-          if (fileNameElement && fileNameElement.textContent.trim() === fileName) {
-            await highlightFile(item, fileName)
-            return true
-          }
-        }
-        
-        // If not found in visible items, we need to expand folders
-        return expandFoldersAndFind(fileName)
-        
-      } catch (err) {
-        console.error('[handleNavigateToFile] Error:', err)
-        alertModalRef.current?.show({
-          title: 'Error',
-          message: 'Error navigating to file location',
-          type: 'error'
-        })
-        return false
-      }
-    }
-    
-    const highlightFile = async (fileItem, fileName) => {
-      // Step 1: Check if file is in a collapsed folder and expand it
-      let parent = fileItem.parentElement
-      let needsExpanding = false
-      
-      while (parent) {
-        if (parent.classList.contains('sub-items')) {
-          const isHidden = parent.style.display === 'none' || !parent.offsetHeight
-          
-          if (isHidden) {
-            // Find the folder button that controls this sub-items
-            const folderButton = parent.previousElementSibling
-            if (folderButton && folderButton.classList.contains('folder-button')) {
-              // Click the button to expand
-              folderButton.click()
-              needsExpanding = true
-            }
-            // Force display block
-            parent.style.display = 'block'
-          }
-        }
-        parent = parent.parentElement
-      }
-      
-      // Wait for DOM to update if we expanded folders
-      if (needsExpanding) {
-        await new Promise(r => setTimeout(r, 200))
-      }
-      
-      // Step 2: Now scroll into view
-      try {
-        fileItem.scrollIntoView({ behavior: 'auto', block: 'center' })
-        await new Promise(r => setTimeout(r, 100))
-        
-      } catch (e) {
-        // scrollIntoView error silently
-      }
-      
-      // Store original styles
-      const originalBackground = fileItem.style.backgroundColor
-      const originalBorder = fileItem.style.border
-      const originalBorderRadius = fileItem.style.borderRadius
-      const originalPadding = fileItem.style.padding
-      const originalBoxShadow = fileItem.style.boxShadow
-      const originalZIndex = fileItem.style.zIndex
-      const originalPosition = fileItem.style.position
-      const originalOutline = fileItem.style.outline
-      const originalOutlineOffset = fileItem.style.outlineOffset
-      
-      // Apply EXTREME highlight styles that will definitely show
-      fileItem.style.position = 'relative'
-      fileItem.style.backgroundColor = '#FFD700 !important'  // Bright gold
-      fileItem.style.border = '5px solid #FF0000 !important'  // Bright red border
-      fileItem.style.borderRadius = '10px'
-      fileItem.style.padding = '10px 15px !important'
-      fileItem.style.boxShadow = '0 0 20px rgba(255, 0, 0, 1), inset 0 0 10px rgba(255, 215, 0, 0.7) !important'
-      fileItem.style.zIndex = '99999'
-      fileItem.style.outline = '3px dashed #FF0000'
-      fileItem.style.outlineOffset = '3px'
-      fileItem.style.transition = 'none'
-      
-      // Remove highlight after 3 seconds
-      setTimeout(() => {
-        fileItem.style.backgroundColor = originalBackground
-        fileItem.style.border = originalBorder
-        fileItem.style.borderRadius = originalBorderRadius
-        fileItem.style.padding = originalPadding
-        fileItem.style.boxShadow = originalBoxShadow
-        fileItem.style.zIndex = originalZIndex
-        fileItem.style.position = originalPosition
-        fileItem.style.outline = originalOutline
-        fileItem.style.outlineOffset = originalOutlineOffset
-      }, 3000)
-    }
-    
-    const expandFoldersAndFind = (targetFileName) => {
-      // Get all folder buttons that are currently visible
-      const folderButtons = document.querySelectorAll('.folder-button')
-      
-      let foundAndHighlighted = false
-      let expandedCount = 0
-      
-      // Click each folder to expand it and check if the file appears
-      folderButtons.forEach((button) => {
-        if (!foundAndHighlighted) {
-          const folderName = button.textContent.trim()
-          
-          // Get the adjacent sub-items div
-          const subItems = button.parentElement?.nextElementSibling
-          if (subItems && subItems.classList.contains('sub-items')) {
-            const isHidden = subItems.style.display === 'none' || !subItems.offsetHeight
-            
-            if (isHidden) {
-              button.click()
-              expandedCount++
-              
-              // Wait a bit for DOM to update, then search
-              setTimeout(() => {
-                const fileItems = subItems.querySelectorAll('.file-item')
-                
-                for (let item of fileItems) {
-                  const fileNameElement = item.querySelector('.file-name')
-                  if (fileNameElement && fileNameElement.textContent.trim() === targetFileName) {
-                    highlightFile(item, targetFileName)
-                    foundAndHighlighted = true
-                    return
-                  }
-                }
-              }, 100)
-            }
-          }
-        }
-      })
-      
-      // If we expanded folders but still haven't found the file, show info message
-      if (expandedCount > 0 && !foundAndHighlighted) {
-        setTimeout(() => {
-          // Try one more search after all expansions
-          const allVisibleItems = document.querySelectorAll('.file-item')
-          for (let item of allVisibleItems) {
-            const fileNameElement = item.querySelector('.file-name')
-            if (fileNameElement && fileNameElement.textContent.trim() === targetFileName) {
-              highlightFile(item, targetFileName)
-              foundAndHighlighted = true
-              return
-            }
-          }
-          
-          if (!foundAndHighlighted) {
-            alertModalRef.current?.show({
-              title: 'File Not Found',
-              message: `Could not locate file "${targetFileName}" in the file structure. It may have been deleted or moved.`,
-              type: 'warning'
-            })
-          }
-        }, 500)
-      }
-      
-      return foundAndHighlighted
-    }
-    
-    // Start the search after a small delay to ensure modal is closed
-    setTimeout(searchAndHighlightFile, 100)
-  }
+  const [expanded, setExpanded] = useState({})
+  const [allOpen, setAllOpen] = useState(false)
 
-  // Handle resending files from history
-  const handleResendFile = (fileNames, filePaths) => {
-    // Pre-select the files and open the send dialog
-    const fileList = Array.isArray(fileNames) ? fileNames : [fileNames]
-    const files = fileList.map((name, idx) => ({
-      name: name,
-      path: filePaths[idx] || filePaths[0]
-    }))
-    
-    // Set up the file picker with these files
-    const fileCheckboxes = document.querySelectorAll('.file-checkbox')
-    fileCheckboxes.forEach(checkbox => {
-      const label = checkbox.parentElement.textContent
-      if (files.some(f => label.includes(f.name))) {
-        checkbox.checked = true
-      }
-    })
-    
-    // Open the user picker modal to select recipients
-    userPickerModalRef.current?.show()
-  }
+  // null | 'send' | 'delete'
+  const [mode, setMode] = useState(null)
+  const [selected, setSelected] = useState([])
 
-  // Handle deleting files from history
-  const handleDeleteFile = async (fileNames) => {
+  const [preview, setPreview] = useState(null)
+  const [previewState, setPreviewState] = useState('idle') // idle | loading | ready | error
+  const [fullscreen, setFullscreen] = useState(false)
+
+  const [nameQuery, setNameQuery] = useState('')
+  const [dateQuery, setDateQuery] = useState('')
+  const [result, setResult] = useState(null) // { kind, label, files, folders }
+  const [showMatched, setShowMatched] = useState(false)
+
+  const [confirmDelete, setConfirmDelete] = useState(null) // array of names
+  const [busy, setBusy] = useState(false)
+  const [toast, setToast] = useState(null)
+
+  const userPickerRef = useRef(null)
+  const historyRef = useRef(null)
+  const objectUrlRef = useRef(null)
+
+  useEffect(() => () => {
+    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current)
+  }, [])
+
+  const notify = useCallback((message, type = 'success') => {
+    setToast({ message, type })
+    window.clearTimeout(notify._t)
+    notify._t = window.setTimeout(() => setToast(null), 4000)
+  }, [])
+
+  // ------------------------------------------------------------- data
+
+  const loadTree = useCallback(async () => {
+    setLoadingTree(true)
+    setTreeError(false)
     try {
-      const fileList = Array.isArray(fileNames) ? fileNames : [fileNames]
-      const response = await fetch('/admin/delete-file', {
-        method: 'DELETE',
+      const res = await fetch('/admin/file-structure', {
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ files: fileList }),
+        headers: { Accept: 'application/json' },
       })
-      if (!response.ok) {
-        const j = await response.json().catch(() => null)
-        throw new Error(j?.error || `Failed to delete files`)
-      }
-      
-      alertModalRef.current?.show({
-        title: 'Files Deleted',
-        message: `Successfully deleted ${fileList.length} file(s).`,
-        type: 'success'
-      })
-      
-      // Refresh the folder structure
-      location.reload()
+      if (!res.ok) throw new Error('failed')
+      // the endpoint answers { statusCode, fileStructure }
+      const data = await res.json()
+      setStructure(data && data.fileStructure ? data.fileStructure : data)
     } catch (err) {
-      alertModalRef.current?.show({
-        title: 'Delete Error',
-        message: `Error deleting files: ${err.message}`,
-        type: 'error'
-      })
-    }
-  }
-
-  useEffect(() => {
-    let mounted = true
-    ;(async () => {
-      // Fetch user authorization data first
-      let authData = null
-      try {
-        const authRes = await fetch('/admin/dashboard-data', { 
-          credentials: 'include', 
-          headers: { Accept: 'application/json' } 
-        })
-        if (authRes.ok) {
-          authData = await authRes.json()
-          if (authData && authData.statusCode === 200 && authData.auths) {
-            console.log('[Gallery] Setting userAuths:', authData.auths)
-            if (mounted) setUserAuths(authData.auths)
-            
-            // Hide buttons based on permissions immediately after fetching
-            const pickSendBtn = document.getElementById('pick-send-button')
-            const deleteBtn = document.getElementById('delete-button')
-            const cancelDeleteBtn = document.getElementById('cancel-delete-button')
-            const sendBtn = document.getElementById('send-button')
-
-            // Pick & Send button: requires view_upload and not disabled
-            if (pickSendBtn) {
-              if (!(authData.auths && !authData.auths.is_disabled && authData.auths.view_upload)) {
-                pickSendBtn.style.display = 'none'
-              }
-            }
-            
-            // Delete and Cancel Delete buttons: requires is_admin
-            if (deleteBtn) {
-              if (!(authData.auths && authData.auths.is_admin)) {
-                deleteBtn.style.display = 'none'
-              }
-            }
-            if (cancelDeleteBtn) {
-              if (!(authData.auths && authData.auths.is_admin)) {
-                cancelDeleteBtn.remove()
-              }
-            }
-            
-            // Send button: requires view_upload and not disabled
-            if (sendBtn) {
-              if (!(authData.auths && !authData.auths.is_disabled && authData.auths.view_upload)) {
-                sendBtn.remove()
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error('Failed to fetch user authorizations', e)
-      }
-
-      // Fetch server-provided file structure for the authenticated user
-      let serverStructure = null
-      try {
-        const res = await fetch('/admin/file-structure', { credentials: 'include', headers: { Accept: 'application/json' } })
-        if (res.ok) {
-          const j = await res.json()
-          serverStructure = j && j.fileStructure ? j.fileStructure : null
-        }
-      } catch (e) {
-        serverStructure = null
-      }
-
-        // Always use the file structure from the API/database only
-        const fileStructure = serverStructure
-        const folderTree = document.getElementById('folder-tree')
-        if (folderTree) {
-          // Clear folder tree (the RevealFoldersButton component will be rendered in JSX)
-          folderTree.innerHTML = ''
-        }
-
-    // --- Helpers for file grouping / date extraction (ported from EJS) ---
-    function extractDateFromFilename(filename) {
-      const match = filename.match(/[\s_\-\.](\d{1,2})-(\d{1,2})-(\d{4})\./)
-      if (!match) return null
-      const day = parseInt(match[1], 10)
-      const month = parseInt(match[2], 10) - 1
-      const year = parseInt(match[3], 10)
-      return new Date(year, month, day)
-    }
-
-    function sortFilesByDateDesc(files) {
-      return files.slice().sort(function (a, b) {
-        const dateA = extractDateFromFilename(a) || new Date(0)
-        const dateB = extractDateFromFilename(b) || new Date(0)
-        return dateB - dateA
-      })
-    }
-
-    function extractBatchName(filename) {
-      // Extract everything after the first '@' up to the last dot before the extension
-      // Example: file@batch_name-2024_01_23.pdf => batch_name-2024_01_23
-      const atIdx = filename.indexOf('@')
-      if (atIdx === -1) return null
-      // Find the last dot before the extension
-      const lastDotIdx = filename.lastIndexOf('.')
-      if (lastDotIdx === -1 || lastDotIdx < atIdx) return filename.slice(atIdx + 1)
-      return filename.slice(atIdx + 1, lastDotIdx)
-    }
-
-    function groupFilesByBatch(files) {
-      const groups = {}
-      files.forEach(file => {
-        const batch = extractBatchName(file) || '__none__'
-        if (!groups[batch]) groups[batch] = []
-        groups[batch].push(file)
-      })
-      return groups
-    }
-
-    function createFileItem(fileName, parentKey) {
-      const wrapper = document.createElement('div')
-      wrapper.className = 'file-item'
-
-      const cb = document.createElement('input')
-      cb.type = 'checkbox'
-      cb.className = 'file-checkbox'
-      cb.setAttribute('data-file', fileName)
-      cb.style.display = 'none'
-      // data-fullpath removed: delete endpoint now accepts file names, not absolute paths
-
-
-      // Use a small inline SVG file icon to avoid relying on FontAwesome
-      const icon = document.createElement('span')
-      icon.className = 'file-icon'
-      icon.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#6b7280" />
-          <path d="M14 2v6h6" fill="#9ca3af" />
-        </svg>`
-
-      const span = document.createElement('span')
-      span.className = 'file-name'
-      span.setAttribute('data-file', fileName)
-      span.title = fileName
-      span.style.maxWidth = '220px'
-      span.innerText = fileName
-
-      wrapper.appendChild(cb)
-      wrapper.appendChild(icon)
-      wrapper.appendChild(span)
-      return wrapper
-    }
-
-    function renderFiles(files, parentKey, container) {
-      // files: array of filenames
-      const sorted = sortFilesByDateDesc(files)
-      const grouped = groupFilesByBatch(sorted)
-
-      Object.keys(grouped).forEach(batch => {
-        const batchFiles = grouped[batch]
-        const target = container || folderTree
-        if (batch === '__none__') {
-          if (batchFiles.length > 0) {
-            const singleFolderBtn = document.createElement('button')
-            singleFolderBtn.className = 'folder-button'
-            const singleKey = parentKey ? `${parentKey}/Single Uploads` : 'Single Uploads'
-            singleFolderBtn.setAttribute('data-folder', singleKey)
-            singleFolderBtn.innerHTML = `<svg width=14 height=14 viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' aria-hidden><path d='M3 7h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z' fill='#6b7280'/></svg> <strong class="folder-name" title="Single Uploads">Single Uploads</strong> <span class='badge badge-secondary' style='margin-left:8px'>${batchFiles.length}</span>`
-            const singleSub = document.createElement('div')
-            singleSub.className = 'sub-items'
-            singleSub.style.display = 'none'
-            target.appendChild(singleFolderBtn)
-            target.appendChild(singleSub)
-            singleFolderBtn.addEventListener('click', function (ev) {
-              ev.preventDefault()
-              const isClosed = singleSub.style.display === 'none' || !singleSub.style.display
-              // Always toggle open/close
-              singleSub.style.display = isClosed ? 'block' : 'none'
-              // In delete mode, only toggle checkboxes if folder is already open (on second click)
-              if (window.__galleryIsDeleteMode && !isClosed) {
-                const checkboxes = singleSub.querySelectorAll('.file-checkbox')
-                const allChecked = Array.from(checkboxes).every(cb => cb.checked)
-                checkboxes.forEach(cb => { cb.checked = !allChecked; cb.dispatchEvent(new Event('change', { bubbles: true })) })
-              }
-            })
-            batchFiles.forEach(f => singleSub.appendChild(createFileItem(f, parentKey)))
-          }
-        } else {
-          const batchFolderBtn = document.createElement('button')
-          batchFolderBtn.className = 'folder-button'
-          const batchKey = parentKey ? `${parentKey}/${batch}` : batch
-          batchFolderBtn.setAttribute('data-folder', batchKey)
-          batchFolderBtn.innerHTML = `<svg width=14 height=14 viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' aria-hidden><path d='M3 7h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z' fill='#6b7280'/></svg> <strong class="folder-name" title="${batch}">${batch}</strong> <span class='badge badge-secondary' style='margin-left:8px'>${batchFiles.length}</span>`
-          const batchSub = document.createElement('div')
-          batchSub.className = 'sub-items'
-          batchSub.style.display = 'none'
-          ;(container || target).appendChild(batchFolderBtn)
-          ;(container || target).appendChild(batchSub)
-          batchFolderBtn.addEventListener('click', function (ev) {
-            ev.preventDefault()
-            const isClosed = batchSub.style.display === 'none' || !batchSub.style.display
-            // Always toggle open/close
-            batchSub.style.display = isClosed ? 'block' : 'none'
-            // In delete mode, only toggle checkboxes if folder is already open (on second click)
-            if (window.__galleryIsDeleteMode && !isClosed) {
-              const checkboxes = batchSub.querySelectorAll('.file-checkbox')
-              const allChecked = Array.from(checkboxes).every(cb => cb.checked)
-              checkboxes.forEach(cb => { cb.checked = !allChecked; cb.dispatchEvent(new Event('change', { bubbles: true })) })
-            }
-          })
-          batchFiles.forEach(f => batchSub.appendChild(createFileItem(f, batchKey)))
-        }
-      })
-    }
-
-    function renderStructure(structure, parentKey = '', container) {
-      if (!folderTree) return
-      if (typeof structure !== 'object') return
-
-      const keys = Object.keys(structure)
-      keys.forEach(key => {
-        if (key === 'files' && Array.isArray(structure[key])) {
-          // append files into the provided container (or folderTree if none)
-          renderFiles(structure[key], parentKey, container || folderTree)
-        } else if (Array.isArray(structure[key])) {
-          // folder contains files array — render into a sub container first
-          if (!structure[key] || structure[key].length === 0) return // skip empty folders
-          const sub = document.createElement('div')
-          sub.className = 'sub-items'
-          sub.style.display = 'none'
-          // populate sub
-          renderFiles(structure[key], parentKey ? `${parentKey}/${key}` : key, sub)
-          // only append folder if sub has children
-          if (sub.children.length > 0) {
-            const folderBtn = document.createElement('button')
-            folderBtn.className = 'folder-button'
-            folderBtn.setAttribute('data-folder', parentKey ? `${parentKey}/${key}` : key)
-            folderBtn.innerHTML = `<svg width=14 height=14 viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' aria-hidden><path d='M10 4H4a2 2 0 0 0-2 2v2h20V8a2 2 0 0 0-2-2h-8z' fill='#6b7280'/><path d='M2 10v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-8H2z' fill='#9ca3af'/></svg><strong class="folder-name" title="${key}">${key}</strong>`
-            ;(container || folderTree).appendChild(folderBtn)
-            ;(container || folderTree).appendChild(sub)
-            // attach click handler directly to ensure toggle works reliably
-            folderBtn.addEventListener('click', function (ev) {
-              ev.preventDefault()
-              sub.style.display = sub.style.display === 'none' || !sub.style.display ? 'block' : 'none'
-            })
-          }
-        } else if (typeof structure[key] === 'object') {
-          // nested folder object — render into sub first and check children
-          const sub = document.createElement('div')
-          sub.className = 'sub-items'
-          sub.style.display = 'none'
-          renderStructure(structure[key], parentKey ? `${parentKey}/${key}` : key, sub)
-          if (sub.children.length > 0) {
-            const folderBtn = document.createElement('button')
-            folderBtn.className = 'folder-button'
-            folderBtn.setAttribute('data-folder', parentKey ? `${parentKey}/${key}` : key)
-            folderBtn.innerHTML = `<svg width=14 height=14 viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' aria-hidden><path d='M10 4H4a2 2 0 0 0-2 2v2h20V8a2 2 0 0 0-2-2h-8z' fill='#6b7280'/><path d='M2 10v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-8H2z' fill='#9ca3af'/></svg><strong class="folder-name" title="${key}">${key}</strong>`
-            ;(container || folderTree).appendChild(folderBtn)
-            ;(container || folderTree).appendChild(sub)
-            // attach click handler directly to ensure toggle works reliably
-            folderBtn.addEventListener('click', function (ev) {
-              ev.preventDefault()
-              sub.style.display = sub.style.display === 'none' || !sub.style.display ? 'block' : 'none'
-            })
-          }
-        }
-      })
-    }
-
-    // Only render structure if received from server
-    if (fileStructure) {
-      // if root contains single Admin, use that
-      const keys = Object.keys(fileStructure)
-      if (keys.length === 1 && keys[0] === 'Admin') renderStructure(fileStructure['Admin'])
-      else renderStructure(fileStructure)
-    }
-
-    // -------------------------
-    // Client wiring for interactions
-    // -------------------------
-    const wireUi = () => {
-      const pickSendButton = document.getElementById('pick-send-button')
-      const deleteButton = document.getElementById('delete-button')
-      const cancelDeleteButton = document.getElementById('cancel-delete-button')
-      const sendButton = document.getElementById('send-button')
-      const selectFileMessage = document.getElementById('select-file-message')
-      const deleteInfo = document.getElementById('delete-info')
-      const searchBtn = document.getElementById('searchButton')
-      const searchInputEl = document.getElementById('search-input')
-
-      let isPickSendMode = false
-      let isDeleteMode = false
-      let userCanDelete = false  // Track if user has delete permissions
-      // Expose delete mode flag globally for batch click logic
-      window.__galleryIsDeleteMode = false
-
-      // Determine if user has delete permissions (is_admin)
-      if (authData && authData.auths && authData.auths.is_admin) {
-        userCanDelete = true
-      }
-
-      function updateCheckboxVisibility(visible) {
-        document.querySelectorAll('.file-checkbox').forEach(cb => {
-          cb.style.display = visible ? 'inline-block' : 'none'
-          if (!visible) cb.checked = false
-          // Add change listener to update send button visibility
-          if (visible && !cb.dataset.listenerAttached) {
-            cb.addEventListener('change', updateSendButtonVisibility)
-            cb.dataset.listenerAttached = 'true'
-          }
-        })
-        if (visible) updateSendButtonVisibility()
-      }
-
-      function getSelectedFilePaths() {
-        const paths = []
-        document.querySelectorAll('.file-checkbox:checked').forEach(cb => {
-          let fullPath = cb.getAttribute('data-fullpath')
-          const fileName = cb.getAttribute('data-file')
-          // Extract batch name from fileName (after @, before .)
-          let batchName = null
-          const atIdx = fileName.indexOf('@')
-          const lastDotIdx = fileName.lastIndexOf('.')
-          if (atIdx !== -1) {
-            batchName = lastDotIdx > atIdx ? fileName.slice(atIdx + 1, lastDotIdx) : fileName.slice(atIdx + 1)
-          }
-          if (batchName) {
-            // Look for the pattern \\batchName\\fileName at the end of the path
-            const batchFolderPattern = new RegExp(`\\\\${batchName}\\\\${fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)
-            if (batchFolderPattern.test(fullPath)) {
-              // Remove the batch folder from the path
-              fullPath = fullPath.replace(new RegExp(`\\\\${batchName}\\\\${fileName}$`), `\\${fileName}`)
-            }
-          }
-          if (fullPath) paths.push(fullPath)
-        })
-        return paths
-      }
-
-      function getSelectedFileNames() {
-        const names = []
-        document.querySelectorAll('.file-checkbox:checked').forEach(cb => {
-          const fileName = cb.getAttribute('data-file')
-          if (fileName) names.push(fileName)
-        })
-        return names
-      }
-
-      // Update send button visibility based on selection (like EJS)
-      function updateSendButtonVisibility() {
-        const anyChecked = document.querySelectorAll('.file-checkbox:checked').length > 0
-        if (isPickSendMode) {
-          // Always keep pickSendButton visible in Pick & Send mode as the cancel button
-          if (pickSendButton) pickSendButton.style.display = 'inline-block'
-          
-          if (anyChecked) {
-            if (selectFileMessage) selectFileMessage.style.display = 'none'
-            if (sendButton) sendButton.style.display = 'inline-block'
-          } else {
-            if (selectFileMessage) selectFileMessage.style.display = 'block'
-            if (sendButton) sendButton.style.display = 'none'
-          }
-        } else {
-          // Not in Pick & Send mode - hide send button and message
-          if (sendButton) sendButton.style.display = 'none'
-          if (selectFileMessage) selectFileMessage.style.display = 'none'
-          if (isDeleteMode) {
-            // In delete mode but not in pick & send
-          } else {
-            if (cancelDeleteButton) cancelDeleteButton.style.display = 'none'
-          }
-        }
-      }
-
-      if (pickSendButton) {
-        pickSendButton.addEventListener('click', () => {
-          isPickSendMode = !isPickSendMode
-          if (isPickSendMode) {
-            isDeleteMode = false
-            updateCheckboxVisibility(true)
-            selectFileMessage.style.display = 'block'
-            pickSendButton.innerText = 'Cancel file sending'
-            pickSendButton.classList.remove('btn-primary')
-            pickSendButton.classList.add('btn-danger')
-            pickSendButton.style.display = 'inline-block'
-            if (deleteButton) deleteButton.style.display = 'none'
-          } else {
-            updateCheckboxVisibility(false)
-            selectFileMessage.style.display = 'none'
-            pickSendButton.innerText = 'Pick & Send'
-            pickSendButton.classList.remove('btn-danger')
-            pickSendButton.classList.add('btn-primary')
-            pickSendButton.style.display = 'inline-block'
-            // Only show delete button if user has delete permissions
-            if (deleteButton && userCanDelete) deleteButton.style.display = 'inline-block'
-            updateSendButtonVisibility()
-          }
-        })
-      }
-
-      if (deleteButton) {
-        deleteButton.addEventListener('click', async () => {
-          if (!isDeleteMode) {
-            // activate delete mode
-            isDeleteMode = true
-            window.__galleryIsDeleteMode = true
-            updateCheckboxVisibility(true)
-            deleteInfo.style.display = 'block'
-            if (cancelDeleteButton) {
-              cancelDeleteButton.style.display = 'inline-block'
-              cancelDeleteButton.innerText = 'Cancel Delete'
-            }
-            deleteButton.innerText = 'Confirm Delete'
-            deleteButton.classList.remove('btn-secondary')
-            deleteButton.classList.add('btn-danger')
-            if (pickSendButton) pickSendButton.style.display = 'none'
-            return
-          }
-
-          // Confirm delete
-          const filePaths = getSelectedFileNames()
-          if (filePaths.length === 0) {
-            if (window.Swal && window.Swal.fire) {
-              await window.Swal.fire('No Files Selected', 'Please select at least one file to delete.', 'warning')
-            } else if (window.swal) {
-              window.swal('No Files Selected', 'Please select at least one file to delete.', 'warning')
-            } else {
-              alert('Please select at least one file to delete.')
-            }
-            return
-          }
-          let confirmed = false;
-          if (window.Swal && window.Swal.fire) {
-            const result = await window.Swal.fire({
-              title: 'Confirm Delete',
-              text: `Delete ${filePaths.length} file(s)? This action cannot be undone.`,
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonText: 'Delete',
-              cancelButtonText: 'Cancel',
-              reverseButtons: true
-            });
-            confirmed = !!result.isConfirmed;
-          } else if (window.swal) {
-            confirmed = await window.swal({
-              title: 'Confirm Delete',
-              text: `Delete ${filePaths.length} file(s)? This action cannot be undone.`,
-              icon: 'warning',
-              buttons: ['Cancel', 'Delete'],
-              dangerMode: true
-            });
-          } else {
-            confirmed = window.confirm(`Delete ${filePaths.length} file(s)? This action cannot be undone.`);
-          }
-          if (!confirmed) return;
-          try {
-            const res = await fetch('/admin/delete-file', {
-              method: 'DELETE',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ files: filePaths }),
-            })
-            const j = await res.json().catch(() => null)
-            if (res.ok) {
-              if (window.Swal && window.Swal.fire) {
-                await window.Swal.fire('Success', 'Files deleted successfully.', 'success')
-              } else if (window.swal) {
-                await window.swal('Success', 'Files deleted successfully.', 'success')
-              } else {
-                alert('Files deleted successfully.')
-              }
-              window.location.reload()
-            } else {
-              if (window.Swal && window.Swal.fire) {
-                await window.Swal.fire('Delete Failed', (j && j.message) || 'Failed to delete files.', 'error')
-              } else if (window.swal) {
-                await window.swal('Delete Failed', (j && j.message) || 'Failed to delete files.', 'error')
-              } else {
-                alert((j && j.message) || 'Failed to delete files.')
-              }
-            }
-          } catch (err) {
-            if (window.Swal && window.Swal.fire) {
-              await window.Swal.fire('Network Error', 'Unable to delete files. Please check your connection and try again.', 'error')
-            } else if (window.swal) {
-              await window.swal('Network Error', 'Unable to delete files. Please check your connection and try again.', 'error')
-            } else {
-              alert('Unable to delete files. Please check your connection and try again.')
-            }
-          }
-        })
-      }
-
-      if (cancelDeleteButton) {
-        cancelDeleteButton.addEventListener('click', () => {
-          if (isDeleteMode) {
-            isDeleteMode = false
-            window.__galleryIsDeleteMode = false
-            updateCheckboxVisibility(false)
-            deleteInfo.style.display = 'none'
-            cancelDeleteButton.style.display = 'none'
-            cancelDeleteButton.innerText = 'Cancel Delete'
-            deleteButton.innerText = 'Delete'
-            deleteButton.classList.remove('btn-danger')
-            deleteButton.classList.add('btn-secondary')
-            if (pickSendButton) pickSendButton.style.display = 'inline-block'
-          }
-        })
-      }
-
-      if (sendButton) {
-        sendButton.addEventListener('click', async () => {
-          const files = getSelectedFileNames() // Changed from getSelectedFilePaths to getSelectedFileNames
-          if (files.length === 0) { 
-            alertModalRef.current?.show({ 
-              title: 'No Files Selected', 
-              message: 'Please select at least one file to send.', 
-              type: 'warning' 
-            })
-            return 
-          }
-          const recipients = await userPickerModalRef.current?.show()
-          if (!recipients || recipients.length === 0) return
-          try {
-            const res = await fetch('/admin/sendFilesToUsers', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ users: recipients, files }),
-            })
-            const j = await res.json().catch(() => null)
-            if (res.ok) {
-              showToast((j && j.message) || 'Files sent successfully', 'success')
-              // reset UI
-              updateCheckboxVisibility(false)
-              isPickSendMode = false
-              selectFileMessage.style.display = 'none'
-              if (sendButton) sendButton.style.display = 'none'
-              if (pickSendButton) { pickSendButton.style.display = 'inline-block'; pickSendButton.innerText = 'Pick & Send'; pickSendButton.classList.remove('btn-danger'); pickSendButton.classList.add('btn-primary') }
-              if (deleteButton) deleteButton.style.display = 'inline-block'
-              // Reload page after sending files to keep content up to date
-              setTimeout(() => window.location.reload(), 500)
-            } else {
-              showToast((j && j.message) || 'Failed to send files', 'error')
-            }
-          } catch (err) {
-            alertModalRef.current?.show({ 
-              title: 'Network Error', 
-              message: 'Unable to send files. Please check your connection and try again.', 
-              type: 'error' 
-            })
-          }
-        })
-      }
-
-      // File preview via API
-      folderTree && folderTree.addEventListener('click', async (e) => {
-        const target = e.target.closest && e.target.closest('.file-name')
-        if (!target) return
-        const fileName = target.getAttribute('data-file')
-        try {
-          const res = await fetch(`/admin/file-content?fileName=${encodeURIComponent(fileName)}`, { credentials: 'include' })
-          if (!res.ok) { 
-            alertModalRef.current?.show({ 
-              title: 'Error', 
-              message: 'Unable to fetch file. The file may not exist or you may not have permission.', 
-              type: 'error' 
-            })
-            return 
-          }
-          const blob = await res.blob()
-          const viewer = document.getElementById('file-viewer')
-          if (!viewer) return
-          const type = blob.type || ''
-          const url = URL.createObjectURL(blob)
-          if (type.startsWith('image/')) {
-            viewer.innerHTML = `<img src="${url}" style="max-width:100%; height:auto" />`
-          } else if (type === 'application/pdf') {
-            viewer.innerHTML = `<object data="${url}" type="application/pdf" width="100%" height="100%"></object>`
-          } else {
-            // attempt text
-            const text = await blob.text()
-            viewer.innerHTML = `<pre style="white-space:pre-wrap;">${escapeHtml(text)}</pre>`
-          }
-        } catch (err) {
-          alertModalRef.current?.show({ 
-            title: 'Preview Error', 
-            message: 'Error loading file preview.', 
-            type: 'error' 
-          })
-        }
-      })
-
-      // helper escape
-      function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]) }
-
-      // Toast notification function (matches EJS pattern)
-      function showToast(message, type) {
-        // Check for jQuery notify plugin first
-        if (window.$ && window.$.notify) {
-          window.$.notify({ message }, { type: type || 'info', delay: 3000 })
-          return
-        }
-        // Fallback: create custom notification modal (like EJS)
-        let notif = document.getElementById('customNotificationModal')
-        const bgColor = type === 'error' ? '#dc3545' : 'white'
-        const textColor = type === 'error' ? 'white' : '#333'
-        if (!notif) {
-          notif = document.createElement('div')
-          notif.id = 'customNotificationModal'
-          notif.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);display:flex;justify-content:center;align-items:center;z-index:10000'
-          notif.innerHTML = `<div style="background:${bgColor};padding:30px 40px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.18);font-size:1.2rem;min-width:250px;text-align:center">
-            <p id="notificationMessage" style="margin:0 0 20px 0;color:${textColor}">${message}</p>
-            <button id="closeNotificationModal" class="btn ${type === 'error' ? 'btn-light' : 'btn-primary'}" style="color:${type === 'error' ? '#dc3545' : 'inherit'}">OK</button>
-          </div>`
-          document.body.appendChild(notif)
-          document.getElementById('closeNotificationModal').onclick = () => { notif.remove() }
-        } else {
-          document.getElementById('notificationMessage').textContent = message
-          notif.style.display = 'flex'
-          const div = notif.querySelector('div')
-          if (div) {
-            div.style.background = bgColor
-            div.querySelector('p').style.color = textColor
-            const btn = div.querySelector('button')
-            if (btn) {
-              btn.className = type === 'error' ? 'btn btn-light' : 'btn btn-primary'
-              btn.style.color = type === 'error' ? '#dc3545' : 'inherit'
-            }
-          }
-        }
-        // Auto-close after 3 seconds for success messages
-        if (type === 'success') {
-          setTimeout(() => { if (notif) notif.remove() }, 3000)
-        }
-      }
-    }
-
-    // If folder-tree ends up empty (only reveal link present), show a friendly message
-    if (folderTree) {
-      const hasReveal = !!folderTree.querySelector('#reveal-all-folders')
-      const onlyReveal = hasReveal && folderTree.children.length === 1
-      if (onlyReveal) {
-        const info = document.createElement('div')
-        info.className = 'text-muted'
-        info.style.marginTop = '8px'
-        info.innerText = 'No files or folders available.'
-        folderTree.appendChild(info)
-      }
-    }
-
-    // wire UI after a short timeout to ensure DOM nodes created
-    setTimeout(() => { try { wireUi() } catch (e) { console.error('wireUi error', e) } }, 50)
-
-    // Add username search button logic
-    setTimeout(() => {
-      const searchUsernameBtn = document.getElementById('search-username-btn')
-      if (searchUsernameBtn && userPickerModalRef.current?.show) {
-        searchUsernameBtn.onclick = async () => {
-          const selectedUsernames = await userPickerModalRef.current.show()
-          if (!selectedUsernames || !selectedUsernames.length) return
-
-          // Recursively search for the folder button with data-folder ending in /username or =username
-          function findFolderBtn(username) {
-            // Try exact match first
-            let btn = document.querySelector(`.folder-button[data-folder='${username}']`)
-            if (btn) return btn
-            // Try nested: look for any folder whose data-folder ends with /username
-            const allBtns = Array.from(document.querySelectorAll('.folder-button[data-folder]'))
-            return allBtns.find(b => {
-              const folder = b.getAttribute('data-folder')
-              return folder === username || folder.endsWith('/' + username) || folder.split('/').includes(username)
-            })
-          }
-
-          // Process each selected username
-          let firstFolder = null
-          selectedUsernames.forEach((username) => {
-            const folderBtn = findFolderBtn(username)
-            if (folderBtn) {
-              // Reveal all parent folders
-              let parent = folderBtn.parentElement
-              while (parent) {
-                if (parent.classList && parent.classList.contains('sub-items')) {
-                  parent.style.display = 'block'
-                }
-                parent = parent.parentElement
-              }
-              
-              // Open this folder
-              const subItems = folderBtn.nextElementSibling
-              if (subItems && subItems.classList.contains('sub-items')) {
-                subItems.style.display = 'block'
-              }
-              
-              // Store first folder for scrolling
-              if (!firstFolder) {
-                firstFolder = folderBtn
-              }
-            }
-          })
-          
-          // Scroll to the first found folder
-          if (firstFolder) {
-            firstFolder.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          } else {
-            const notFoundUsernames = selectedUsernames.join(', ')
-            if (window.$ && window.$.notify) {
-              window.$.notify({ message: `No folders found for: ${notFoundUsernames}` }, { type: 'warning', delay: 3000 })
-            } else {
-              alert(`No folders found for: ${notFoundUsernames}`)
-            }
-          }
-        }
-      }
-    }, 200)
-
-    // Hash-based auto-activation: check if URL has #picksend and auto-activate Pick & Send mode (like EJS)
-    if (window.location.hash === '#picksend') {
-      setTimeout(() => {
-        const pickSendBtn = document.getElementById('pick-send-button')
-        if (pickSendBtn) pickSendBtn.click()
-      }, 150)
-    }
-
-    // Scoped native handlers: avoid duplicating handlers and conflicting with the reveal link's dedicated listener
-    document.addEventListener('click', function (e) {
-      // Fullscreen preview from the file viewer area
-      const fv = document.getElementById('file-viewer')
-      if ((e.target === fv || e.target.closest && e.target.closest('#file-viewer')) && fv) {
-        const content = fv.innerHTML.trim()
-        if (!content || content.includes('Select a file to preview')) return
-        // create full-screen preview
-        if (!document.getElementById('full-screen-preview')) {
-          const fs = document.createElement('div')
-          fs.id = 'full-screen-preview'
-          fs.innerHTML = `<div id="preview-content">${content}</div><button id="close-preview">Close</button>`
-          document.body.appendChild(fs)
-        }
-        return
-      }
-
-      // Close fullscreen preview
-      if (e.target && e.target.id === 'close-preview') {
-        const el = document.getElementById('full-screen-preview')
-        if (el) el.remove()
-        return
-      }
-    })
-
-    // Panel resizer logic (native)
-    const folderPanel = document.getElementById('folder-panel')
-    const fileViewerPanel = document.getElementById('file-viewer-panel')
-    const resizer = document.getElementById('panel-resizer')
-    let isResizing = false
-    let lastDownX = 0
-    if (resizer && folderPanel) {
-      resizer.addEventListener('mousedown', e => { isResizing = true; lastDownX = e.clientX; document.body.style.cursor = 'ew-resize'; document.body.style.userSelect = 'none' })
-      document.addEventListener('mousemove', e => {
-        if (!isResizing) return
-        let newWidth = e.clientX - folderPanel.getBoundingClientRect().left
-        if (newWidth < 120) newWidth = 120
-        if (newWidth > window.innerWidth * 0.6) newWidth = window.innerWidth * 0.6
-        folderPanel.style.flex = `0 0 ${newWidth}px`
-        folderPanel.style.maxWidth = `${newWidth}px`
-      })
-      document.addEventListener('mouseup', () => { if (isResizing) { isResizing = false; document.body.style.cursor = ''; document.body.style.userSelect = '' } })
-    }
-
-    // Horizontal resizer
-    const fileViewer = document.getElementById('file-viewer')
-    const horizontalResizer = document.getElementById('horizontal-resizer')
-    const fileViewerBelow = document.getElementById('file-viewer-below')
-    let isResizingH = false
-    let lastDownY = 0
-    let startHeight = 0
-    if (horizontalResizer && fileViewer) {
-      horizontalResizer.addEventListener('mousedown', function (e) {
-        isResizingH = true; lastDownY = e.clientY; startHeight = fileViewer.offsetHeight; document.body.style.cursor = 'ns-resize'; document.body.style.userSelect = 'none'; e.preventDefault()
-      })
-      document.addEventListener('mousemove', function (e) {
-        if (!isResizingH) return
-        let newHeight = startHeight + (e.clientY - lastDownY)
-        if (newHeight < 120) newHeight = 120
-        if (newHeight > window.innerHeight * 0.7) newHeight = window.innerHeight * 0.7
-        fileViewer.style.flex = `0 0 ${newHeight}px`
-        fileViewer.style.maxHeight = `${newHeight}px`
-      })
-      document.addEventListener('mouseup', function () { if (isResizingH) { isResizingH = false; document.body.style.cursor = ''; document.body.style.userSelect = '' } })
-    }
-
-    // Search logic
-    const searchInput = document.getElementById('search-input')
-    const searchButton = document.getElementById('searchButton')
-    const fileSearchInfo = document.getElementById('fileSearchInfo')
-    const searchResultsModal = document.getElementById('searchResultsModal')
-    const modalList = document.getElementById('matchedFilesList')
-    const closeFilesModalButton = document.getElementById('closeFilesModalButton')
-
-    if (searchInput) searchInput.addEventListener('click', () => { if (fileSearchInfo) fileSearchInfo.style.display = 'inline-block' })
-    if (searchButton) searchButton.addEventListener('click', () => {
-      const searchDateRaw = (searchInput && searchInput.value) ? searchInput.value.trim() : ''
-      const normalizedDate = normalizeDateInput(searchDateRaw)
-      if (!searchDateRaw) { 
-        alertModalRef.current?.show({ 
-          title: 'Invalid Input', 
-          message: 'Please enter a valid date in the format (d-m-yyyy)', 
-          type: 'warning' 
-        })
-        return 
-      }
-      if (!normalizedDate) { 
-        alertModalRef.current?.show({ 
-          title: 'Invalid Format', 
-          message: 'Invalid date format. Please enter date as (day-month-year) like 12-4-2024.', 
-          type: 'warning' 
-        })
-        return 
-      }
-      const matchedFiles = filterFileStructure(normalizedDate)
-      if (matchedFiles.length === 0) { 
-        alertModalRef.current?.show({ 
-          title: 'No Results', 
-          message: 'No files found for the given date.', 
-          type: 'info' 
-        })
-      } else { showModal(matchedFiles, normalizedDate); matchedFiles.forEach(revealFileInTree) }
-    })
-
-    if (closeFilesModalButton) closeFilesModalButton.addEventListener('click', () => { if (searchResultsModal) searchResultsModal.style.display = 'none' })
-    if (searchResultsModal) searchResultsModal.addEventListener('mousedown', function (e) { if (e.target === searchResultsModal) searchResultsModal.style.display = 'none' })
-
-    function normalizeDateInput(input) {
-      input = (input || '').trim().replace(/[\s\/\.]+/g, '-')
-      const match = input.match(/^0*(\d{1,2})-0*(\d{1,2})-(\d{4})$/)
-      if (!match) return null
-      const day = String(Number(match[1]))
-      const month = String(Number(match[2]))
-      const year = match[3]
-      return `${day}-${month}-${year}`
-    }
-
-    function revealFileInTree(fileName) {
-      const fileSpans = document.querySelectorAll(`.file-name[data-file='${fileName}']`)
-      if (!fileSpans.length) return
-      fileSpans.forEach(fileSpan => {
-        let parent = fileSpan.parentElement
-        while (parent) {
-          if (parent.classList && parent.classList.contains('sub-items')) parent.style.display = 'block'
-          parent = parent.parentElement
-        }
-        fileSpan.style.background = '#ffff99'
-      })
-    }
-
-    function filterFileStructure(searchDate) {
-      const matchedFiles = []
-      const fileItems = document.querySelectorAll('.file-item')
-      fileItems.forEach(fileItem => {
-        const fnEl = fileItem.querySelector('.file-name')
-        if (!fnEl) return
-        const fileName = fnEl.getAttribute('data-file')
-        fnEl.style.background = ''
-        const regex = new RegExp(`${searchDate}\\.[^.]+$`)
-        if (regex.test(fileName)) matchedFiles.push(fileName)
-        fileItem.style.display = 'block'
-      })
-      return matchedFiles
-    }
-
-    function showModal(matchedFiles, normalizedDate) {
-      if (!modalList) return
-      modalList.innerHTML = ''
-      // Update modal title with formatted date (like EJS)
-      const modalTitle = document.querySelector('#filesModalContent h2')
-      if (modalTitle && normalizedDate) {
-        const formattedDate = formatDateForDisplay(normalizedDate)
-        modalTitle.innerHTML = `<i class='fa fa-calendar text-primary'></i> <span style='font-size:1.1em;'>Files uploaded on <b>${formattedDate}</b></span>`
-      }
-      matchedFiles.forEach((fileName, index) => {
-        const li = document.createElement('li')
-        li.innerHTML = `<span class="modal-file-name" data-file="${fileName}" style="padding:8px 12px; border-radius:6px; background:#f5f7fa; margin-bottom:6px; display:inline-block; cursor:pointer; transition:background 0.2s;">${index+1}. <b>${fileName}</b></span>`
-        modalList.appendChild(li)
-      })
-      // Apply styled modal (like EJS)
-      const modalContent = document.getElementById('filesModalContent')
-      if (modalContent) {
-        modalContent.style.boxShadow = '0 6px 32px rgba(0,0,0,0.18)'
-        modalContent.style.border = '1px solid #e3e3e3'
-        modalContent.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%)'
-        modalContent.style.color = '#333' // Ensure dark text for readability
-      }
-      if (searchResultsModal) searchResultsModal.style.display = 'flex'
-      document.querySelectorAll('.modal-file-name').forEach(fileEl => fileEl.addEventListener('click', function () { const fileName = this.getAttribute('data-file'); loadFilePreview(fileName); if (searchResultsModal) searchResultsModal.style.display = 'none' }))
-    }
-
-    function formatDateForDisplay(normalizedDate) {
-      const [d, m, y] = normalizedDate.split('-')
-      const day = d.padStart(2, '0')
-      const month = m.padStart(2, '0')
-      return `${day}-${month}-${y}`
-    }
-
-    async function loadFilePreview(fileName) {
-      const viewer = document.getElementById('file-viewer')
-      if (!viewer) return
-      
-      try {
-        const res = await fetch(`/admin/file-content?fileName=${encodeURIComponent(fileName)}`, { credentials: 'include' })
-        if (!res.ok) { 
-          alertModalRef.current?.show({ 
-            title: 'Error', 
-            message: 'Unable to fetch file. The file may not exist or you may not have permission.', 
-            type: 'error' 
-          })
-          return 
-        }
-        const blob = await res.blob()
-        const type = blob.type || ''
-        const url = URL.createObjectURL(blob)
-        
-        if (type.startsWith('image/')) {
-          viewer.innerHTML = `<img src="${url}" style="max-width:100%; height:auto" />`
-        } else if (type === 'application/pdf') {
-          viewer.innerHTML = `<object data="${url}" type="application/pdf" width="100%" height="100%"></object>`
-        } else {
-          // attempt text
-          const text = await blob.text()
-          viewer.innerHTML = `<pre style="white-space:pre-wrap;">${escapeHtml(text)}</pre>`
-        }
-      } catch (err) {
-        alertModalRef.current?.show({ 
-          title: 'Preview Error', 
-          message: 'Error loading file preview: ' + (err.message || err), 
-          type: 'error' 
-        })
-      }
-    }
-
-    })();
-
-    // Cleanup on unmount: remove listeners added to document
-    return () => {
-      mounted = false
-      // no-op for now
+      console.error('[files] structure', err)
+      setTreeError(true)
+    } finally {
+      setLoadingTree(false)
     }
   }, [])
 
-  return (
-    <AuthsContext.Provider value={userAuths}>
-      <div>
-        <style dangerouslySetInnerHTML={{ __html: galleryCss }} />
-        <AlertModal ref={alertModalRef} />
-        <UserPickerModal ref={userPickerModalRef} />
-        <FileSendingHistoryModal 
-          ref={fileSendingHistoryModalRef}
-          onNavigateToFile={handleNavigateToFile}
-          onDeleteFile={handleDeleteFile}
-        />
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const res = await fetch('/admin/dashboard-data', {
+          credentials: 'include',
+          headers: { Accept: 'application/json' },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data && data.auths) setAuths(data.auths)
+        }
+      } catch (err) {
+        console.error('[files] auths', err)
+      }
+    })()
+    loadTree()
+  }, [loadTree])
 
-        <div className="container mt-5 mb-5">
-        <div className="mb-3">
-          <em id="fileSearchInfo" style={{ color: 'rgb(5,196,5)', display: 'none' }}>Enter a search date in this format (d-m-yyy)</em>
-          <div className="input-group mb-2 align-items-center">
-            <div className="input-group-prepend" id="searchButton">
-              <span className="input-group-text mobile-search" style={{height: '100%', display: 'flex', alignItems: 'center'}}><i className="fa fa-search" /></span>
-            </div>
-            <input id="search-input" className="form-control" type="text" placeholder="Search Here........" style={{height: '38px'}} />
+  const nodes = useMemo(() => buildNodes(structure || {}), [structure])
+  const canDelete = !!auths.is_admin
+
+  // Which files the user can see is decided server side; this only labels it.
+  const scopeLabel = auths.canViewBranchFiles
+    ? 'your branch'
+    : auths.canViewDepartmentFiles
+      ? 'your department'
+      : 'your own files'
+
+  // ------------------------------------------------------------- tree state
+
+  const isOpen = useCallback((path) => !!expanded[path], [expanded])
+
+  const toggle = useCallback((path) => {
+    setExpanded((prev) => ({ ...prev, [path]: !prev[path] }))
+  }, [])
+
+  // Folders only. Batch groups keep whatever the user set, so expanding the
+  // structure never dumps every file onto the page at once.
+  const toggleAllFolders = useCallback(() => {
+    const paths = collectFolderPaths(nodes)
+    const opening = !allOpen
+    setExpanded((prev) => {
+      const next = { ...prev }
+      paths.forEach((p) => { next[p] = opening })
+      return next
+    })
+    setAllOpen(opening)
+  }, [nodes, allOpen])
+
+  const revealFiles = useCallback((fileNames) => {
+    setExpanded((prev) => {
+      const next = { ...prev }
+      fileNames.forEach((name) => {
+        findFilePaths(nodes, name).forEach((trail) => {
+          trail.forEach((p) => { next[p] = true })
+        })
+      })
+      return next
+    })
+  }, [nodes])
+
+  const openUserFolder = useCallback((username) => {
+    const target = []
+    const walk = (list, trail) => {
+      list.forEach((n) => {
+        if (n.kind !== 'folder') return
+        const nextTrail = [...trail, n.path]
+        if (n.name === username) target.push(nextTrail)
+        walk(n.children || [], nextTrail)
+      })
+    }
+    walk(nodes, [])
+    if (target.length === 0) {
+      notify(`No folder found for ${username}.`, 'error')
+      return
+    }
+    setExpanded((prev) => {
+      const next = { ...prev }
+      target.forEach((trail) => trail.forEach((p) => { next[p] = true }))
+      return next
+    })
+    setResult({ kind: 'user', label: username, files: [], folders: target.length })
+  }, [nodes, notify])
+
+  // ------------------------------------------------------------- searching
+
+  const allFiles = useMemo(() => {
+    const out = []
+    const walk = (list) => list.forEach((n) => {
+      if (n.kind === 'batch') out.push(...n.files)
+      else walk(n.children || [])
+    })
+    walk(nodes)
+    return out
+  }, [nodes])
+
+  const searchByName = () => {
+    const q = nameQuery.trim().toLowerCase()
+    if (!q) return notify('Enter part of a file name.', 'error')
+    const hits = allFiles.filter((f) => f.toLowerCase().includes(q))
+    if (hits.length === 0) {
+      setResult(null)
+      return notify('No files match that name.', 'error')
+    }
+    revealFiles(hits)
+    setResult({ kind: 'name', label: nameQuery.trim(), files: hits })
+  }
+
+  const searchByDate = () => {
+    const api = isoToApiDate(dateQuery)
+    if (!api) return notify('Choose a date first.', 'error')
+    // The date sits immediately before the extension, as the archive names them.
+    const re = new RegExp(`${api.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\.[^.]+$`)
+    const hits = allFiles.filter((f) => re.test(f))
+    if (hits.length === 0) {
+      setResult(null)
+      return notify('No files found for that date.', 'error')
+    }
+    const folders = new Set()
+    hits.forEach((f) => findFilePaths(nodes, f).forEach((t) => folders.add(t[t.length - 1])))
+    revealFiles(hits)
+    setResult({ kind: 'date', label: prettyDate(dateQuery), files: hits, folders: folders.size })
+  }
+
+  const searchByUser = async () => {
+    if (!userPickerRef.current?.show) return
+    const picked = await userPickerRef.current.show()
+    if (!picked || picked.length === 0) return
+    openUserFolder(picked[0])
+  }
+
+  const clearResult = () => {
+    setResult(null)
+    setNameQuery('')
+    setDateQuery('')
+  }
+
+  // ------------------------------------------------------------- preview
+
+  const openPreview = useCallback(async (fileName, meta) => {
+    setPreview({ name: fileName, meta, url: null, type: null })
+    setPreviewState('loading')
+    try {
+      const res = await fetch(`/admin/file-content?fileName=${encodeURIComponent(fileName)}`, {
+        credentials: 'include',
+      })
+      if (!res.ok) throw new Error('failed')
+      const blob = await res.blob()
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current)
+      const url = URL.createObjectURL(blob)
+      objectUrlRef.current = url
+      let text = null
+      const type = blob.type || ''
+      if (!type.startsWith('image/') && type !== 'application/pdf') {
+        text = await blob.slice(0, 200000).text()
+      }
+      setPreview({ name: fileName, meta, url, type, text })
+      setPreviewState('ready')
+    } catch (err) {
+      console.error('[files] preview', err)
+      setPreviewState('error')
+    }
+  }, [])
+
+  const downloadUrl = (fileName) => `/admin/file-content?fileName=${encodeURIComponent(fileName)}`
+
+  // ------------------------------------------------------------- selection
+
+  const toggleFile = (fileName) => {
+    setSelected((prev) =>
+      prev.includes(fileName) ? prev.filter((f) => f !== fileName) : [...prev, fileName])
+  }
+
+  const toggleBatch = (batch) => {
+    const every = batch.files.every((f) => selected.includes(f))
+    setSelected((prev) => every
+      ? prev.filter((f) => !batch.files.includes(f))
+      : [...new Set([...prev, ...batch.files])])
+  }
+
+  const startMode = (next) => {
+    setMode(next)
+    setSelected([])
+  }
+
+  const cancelMode = () => {
+    setMode(null)
+    setSelected([])
+  }
+
+  // ------------------------------------------------------------- actions
+
+  const sendSelected = async () => {
+    if (selected.length === 0) return notify('Please select a file.', 'error')
+    if (!userPickerRef.current?.show) return
+    const recipients = await userPickerRef.current.show()
+    if (!recipients || recipients.length === 0) return
+
+    setBusy(true)
+    try {
+      const res = await fetch('/admin/sendFilesToUsers', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ users: recipients, files: selected }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        notify(data.message || 'Files sent successfully', 'success')
+        cancelMode()
+        loadTree()
+      } else if (res.status === 404 && Array.isArray(data.missingFiles)) {
+        notify(`Partly sent. Skipped: ${data.missingFiles.join(', ')}`, 'error')
+        cancelMode()
+        loadTree()
+      } else {
+        notify(data.message || 'Failed to send files', 'error')
+      }
+    } catch (err) {
+      console.error('[files] send', err)
+      notify('Failed to send files', 'error')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const runDelete = async () => {
+    const files = confirmDelete || []
+    setBusy(true)
+    try {
+      const res = await fetch('/admin/delete-file', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.message || 'failed')
+      notify(data.message || `${files.length} file(s) deleted`, 'success')
+      setConfirmDelete(null)
+      cancelMode()
+      if (preview && files.includes(preview.name)) {
+        setPreview(null)
+        setPreviewState('idle')
+      }
+      loadTree()
+    } catch (err) {
+      console.error('[files] delete', err)
+      notify('Delete failed', 'error')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // ------------------------------------------------------------- rendering
+
+  const renderFile = (fileName, batch) => {
+    const isSelected = selected.includes(fileName)
+    const active = preview && preview.name === fileName
+    return (
+      <div
+        key={fileName}
+        className={`ea-row ea-file${active ? ' ea-active' : ''}`}
+      >
+        {mode && (
+          <input
+            className="form-check-input ea-check me-2"
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => toggleFile(fileName)}
+          />
+        )}
+        <i className={`mdi ${fileIcon(fileName)} me-1`} />
+        <button
+          type="button"
+          className="ea-name"
+          title={fileName}
+          onClick={() => openPreview(fileName, batch)}
+        >
+          {displayName(fileName)}
+        </button>
+        <span className="ea-actions">
+          <a
+            href={downloadUrl(fileName)}
+            download={fileName}
+            className="text-muted me-2"
+            title="Download"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <i className="mdi mdi-download-outline" />
+          </a>
+          {canDelete && (
+            <button
+              type="button"
+              className="btn btn-link p-0 text-danger"
+              title="Delete"
+              onClick={() => setConfirmDelete([fileName])}
+            >
+              <i className="mdi mdi-trash-can-outline" />
+            </button>
+          )}
+        </span>
+      </div>
+    )
+  }
+
+  const renderNode = (node) => {
+    if (node.kind === 'batch') {
+      const open = isOpen(node.path)
+      const every = node.files.length > 0 && node.files.every((f) => selected.includes(f))
+      return (
+        <div key={node.path} className={`ea-node${open ? ' ea-open' : ''}`} data-kind="batch">
+          <div className="ea-row" role="button" onClick={() => toggle(node.path)}>
+            {mode && (
+              <input
+                className="form-check-input ea-check me-2"
+                type="checkbox"
+                checked={every}
+                onChange={() => toggleBatch(node)}
+                onClick={(e) => e.stopPropagation()}
+                title="Select everything in this batch"
+              />
+            )}
+            <i className={`mdi mdi-chevron-${open ? 'down' : 'right'} ea-caret`} />
+            <i className={`mdi ${node.isSingle ? 'mdi-folder-outline text-muted' : 'mdi-folder-zip-outline text-warning'} me-1`} />
+            <span className="fw-bold" title={node.name}>{node.name}</span>
+            <span className="badge bg-light text-dark ms-2">{node.files.length}</span>
           </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <button id="search-username-btn" className="btn btn-outline-primary btn-sm" type="button" style={{marginTop:4}}>Search by Username</button>
-            <button id="history-button" className="btn btn-info btn-sm" type="button" style={{marginTop:4, visibility: 'hidden'}} onClick={() => fileSendingHistoryModalRef.current?.show()}>📋 Sending History</button>
+          {open && (
+            <div className="ea-children">
+              {node.files.map((f) => renderFile(f, node.name))}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    const open = isOpen(node.path)
+    const depth = node.path.split('/').length
+    const icon = depth === 1 ? 'mdi-domain text-muted'
+      : depth === 2 ? 'mdi-sitemap-outline text-muted'
+        : open ? 'mdi-folder-open text-warning' : 'mdi-folder text-warning'
+
+    return (
+      <div key={node.path} className={`ea-node${open ? ' ea-open' : ''}`}>
+        <div className="ea-row" role="button" onClick={() => toggle(node.path)}>
+          <i className={`mdi mdi-chevron-${open ? 'down' : 'right'} ea-caret`} />
+          <i className={`mdi ${icon} me-1`} />
+          {/* no count here: branch, department and user folders never showed one */}
+          <span className="fw-bold" title={node.name}>{node.name}</span>
+        </div>
+        {open && (
+          <div className="ea-children">
+            {(node.children || []).map(renderNode)}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <AuthsContext.Provider value={auths}>
+      <style>{PAGE_CSS}</style>
+
+      <UserPickerModal ref={userPickerRef} />
+      <FileSendingHistoryModal ref={historyRef} onNavigateToFile={(name) => revealFiles([name])} />
+
+      <div className="row">
+        <div className="col-12">
+          <div className="card">
+            <div className="card-body">
+
+              {/* three searches, each its own control */}
+              <div className="d-flex flex-wrap align-items-end gap-2 mb-3">
+                <div>
+                  <label className="form-label font-12 text-muted mb-1 d-block" htmlFor="ea-name">
+                    Search by file name
+                  </label>
+                  <div className="input-group input-group-sm" style={{ width: 250 }}>
+                    <input
+                      id="ea-name"
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Payroll"
+                      value={nameQuery}
+                      onChange={(e) => setNameQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && searchByName()}
+                    />
+                    <button className="btn btn-primary" type="button" onClick={searchByName} title="Search">
+                      <i className="mdi mdi-magnify" />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="form-label font-12 text-muted mb-1 d-block" htmlFor="ea-date">
+                    Search by date
+                  </label>
+                  <div className="input-group input-group-sm" style={{ width: 195 }}>
+                    <input
+                      id="ea-date"
+                      type="date"
+                      className="form-control"
+                      value={dateQuery}
+                      onChange={(e) => setDateQuery(e.target.value)}
+                    />
+                    <button className="btn btn-primary" type="button" onClick={searchByDate} title="Search">
+                      <i className="mdi mdi-magnify" />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="form-label font-12 text-muted mb-1 d-block">Search by person</label>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-light border"
+                    style={{ width: 200 }}
+                    onClick={searchByUser}
+                  >
+                    <i className="mdi mdi-folder-account-outline me-1" />
+                    Find a user&rsquo;s files
+                  </button>
+                </div>
+
+                <div className="ms-auto">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-light border"
+                    onClick={() => historyRef.current?.show()}
+                  >
+                    <i className="mdi mdi-history me-1" />Sending history
+                  </button>
+                </div>
+              </div>
+
+              {/* what the last search found */}
+              {result && (
+                <div className="alert alert-info py-2 px-3 d-flex align-items-center mb-2" role="alert">
+                  <i className={`mdi ${result.kind === 'date' ? 'mdi-calendar-search' : result.kind === 'user' ? 'mdi-folder-account-outline' : 'mdi-file-search-outline'} me-2`} />
+                  <span className="flex-grow-1">
+                    {result.kind === 'name' && (
+                      <><strong>{result.files.length} file(s)</strong> match <strong>&ldquo;{result.label}&rdquo;</strong>. Each one is highlighted below.</>
+                    )}
+                    {result.kind === 'date' && (
+                      <>Files dated <strong>{result.label}</strong> were found in <strong>{result.folders} folder(s)</strong>. Those folders are open below.</>
+                    )}
+                    {result.kind === 'user' && (
+                      <>Opened the folder for <strong>{result.label}</strong>.</>
+                    )}
+                  </span>
+                  {result.kind === 'name' && (
+                    <button className="btn btn-link p-0 me-3" onClick={() => setShowMatched(true)}>
+                      View as list
+                    </button>
+                  )}
+                  <button className="btn btn-link p-0 text-muted" onClick={clearResult}>
+                    <i className="mdi mdi-close" /> Clear
+                  </button>
+                </div>
+              )}
+
+              <div className="ea-split">
+
+                {/* ---------------- tree ---------------- */}
+                <div className="ea-pane-left">
+                  <div className="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
+                    <span className="text-muted font-12">
+                      <i className="mdi mdi-eye-outline me-1" />
+                      Showing {scopeLabel}
+                    </span>
+                    <button className="btn btn-sm btn-link text-muted p-0" onClick={toggleAllFolders}>
+                      <i className={`mdi mdi-unfold-${allOpen ? 'less' : 'more'}-horizontal me-1`} />
+                      {allOpen ? 'Collapse' : 'Expand'} all folders
+                    </button>
+                  </div>
+
+                  {loadingTree && (
+                    <div className="placeholder-glow">
+                      {[8, 6, 7, 5, 9].map((c, i) => (
+                        <p key={i} className={`placeholder col-${c} mb-2`} style={{ marginLeft: i * 6 }} />
+                      ))}
+                    </div>
+                  )}
+
+                  {!loadingTree && treeError && (
+                    <div className="alert alert-danger py-2 px-3" role="alert">
+                      <i className="mdi mdi-alert-circle-outline me-1" />
+                      Could not load your folders.{' '}
+                      <button className="btn btn-link p-0 align-baseline" onClick={loadTree}>Retry</button>
+                    </div>
+                  )}
+
+                  {!loadingTree && !treeError && nodes.length === 0 && (
+                    <div className="text-center py-5">
+                      <i className="mdi mdi-folder-open-outline text-muted" style={{ fontSize: 34 }} />
+                      <h5 className="mt-2 mb-1">No files yet</h5>
+                      <p className="text-muted mb-0 font-13">Files you upload will appear here.</p>
+                    </div>
+                  )}
+
+                  {!loadingTree && !treeError && nodes.length > 0 && (
+                    <div className="ea-tree">{nodes.map(renderNode)}</div>
+                  )}
+                </div>
+
+                {/* ---------------- viewer ---------------- */}
+                <div className="ea-pane-right">
+                  <div className="ea-viewer">
+                    <div className="ea-viewer-head">
+                      {preview ? (
+                        <>
+                          <span className="text-truncate fw-bold" title={preview.name}>
+                            {displayName(preview.name)}
+                          </span>
+                          {preview.meta && (
+                            <span className="text-muted font-12 ms-2 text-truncate">{preview.meta}</span>
+                          )}
+                          <span className="ms-auto">
+                            <a
+                              className="btn btn-sm btn-light py-0 px-1 me-1"
+                              href={downloadUrl(preview.name)}
+                              download={preview.name}
+                              title="Download"
+                            >
+                              <i className="mdi mdi-download-outline" />
+                            </a>
+                            <button
+                              className="btn btn-sm btn-light py-0 px-1"
+                              title="Open full screen"
+                              onClick={() => setFullscreen(true)}
+                              disabled={previewState !== 'ready'}
+                            >
+                              <i className="mdi mdi-fullscreen" />
+                            </button>
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-muted">Preview</span>
+                      )}
+                    </div>
+
+                    <div className="ea-viewer-body">
+                      {previewState === 'idle' && (
+                        <div className="text-center text-muted">
+                          <i className="mdi mdi-file-eye-outline" style={{ fontSize: 40 }} />
+                          <p className="mb-0 mt-1">Select a file to preview its content here.</p>
+                        </div>
+                      )}
+                      {previewState === 'loading' && (
+                        <div className="text-center text-muted">
+                          <div className="spinner-border text-primary" role="status" />
+                          <p className="mb-0 mt-2 font-13">Loading preview&hellip;</p>
+                        </div>
+                      )}
+                      {previewState === 'error' && (
+                        <div className="text-center text-muted">
+                          <i className="mdi mdi-alert-circle-outline text-danger" style={{ fontSize: 36 }} />
+                          <p className="mb-0 mt-2">Error loading file preview.</p>
+                        </div>
+                      )}
+                      {previewState === 'ready' && preview && <PreviewBody preview={preview} />}
+                    </div>
+                  </div>
+
+                  {/* ---------------- modes ---------------- */}
+                  <div className="mt-2">
+                    {!mode && (
+                      <div className="d-flex flex-wrap align-items-center gap-2">
+                        {auths.view_upload && (
+                          <button className="btn btn-sm btn-primary" onClick={() => startMode('send')}>
+                            <i className="mdi mdi-send-outline me-1" />Pick &amp; Send
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button className="btn btn-sm btn-light" onClick={() => startMode('delete')}>
+                            <i className="mdi mdi-trash-can-outline me-1" />Delete
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {mode === 'send' && (
+                      <div className="d-flex flex-wrap align-items-center gap-2">
+                        <span className="badge bg-primary-lighten text-primary">Pick &amp; Send mode</span>
+                        <button className="btn btn-sm btn-danger" onClick={cancelMode}>
+                          <i className="mdi mdi-close me-1" />Cancel file sending
+                        </button>
+                        <button
+                          className="btn btn-sm btn-success"
+                          onClick={sendSelected}
+                          disabled={selected.length === 0 || busy}
+                        >
+                          {busy
+                            ? <><span className="spinner-border spinner-border-sm me-1" role="status" />Sending&hellip;</>
+                            : <><i className="mdi mdi-send me-1" />Send{selected.length ? ` ${selected.length}` : ''}</>}
+                        </button>
+                        {selected.length === 0 && (
+                          <span className="text-success font-13">Please select a file.</span>
+                        )}
+                      </div>
+                    )}
+
+                    {mode === 'delete' && (
+                      <div className="d-flex flex-wrap align-items-center gap-2">
+                        <span className="badge bg-danger-lighten text-danger">Delete mode</span>
+                        <button className="btn btn-sm btn-secondary" onClick={cancelMode}>
+                          <i className="mdi mdi-close me-1" />Cancel Delete
+                        </button>
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => setConfirmDelete(selected)}
+                          disabled={selected.length === 0}
+                        >
+                          <i className="mdi mdi-trash-can-outline me-1" />
+                          Delete selected{selected.length ? ` (${selected.length})` : ''}
+                        </button>
+                        {selected.length === 0 && (
+                          <span className="text-success font-13">Select file(s) to delete.</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="row" id="resizable-panels-row" style={{ display: 'flex', flexDirection: 'row', minWidth: 0 }}>
-          <div className="bg-white box-shadow col-4 border p-3" id="folder-panel" style={{ minWidth: 120, maxWidth: '60vw', flex: '0 0 28vw', overflowX: 'auto' }}>
-            <input type="hidden" id="baseUploadPath" value="C:\\e-archiveUploads" />
-            <RevealFoldersButton containerId="folder-tree" />
-            <div id="folder-tree"></div>
-          </div>
-
-          <div id="panel-resizer" style={{ width: 3, cursor: 'ew-resize', background: '#e0e0e003', minHeight: '100%', zIndex: 10, transition: 'background 0.2s' }} />
-
-          <div className="col-8" id="file-viewer-panel" style={{ flex: '1 1 0', minWidth: 200, maxWidth: '100vw', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div className="bg-white box-shadow file-content" id="file-viewer" style={{ flex: '0 0 300px', minHeight: 120, maxHeight: '70vh', overflowY: 'auto', position: 'relative' }}>
-              <em>Select a file to preview its content here.</em>
-              <div id="horizontal-resizer" style={{ height: 3, width: '100%', cursor: 'ns-resize', background: '#e0e0e0', position: 'absolute', bottom: 0, left: 0, zIndex: 11, transition: 'background 0.2s' }} />
-            </div>
-            <div id="file-viewer-below" style={{ flex: '1 1 auto' }}>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <button id="pick-send-button" className="btn btn-primary mt-3">Pick &amp; Send</button>
-                <button id="delete-button" className="btn btn-secondary mt-3">Delete</button>
-                <button id="cancel-delete-button" style={{ display: 'none' }} className="btn btn-secondary mt-3">Cancel</button>
-                <button id="send-button" style={{ display: 'none' }} className="btn btn-success mt-3">Send</button>
-                {/* History button moved to search area above */}
-                <p id="select-file-message" style={{ display: 'none', color: 'green', margin: '0', marginLeft: '8px' }}>Please select a file.</p>
-                <p id="delete-info" className="delete-info" style={{ display: 'none', color: 'green', margin: '0', marginLeft: '8px' }}>Select file(s) to delete.</p>
+      {/* matched files */}
+      {showMatched && result?.kind === 'name' && (
+        <Backdrop onClose={() => setShowMatched(false)}>
+          <div className="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">
+                  Files matching &ldquo;{result.label}&rdquo;
+                  <span className="badge bg-primary ms-1">{result.files.length}</span>
+                </h4>
+                <button type="button" className="btn-close" onClick={() => setShowMatched(false)} />
+              </div>
+              <div className="modal-body p-0">
+                <table className="table table-centered table-hover mb-0">
+                  <tbody>
+                    {result.files.map((f) => (
+                      <tr key={f}>
+                        <td style={{ width: 44 }}>
+                          <i className={`mdi ${fileIcon(f)} font-18`} />
+                        </td>
+                        <td>
+                          <span className="fw-bold d-block">{displayName(f)}</span>
+                          <span className="font-12 text-muted">
+                            {(findFilePaths(nodes, f)[0] || []).join(' / ')}
+                          </span>
+                        </td>
+                        <td className="text-end" style={{ width: 150 }}>
+                          <button
+                            className="btn btn-sm btn-light"
+                            onClick={() => { revealFiles([f]); setShowMatched(false) }}
+                          >
+                            <i className="mdi mdi-target me-1" />Show in tree
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="modal-footer">
+                <span className="text-muted font-13 me-auto">
+                  All matches are highlighted in the tree behind this list.
+                </span>
+                <button className="btn btn-light" onClick={() => setShowMatched(false)}>Close</button>
               </div>
             </div>
           </div>
+        </Backdrop>
+      )}
 
-          <div id="searchResultsModal" style={{ display: 'none' }}>
-            <div id="filesModalContent" style={{ width: '30%' }}>
-              <h2>Matched Files</h2>
-              <ul id="matchedFilesList" />
-              <button className="btn btn-primary" id="closeFilesModalButton">Close</button>
+      {/* full screen preview */}
+      {fullscreen && preview && (
+        <Backdrop onClose={() => setFullscreen(false)}>
+          <div className="modal-dialog modal-fullscreen" role="document">
+            <div className="modal-content">
+              <div className="modal-header py-2">
+                <div className="text-truncate">
+                  <h5 className="modal-title text-truncate mb-0">{displayName(preview.name)}</h5>
+                  {preview.meta && <span className="font-12 text-muted">{preview.meta}</span>}
+                </div>
+                <div className="ms-auto me-2">
+                  <a className="btn btn-sm btn-light" href={downloadUrl(preview.name)} download={preview.name}>
+                    <i className="mdi mdi-download-outline me-1" />Download
+                  </a>
+                </div>
+                <button type="button" className="btn-close" onClick={() => setFullscreen(false)} />
+              </div>
+              <div className="modal-body bg-light p-0 d-flex align-items-center justify-content-center">
+                <PreviewBody preview={preview} full />
+              </div>
+            </div>
+          </div>
+        </Backdrop>
+      )}
+
+      {/* delete confirmation */}
+      {confirmDelete && (
+        <Backdrop onClose={() => !busy && setConfirmDelete(null)}>
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">
+                  Delete {confirmDelete.length} file{confirmDelete.length === 1 ? '' : 's'}?
+                </h4>
+                <button type="button" className="btn-close" onClick={() => setConfirmDelete(null)} disabled={busy} />
+              </div>
+              <div className="modal-body">
+                <p className="mb-2">
+                  {confirmDelete.length === 1
+                    ? <><strong>{displayName(confirmDelete[0])}</strong> will be permanently removed from the archive.</>
+                    : <>These files will be permanently removed from the archive.</>}
+                  {' '}This cannot be undone.
+                </p>
+                {confirmDelete.length > 1 && (
+                  <ul className="mb-0 font-13 text-muted" style={{ maxHeight: 160, overflowY: 'auto' }}>
+                    {confirmDelete.map((f) => <li key={f}>{displayName(f)}</li>)}
+                  </ul>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-light" onClick={() => setConfirmDelete(null)} disabled={busy}>
+                  Cancel
+                </button>
+                <button className="btn btn-danger" onClick={runDelete} disabled={busy}>
+                  {busy
+                    ? <><span className="spinner-border spinner-border-sm me-1" role="status" />Deleting&hellip;</>
+                    : `Delete file${confirmDelete.length === 1 ? '' : 's'}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Backdrop>
+      )}
+
+      {/* toast */}
+      {toast && (
+        <div className="toast-container position-fixed top-0 end-0 p-3" style={{ zIndex: 2050 }}>
+          <div className={`toast show align-items-center text-white border-0 bg-${toast.type === 'error' ? 'danger' : 'success'}`} role="alert">
+            <div className="d-flex">
+              <div className="toast-body">
+                <i className={`mdi ${toast.type === 'error' ? 'mdi-alert-circle-outline' : 'mdi-check-circle-outline'} me-1`} />
+                {toast.message}
+              </div>
+              <button type="button" className="btn-close btn-close-white me-2 m-auto" onClick={() => setToast(null)} />
             </div>
           </div>
         </div>
-        </div>
-      </div>
+      )}
     </AuthsContext.Provider>
   )
 }
 
+// ---------------------------------------------------------------- pieces
+
+function PreviewBody({ preview, full }) {
+  const style = full ? { width: '100%', height: '100%' } : { width: '100%', height: '100%' }
+  if (!preview.url) return null
+  if (preview.type && preview.type.startsWith('image/')) {
+    return <img src={preview.url} alt={preview.name} style={{ maxWidth: '100%', maxHeight: '100%' }} />
+  }
+  if (preview.type === 'application/pdf') {
+    return <object data={preview.url} type="application/pdf" style={style} aria-label={preview.name} />
+  }
+  if (preview.text !== null && preview.text !== undefined) {
+    return (
+      <pre className="p-3 mb-0 w-100 h-100" style={{ whiteSpace: 'pre-wrap', overflow: 'auto' }}>
+        {preview.text}
+      </pre>
+    )
+  }
+  return (
+    <div className="text-center text-muted">
+      <i className="mdi mdi-file-question-outline" style={{ fontSize: 40 }} />
+      <h5 className="mt-2 mb-1">No preview available</h5>
+      <p className="font-13 mb-2">This file type cannot be shown in the browser.</p>
+      <a className="btn btn-sm btn-primary" href={preview.url} download={preview.name}>
+        <i className="mdi mdi-download-outline me-1" />Download to open
+      </a>
+    </div>
+  )
+}
+
+function Backdrop({ children, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <div
+      className="modal fade show d-block"
+      tabIndex="-1"
+      style={{ background: 'rgba(0,0,0,.5)' }}
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    >
+      {children}
+    </div>
+  )
+}
+
+const PAGE_CSS = `
+.ea-split{display:flex;align-items:stretch;gap:16px;width:100%}
+.ea-pane-left{flex:0 0 280px;width:280px;height:620px;overflow:auto;
+  border:1px solid #dee2e6;border-radius:6px;padding:10px}
+.ea-pane-right{flex:1 1 0%;min-width:0;width:100%;display:flex;flex-direction:column}
+@media (max-width:991px){.ea-split{flex-direction:column}
+  .ea-pane-left{flex:none;width:100%;height:320px}}
+.ea-tree{font-size:.875rem;min-width:max-content}
+.ea-children{margin-left:18px;padding-left:10px;border-left:1px dashed rgba(0,0,0,.12)}
+.ea-row{display:flex;align-items:center;padding:5px 6px;border-radius:4px;white-space:nowrap}
+.ea-row:hover{background:#f1f3fa}
+.ea-caret{width:16px;color:#98a6ad;flex:none}
+.ea-name{flex:0 0 auto;background:none;border:0;padding:0;text-align:left;color:inherit;white-space:nowrap}
+.ea-name:hover{text-decoration:underline}
+.ea-file.ea-active{background:#e3ebff}
+.ea-actions{padding-left:16px;flex:none;visibility:hidden;white-space:nowrap;margin-left:auto}
+.ea-row:hover .ea-actions{visibility:visible}
+.ea-viewer{border:1px solid #dee2e6;border-radius:6px;display:flex;flex-direction:column;
+  width:100%;height:560px;overflow:hidden;background:#fff}
+.ea-viewer-head{display:flex;align-items:center;gap:4px;padding:6px 10px;
+  border-bottom:1px solid #dee2e6;background:#f8f9fa;font-size:.8125rem}
+.ea-viewer-body{flex:1 1 auto;overflow:auto;display:flex;align-items:center;
+  justify-content:center;background:#f1f3fa}
+`
