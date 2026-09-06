@@ -68,6 +68,7 @@ export default function Sidebar({ auths = {}, onOpenScan, onOpenAccessControl, o
           <NavLink to="/dashboard" icon="mdi-view-dashboard-outline">Dashboard</NavLink>
           {auths.view_upload && <NavLink to="/see-file" icon="mdi-folder-outline">Files</NavLink>}
           {auths.archiving && <NavLink to="/file-upload" icon="mdi-cloud-upload-outline">Upload</NavLink>}
+          {auths.view_upload && <NavLink to="/send-files" icon="mdi-send-outline">Send files</NavLink>}
           {auths.scanning && (
             <NavAction icon="mdi-scanner" onClick={onOpenScan}>Scan</NavAction>
           )}

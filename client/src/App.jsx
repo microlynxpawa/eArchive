@@ -4,6 +4,7 @@ import Dashboard from './pages/dashboard.jsx'
 import Auth from './pages/auth/Auth.jsx'
 import Layout from './components/Layout.jsx'
 import Gallery from './pages/Gallery.jsx'
+import SendFiles from './pages/SendFiles.jsx'
 import FileUpload from './pages/FileUpload.jsx'
 import AuditTrail from './pages/AuditTrail.jsx'
 import UserManagement from './pages/UserManagement.jsx'
@@ -26,6 +27,7 @@ export default function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="see-file" element={<Gallery />} />
               <Route path="file-upload" element={<FileUpload />} />
+              <Route path="send-files" element={<SendFiles />} />
               <Route path="audit-log" element={<AuditTrail />} />
               <Route path="user-management" element={<UserManagement />} />
               <Route path="user-group" element={<Departments />} />
