@@ -1,6 +1,8 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import UserPickerModal from '../components/UserPickerModal'
 import FileSendingHistoryModal from '../components/FileSendingHistoryModal'
+import SearchResults from '../components/SearchResults'
+import { useSearchParams } from 'react-router-dom'
 
 // FileSendingHistoryModal reads permissions from here to decide whether the
 // current user may look at someone else's history.
@@ -145,6 +147,9 @@ function findFilePaths(nodes, fileName, trail = [], out = []) {
 // ---------------------------------------------------------------- component
 
 export default function Gallery() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const archiveQuery = searchParams.get('q') || ''
+
   const [auths, setAuths] = useState({})
   const [structure, setStructure] = useState(null)
   const [loadingTree, setLoadingTree] = useState(true)
@@ -460,6 +465,26 @@ export default function Gallery() {
     }
   }
 
+  // ------------------------------------------------------------- search
+
+  const clearArchiveQuery = useCallback(() => {
+    const next = new URLSearchParams(searchParams)
+    next.delete('q')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, setSearchParams])
+
+  // Open a search hit straight into the preview pane.
+  const openResult = useCallback((result) => {
+    revealFiles([result.fileName])
+    openPreview(result.fileName, result.batch)
+  }, [revealFiles, openPreview])
+
+  // Expand the tree to where the file lives and leave search.
+  const showResultInTree = useCallback((result) => {
+    revealFiles([result.fileName])
+    clearArchiveQuery()
+  }, [revealFiles, clearArchiveQuery])
+
   // ------------------------------------------------------------- rendering
 
   const renderFile = (fileName, batch) => {
@@ -714,6 +739,15 @@ export default function Gallery() {
 
                 {/* ---------------- viewer ---------------- */}
                 <div className="ea-pane-right">
+                  {archiveQuery ? (
+                    <SearchResults
+                      query={archiveQuery}
+                      onOpen={openResult}
+                      onShowInTree={showResultInTree}
+                      onClearQuery={clearArchiveQuery}
+                    />
+                  ) : (
+                  <>
                   <div className="ea-viewer">
                     <div className="ea-viewer-head">
                       {preview ? (
@@ -829,6 +863,8 @@ export default function Gallery() {
                       </div>
                     )}
                   </div>
+                  </>
+                  )}
                 </div>
               </div>
 

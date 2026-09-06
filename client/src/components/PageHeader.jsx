@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 /*
@@ -23,6 +23,16 @@ export default function PageHeader({ user = {}, messages = [], onToggleSidebar }
   const picture = user.profilePicturePath
     ? `/profile-pictures/${String(user.profilePicturePath).split(/[\\/]/).pop()}`
     : null
+
+  const [term, setTerm] = useState('')
+
+  // Searching is an archive-wide act, so it always lands on the Files page.
+  const submitSearch = (e) => {
+    e.preventDefault()
+    const q = term.trim()
+    if (!q) return
+    navigate(`/see-file?q=${encodeURIComponent(q)}`)
+  }
 
   const signOut = async (e) => {
     e.preventDefault()
@@ -120,6 +130,20 @@ export default function PageHeader({ user = {}, messages = [], onToggleSidebar }
           </div>
         </li>
       </ul>
+
+      <form className="app-search d-none d-lg-block" onSubmit={submitSearch}>
+        <div className="position-relative">
+          <input
+            type="text"
+            id="archive-search"
+            className="form-control"
+            placeholder="Search the archive…"
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
+          />
+          <span className="mdi mdi-magnify search-icon" />
+        </div>
+      </form>
 
       <button className="button-menu-mobile open-left" onClick={onToggleSidebar}>
         <i className="mdi mdi-menu" />

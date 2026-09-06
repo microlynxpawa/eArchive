@@ -20,6 +20,7 @@ const deleteUserById = require("../services/User/removeUser.service");
 const { authenticateUser, forgotPassword } = require("../services/Auth/signIn.service");
 const updateUserPassword = require("../services/Auth/updatePassword.service");
 const buildFolderStructure = require("../services/Display/fileDisplay.service");
+const { searchFiles } = require("../services/Search/search.service");
 const storeProfilePicture = require("../services/Profile/profilePicture.service");
 const uploadFileLogic = require("../services/Upload/fileUpload.service");
 const { uploadMultipleFiles } = require('../services/Upload/fileUploadMultiple.service');
@@ -925,7 +926,36 @@ const updateStorageSettings = async (req, res) => {
   }
 };
 
+// Search the archive by name, date, uploader, department, branch or type.
+// Visibility comes from the same scope the folder tree uses, so this can
+// never return a file the user could not already open.
+const searchArchive = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    if (!userId) return res.status(401).json({ statusCode: 401, message: 'Unauthorized' });
+
+    const q = String(req.query.q || '').slice(0, 300);
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+
+    // Explicit filters from the UI win over anything parsed out of the phrase.
+    const overrides = {};
+    if (req.query.from) overrides.dateFrom = new Date(req.query.from);
+    if (req.query.to) overrides.dateTo = new Date(req.query.to);
+    if (req.query.department) overrides.department = req.query.department;
+    if (req.query.branch) overrides.branch = req.query.branch;
+    if (req.query.type) overrides.fileTypes = String(req.query.type).split(',');
+    if (req.query.batch) overrides.batch = req.query.batch;
+
+    const result = await searchFiles({ userId, q, page, limit, overrides });
+    return res.json({ statusCode: 200, ...result });
+  } catch (err) {
+    console.error('searchArchive error', err);
+    return res.status(500).json({ statusCode: 500, message: err.message });
+  }
+};
 module.exports = {
+  searchArchive,
   // COMMENTED OUT - EJS rendering functions (kept for reference, not exported)
   // login,
   // dashboard,

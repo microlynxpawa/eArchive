@@ -21,6 +21,7 @@ const {
   GetUser,
   dashboardData,
   getFileStructure,
+  searchArchive,
   accessControl,
   uploadProfilePicture,
   getUsers,
@@ -95,6 +96,7 @@ app.use(passAuths)
 // JSON endpoints - KEEP these for React app
 app.get('/dashboard-data', dashboardData);
 app.get('/file-structure', getFileStructure);
+app.get('/search', searchArchive);
 app.get('/file-content', fileContent);
 // Health check route (placed just before module.exports)
 app.get('/health', (req, res) => {
