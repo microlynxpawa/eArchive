@@ -1,331 +1,589 @@
-import React, { useState, useRef } from 'react'
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react'
+import { LayoutContext } from '../components/Layout'
 
-function ShowToast(message, type = 'success') {
-  if (window.Toast && typeof window.Toast.fire === 'function') {
-    window.Toast.fire({ icon: type === 'danger' ? 'error' : type, title: message })
-    return
-  }
-  if (window.Swal && typeof window.Swal.fire === 'function') {
-    window.Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, icon: type === 'danger' ? 'error' : type, title: message })
-    return
-  }
-  // minimal DOM toast
-  const existing = document.getElementById('customToast')
-  if (existing) existing.remove()
-  const toast = document.createElement('div')
-  toast.id = 'customToast'
-  toast.style.position = 'fixed'
-  toast.style.top = '30px'
-  toast.style.right = '30px'
-  toast.style.zIndex = 9999
-  toast.style.minWidth = '200px'
-  toast.innerHTML = `<div style="padding:12px 16px;border-radius:6px;color:#fff;background:${type==='danger'?'#dc3545':'#198754'}">${message}</div>`
-  document.body.appendChild(toast)
-  setTimeout(() => toast.remove(), 3000)
+/*
+ * Upload
+ *
+ * Rebuilt on Hyper markup. The rules are unchanged: JPG, PNG and PDF only, an
+ * optional custom name per file, and an optional batch name of at most 25
+ * characters that may not contain an underscore.
+ *
+ * The final saved name is now shown per file before uploading. Previously only
+ * the single-file tab did that, so in the multiple tab the batch suffix and the
+ * character substitutions were invisible until after the upload.
+ */
+
+const ACCEPT = '.jpg,.jpeg,.png,.pdf'
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
+const BATCH_MAX = 25
+
+// ---------------------------------------------------------------- helpers
+
+function baseName(name) {
+  return name.replace(/\.[^/.]+$/, '')
 }
 
+function extensionOf(name) {
+  const i = name.lastIndexOf('.')
+  return i === -1 ? '' : name.slice(i)
+}
+
+function humanSize(bytes) {
+  if (!Number.isFinite(bytes)) return ''
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+// Exactly the assembly the server side expects, so the preview cannot drift
+// from what is actually sent.
+function finalName(custom, original, batch) {
+  const base = (custom || baseName(original)).replace(/[^a-zA-Z0-9@\-_]/g, '_')
+  const ext = extensionOf(original)
+  let out = base
+  if (batch) out += `@${batch.replace(/[^a-zA-Z0-9\-_]/g, '_')}`
+  if (!out.toLowerCase().endsWith(ext.toLowerCase())) out += ext
+  return out
+}
+
+function iconFor(file) {
+  if (file.type === 'application/pdf') return 'mdi-file-pdf-box text-danger'
+  if (file.type.startsWith('image/')) return 'mdi-file-image-box text-info'
+  return 'mdi-file-outline text-muted'
+}
+
+function validateBatch(value) {
+  if (value.includes('_')) return 'Batch name cannot contain the _ character.'
+  if (value.length > BATCH_MAX) return `Batch name cannot exceed ${BATCH_MAX} characters.`
+  return ''
+}
+
+// XHR rather than fetch, so real upload progress is available.
+function upload(url, formData, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', url, true)
+    xhr.withCredentials = true
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100))
+    }
+    xhr.onload = () => {
+      let data = {}
+      try { data = JSON.parse(xhr.responseText) } catch { /* not json */ }
+      if (xhr.status >= 200 && xhr.status < 300) resolve(data)
+      else reject(new Error(data.message || `Upload failed (${xhr.status})`))
+    }
+    xhr.onerror = () => reject(new Error('Upload failed. Check your connection.'))
+    xhr.send(formData)
+  })
+}
+
+// ---------------------------------------------------------------- component
+
 export default function FileUpload() {
-  // ...existing code...
-  const [batchNameError, setBatchNameError] = useState('')
-  // Single upload state
-  const [singleFile, setSingleFile] = useState(null)
+  const { user = {} } = useContext(LayoutContext)
+
+  const [tab, setTab] = useState('single')
+  const [toast, setToast] = useState(null)
+
+  const [single, setSingle] = useState(null)
   const [singleName, setSingleName] = useState('')
-  const [singleUploading, setSingleUploading] = useState(false)
-  const dropRef = useRef(null)
+  const [singleBusy, setSingleBusy] = useState(false)
+  const [singleProgress, setSingleProgress] = useState(0)
+  const [singleDone, setSingleDone] = useState(false)
 
-  // Multiple upload state
-  const [multiFiles, setMultiFiles] = useState([]) // { file, customName }
-  const [batchName, setBatchName] = useState('')
-  const [multiUploading, setMultiUploading] = useState(false)
+  const [items, setItems] = useState([])
+  const [batch, setBatch] = useState('')
+  const [batchError, setBatchError] = useState('')
+  const [multiBusy, setMultiBusy] = useState(false)
+  const [multiProgress, setMultiProgress] = useState(0)
 
-  // Drag & drop handlers for single file
-  function onDropSingle(e) {
-    e.preventDefault()
-    const f = e.dataTransfer?.files?.[0] || e.target?.files?.[0]
-    if (f) handleSingleSelect(f)
-  }
+  const [rejected, setRejected] = useState(null)
+  const [dragging, setDragging] = useState(null) // 'single' | 'multi' | null
 
-  function handleSingleSelect(file) {
-    // enforce single file and accepted types (jpg,png,pdf)
-    const allowed = ['image/jpeg','image/png','application/pdf','image/jpg']
-    if (!allowed.includes(file.type)) {
-      ShowToast('Unsupported file type (allowed: jpg, png, pdf)', 'danger')
+  const singleInput = useRef(null)
+  const multiInput = useRef(null)
+
+  const destination = [user.branch?.name, user.archive_category?.name, user.username]
+    .filter(Boolean)
+    .join(' / ')
+
+  const notify = useCallback((message, type = 'success') => {
+    setToast({ message, type })
+    window.setTimeout(() => setToast(null), 4000)
+  }, [])
+
+  // ------------------------------------------------------------- single
+
+  const acceptSingle = (file) => {
+    if (!file) return
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setRejected('Unsupported file type. Allowed: JPG, PNG, PDF.')
       return
     }
-    setSingleFile(file)
-    if (!singleName) setSingleName(file.name.replace(/\.[^/.]+$/, ''))
+    setRejected(null)
+    setSingleDone(false)
+    setSingle(file)
+    setSingleName(baseName(file.name))
   }
 
-  async function submitSingle(e) {
-    e && e.preventDefault()
-    if (!singleFile) { ShowToast('Please select a file', 'danger'); return }
-    setSingleUploading(true)
-    const fd = new FormData()
-    fd.append('file', singleFile)
-    const ext = singleFile.name.substring(singleFile.name.lastIndexOf('.'))
-    // Use custom name if provided, otherwise use original filename without extension
-    const baseName = singleName.trim() || singleFile.name.replace(/\.[^/.]+$/, '')
-    const finalName = `${baseName}${ext}`
-    fd.append('fileName', finalName)
+  const clearSingle = () => {
+    setSingle(null)
+    setSingleName('')
+    setSingleProgress(0)
+    setSingleDone(false)
+    if (singleInput.current) singleInput.current.value = ''
+  }
+
+  const submitSingle = async () => {
+    if (!single) return notify('Please select a file.', 'error')
+    setSingleBusy(true)
+    setSingleProgress(0)
+    setSingleDone(false)
     try {
-      const resp = await fetch('/admin/uploadFile', { method: 'POST', credentials: 'include', body: fd })
-      const data = await resp.json().catch(() => ({}))
-      if (resp.ok) {
-        ShowToast(data.message || 'File uploaded', 'success')
-        setSingleFile(null); setSingleName('')
-        if (dropRef.current) dropRef.current.value = ''
-      } else {
-        ShowToast((data && data.message) || 'Upload failed', 'danger')
-      }
+      const fd = new FormData()
+      fd.append('file', single)
+      fd.append('fileName', `${(singleName.trim() || baseName(single.name))}${extensionOf(single.name)}`)
+      const data = await upload('/admin/uploadFile', fd, setSingleProgress)
+      notify(data.message || 'File uploaded.')
+      setSingleDone(true)
+      clearSingle()
     } catch (err) {
-      console.error(err)
-      ShowToast('Upload failed (network)', 'danger')
-    } finally { setSingleUploading(false) }
-  }
-
-  // Multiple handlers
-  function onMultiFilesChange(e) {
-    const files = Array.from(e.target.files || [])
-    const mapped = files.map(f => ({ file: f, customName: f.name.replace(/\.[^/.]+$/, '') }))
-    setMultiFiles(mapped)
-  }
-
-  function removeMulti(index) {
-    const copy = [...multiFiles]; copy.splice(index,1); setMultiFiles(copy)
-  }
-
-  function updateCustomName(idx, val) {
-    const copy = [...multiFiles]; copy[idx] = { ...copy[idx], customName: val }; setMultiFiles(copy)
-  }
-
-  async function submitMulti(e) {
-    e && e.preventDefault();
-    if (!multiFiles.length) { ShowToast('Please select files', 'danger'); return; }
-    if (batchName.includes('_')) {
-      setBatchNameError('Batch name cannot contain the _ character.');
-      ShowToast('Batch name cannot contain the _ character.', 'danger');
-      return;
+      console.error('[upload] single', err)
+      notify(err.message || 'Upload failed.', 'error')
+    } finally {
+      setSingleBusy(false)
     }
-    if (batchName.length > 25) {
-      setBatchNameError('Batch name cannot exceed 25 characters.');
-      ShowToast('Batch name cannot exceed 25 characters.', 'danger');
-      return;
-    }
-    setMultiUploading(true);
-    const fd = new FormData()
-    multiFiles.forEach((m, idx) => {
-      const base = (m.customName || m.file.name.replace(/\.[^/.]+$/, '')).replace(/[^a-zA-Z0-9@\-_]/g, '_')
-      let final = base
-      if (batchName) final += `@${batchName.replace(/[^a-zA-Z0-9\-_]/g, '_')}`
-      const ext = m.file.name.substring(m.file.name.lastIndexOf('.'))
-      if (!final.toLowerCase().endsWith(ext.toLowerCase())) final += ext
-      fd.append('files', m.file)
-      fd.append(`customNames[${idx}]`, final)
-      fd.append(`originalNames[${idx}]`, m.file.name)
+  }
+
+  // ------------------------------------------------------------- multiple
+
+  const acceptMany = (fileList) => {
+    const incoming = Array.from(fileList || [])
+    const good = incoming.filter((f) => ALLOWED_TYPES.includes(f.type))
+    const bad = incoming.length - good.length
+    setRejected(bad > 0
+      ? `${bad} file${bad === 1 ? ' was' : 's were'} skipped. Allowed: JPG, PNG, PDF.`
+      : null)
+    if (good.length === 0) return
+    setItems((prev) => [
+      ...prev,
+      ...good.map((file) => ({
+        file,
+        custom: baseName(file.name),
+        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+      })),
+    ])
+  }
+
+  const removeItem = (index) => {
+    setItems((prev) => {
+      const copy = [...prev]
+      const [gone] = copy.splice(index, 1)
+      if (gone?.preview) URL.revokeObjectURL(gone.preview)
+      return copy
     })
-    try {
-      const resp = await fetch('/admin/uploadMultipleFiles', { method: 'POST', credentials: 'include', body: fd })
-      const data = await resp.json().catch(() => ({}))
-      if (resp.ok) {
-        ShowToast(data.message || 'Files uploaded', 'success')
-        setMultiFiles([]); setBatchName(''); setBatchNameError('')
-        // clear input
-        const el = document.getElementById('multiFiles'); if (el) el.value = ''
-      } else {
-        ShowToast((data && data.message) || 'Upload failed', 'danger')
-      }
-    } catch (err) {
-      console.error(err)
-      ShowToast('Upload failed (network)', 'danger')
-    } finally { setMultiUploading(false) }
   }
+
+  const renameItem = (index, value) => {
+    setItems((prev) => prev.map((it, i) => (i === index ? { ...it, custom: value } : it)))
+  }
+
+  const cancelAll = () => {
+    items.forEach((it) => it.preview && URL.revokeObjectURL(it.preview))
+    setItems([])
+    setBatch('')
+    setBatchError('')
+    setMultiProgress(0)
+    if (multiInput.current) multiInput.current.value = ''
+  }
+
+  const onBatchChange = (value) => {
+    setBatch(value)
+    setBatchError(validateBatch(value))
+  }
+
+  const submitMulti = async () => {
+    if (items.length === 0) return notify('Please select files.', 'error')
+    const problem = validateBatch(batch)
+    if (problem) {
+      setBatchError(problem)
+      return notify(problem, 'error')
+    }
+
+    setMultiBusy(true)
+    setMultiProgress(0)
+    try {
+      const fd = new FormData()
+      items.forEach((it, idx) => {
+        fd.append('files', it.file)
+        fd.append(`customNames[${idx}]`, finalName(it.custom, it.file.name, batch))
+        fd.append(`originalNames[${idx}]`, it.file.name)
+      })
+      const data = await upload('/admin/uploadMultipleFiles', fd, setMultiProgress)
+      notify(data.message || `${items.length} file(s) uploaded.`)
+      cancelAll()
+    } catch (err) {
+      console.error('[upload] multiple', err)
+      notify(err.message || 'Upload failed.', 'error')
+    } finally {
+      setMultiBusy(false)
+    }
+  }
+
+  // ------------------------------------------------------------- drop zone
+
+  const dropProps = (which, handler) => ({
+    className: `up-drop text-center${dragging === which ? ' up-drop-over' : ''}`,
+    onClick: () => (which === 'single' ? singleInput : multiInput).current?.click(),
+    onDragOver: (e) => { e.preventDefault(); setDragging(which) },
+    onDragLeave: () => setDragging(null),
+    onDrop: (e) => {
+      e.preventDefault()
+      setDragging(null)
+      handler(e.dataTransfer.files)
+    },
+  })
+
+  const singlePreviewName = useMemo(
+    () => (single ? `${(singleName.trim() || baseName(single.name))}${extensionOf(single.name)}` : ''),
+    [single, singleName],
+  )
 
   return (
-    <div className="container mt-4">
-      <div className="card">
-        <div className="card-body">
-          <ul className="nav nav-tabs mb-3" role="tablist">
-            <li className="nav-item"><button className="nav-link active" data-bs-target="#single" data-bs-toggle="tab">Single Upload</button></li>
-            <li className="nav-item"><button className="nav-link" data-bs-target="#multiple" data-bs-toggle="tab">Multiple Upload</button></li>
-          </ul>
-          <div className="tab-content">
-            <div className="tab-pane fade show active" id="single">
-              <div className="mb-4">
-                <div 
-                  onDrop={onDropSingle} 
-                  onDragOver={e=>e.preventDefault()} 
-                  style={{
-                    border: singleFile ? '2px solid #198754' : '2px dashed #dbdade', 
-                    padding: 40, 
-                    textAlign: 'center', 
-                    borderRadius: 8,
-                    background: singleFile ? '#f8fff9' : '#fafafa',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onClick={() => dropRef.current?.click()}
-                >
-                  {!singleFile ? (
-                    <>
-                      <div style={{fontSize: '3rem', color: '#6c757d', marginBottom: 12}}>
-                        <i className="bi bi-cloud-upload"></i>
-                      </div>
-                      <div style={{fontSize: '1.1rem', fontWeight: 500, marginBottom: 8}}>
-                        Drop your file here or click to browse
-                      </div>
-                      <div className="small text-muted">
-                        Supported formats: JPG, PNG, PDF (Max 10MB)
-                      </div>
-                    </>
-                  ) : (
-                    <div>
-                      <div style={{fontSize: '3rem', color: '#198754', marginBottom: 12}}>
-                        {singleFile.type.startsWith('image/') ? (
-                          <i className="bi bi-file-earmark-image"></i>
-                        ) : singleFile.type === 'application/pdf' ? (
-                          <i className="bi bi-file-earmark-pdf"></i>
-                        ) : (
-                          <i className="bi bi-file-earmark"></i>
-                        )}
-                      </div>
-                      <div style={{fontSize: '1.1rem', fontWeight: 500, marginBottom: 4}}>
-                        {singleFile.name}
-                      </div>
-                      <div className="text-muted small">
-                        {(singleFile.size / 1024).toFixed(2)} KB
-                      </div>
-                      <button 
-                        type="button" 
-                        className="btn btn-sm btn-outline-danger mt-3"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSingleFile(null)
-                          setSingleName('')
-                          if (dropRef.current) dropRef.current.value = ''
-                        }}
-                      >
-                        <i className="bi bi-x-circle"></i> Remove
-                      </button>
-                    </div>
-                  )}
-                  <input 
-                    ref={dropRef} 
-                    type="file" 
-                    accept=".jpg,.jpeg,.png,.pdf" 
-                    style={{display: 'none'}} 
-                    onChange={(e)=>onDropSingle(e)} 
-                  />
-                </div>
-              </div>
+    <>
+      <style>{PAGE_CSS}</style>
 
-              {singleFile && (
-                <div className="card shadow-sm mb-3" style={{border: 'none', borderLeft: '4px solid #198754'}}>
-                  <div className="card-body">
-                    <div className="row align-items-end">
-                      <div className="col-md-9">
-                        <label className="form-label fw-semibold mb-2">
-                          <i className="bi bi-pencil-square me-2"></i>
-                          Custom File Name (optional)
-                        </label>
-                        <input 
-                          className="form-control form-control-lg" 
-                          value={singleName} 
-                          onChange={e=>setSingleName(e.target.value)} 
-                          placeholder="Enter custom name or leave blank to use original" 
-                          style={{fontSize: '1rem'}}
-                        />
-                        <div className="form-text">
-                          The file will be saved as: <strong>{singleName || singleFile.name.replace(/\.[^/.]+$/, '')}{singleFile.name.substring(singleFile.name.lastIndexOf('.'))}</strong>
+      <div className="row">
+        <div className="col-12">
+          <div className="page-title-box">
+            <h4 className="page-title">Upload</h4>
+          </div>
+        </div>
+      </div>
+
+      <div className="row">
+        <div className="col-12">
+          <div className="card">
+            <div className="card-body">
+
+              {destination && (
+                <p className="text-muted mb-3">
+                  Files are saved to your folder: <strong>{destination}</strong>
+                </p>
+              )}
+
+              <ul className="nav nav-tabs nav-bordered mb-3">
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${tab === 'single' ? 'active' : ''}`}
+                    onClick={() => setTab('single')}
+                  >
+                    <i className="mdi mdi-file-outline me-1" />Single upload
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    className={`nav-link ${tab === 'multi' ? 'active' : ''}`}
+                    onClick={() => setTab('multi')}
+                  >
+                    <i className="mdi mdi-file-multiple-outline me-1" />Multiple upload
+                  </button>
+                </li>
+              </ul>
+
+              {rejected && (
+                <div className="alert alert-danger py-2 px-3" role="alert">
+                  <i className="mdi mdi-alert-circle-outline me-1" />{rejected}
+                </div>
+              )}
+
+              {/* ---------------- single ---------------- */}
+              {tab === 'single' && (
+                <div className="row">
+                  <div className="col-lg-7">
+                    <div {...dropProps('single', (fl) => acceptSingle(fl[0]))}>
+                      <i className="mdi mdi-cloud-upload-outline text-muted" style={{ fontSize: 44 }} />
+                      <h4 className="mt-1 mb-1">Drop a file here, or click to browse</h4>
+                      <span className="text-muted font-13">Accepted types: JPG, PNG, PDF</span>
+                    </div>
+                    <input
+                      ref={singleInput}
+                      type="file"
+                      accept={ACCEPT}
+                      className="d-none"
+                      onChange={(e) => acceptSingle(e.target.files?.[0])}
+                    />
+
+                    {single && (
+                      <div className="card shadow-none border mt-2 mb-0">
+                        <div className="p-2">
+                          <div className="row align-items-center">
+                            <div className="col-auto">
+                              <div className="avatar-sm">
+                                <span className="avatar-title bg-light rounded">
+                                  <i className={`mdi ${iconFor(single)} font-20`} />
+                                </span>
+                              </div>
+                            </div>
+                            <div className="col ps-0">
+                              <span className="fw-bold d-block text-truncate" title={single.name}>
+                                {single.name}
+                              </span>
+                              <span className="font-12 text-muted">{humanSize(single.size)}</span>
+                            </div>
+                            <div className="col-auto">
+                              <button className="btn btn-sm btn-link text-danger" onClick={clearSingle} disabled={singleBusy}>
+                                <i className="mdi mdi-close-circle-outline me-1" />Remove
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="col-md-3">
-                        <button 
-                          className="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-center gap-2" 
-                          onClick={submitSingle} 
-                          disabled={singleUploading}
-                          style={{height: '48px'}}
+                    )}
+
+                    {singleDone && !single && (
+                      <div className="alert alert-success mt-2 mb-0">
+                        <i className="mdi mdi-check-circle-outline me-1" />File uploaded.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="col-lg-5">
+                    <div className="card shadow-none border h-100 mb-0">
+                      <div className="card-body">
+                        <label className="form-label" htmlFor="single-name">
+                          File name <span className="text-muted fw-normal">(optional)</span>
+                        </label>
+                        <input
+                          id="single-name"
+                          type="text"
+                          className="form-control"
+                          placeholder="Leave blank to keep the original name"
+                          value={singleName}
+                          onChange={(e) => setSingleName(e.target.value)}
+                          disabled={!single || singleBusy}
+                        />
+                        <p className="form-text mb-3">
+                          {single
+                            ? <>Saved as <strong>{singlePreviewName}</strong></>
+                            : 'Choose a file to name it.'}
+                        </p>
+
+                        {singleBusy && (
+                          <div className="mb-2">
+                            <div className="d-flex justify-content-between font-12 mb-1">
+                              <span>Uploading&hellip;</span><span>{singleProgress}%</span>
+                            </div>
+                            <div className="progress progress-sm">
+                              <div className="progress-bar" role="progressbar" style={{ width: `${singleProgress}%` }} />
+                            </div>
+                          </div>
+                        )}
+
+                        <button
+                          className="btn btn-success w-100"
+                          onClick={submitSingle}
+                          disabled={!single || singleBusy}
                         >
-                          {singleUploading ? (
-                            <>
-                              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <i className="bi bi-upload"></i>
-                              Upload File
-                            </>
-                          )}
+                          {singleBusy
+                            ? <><span className="spinner-border spinner-border-sm me-1" role="status" />Uploading&hellip;</>
+                            : <><i className="mdi mdi-cloud-upload-outline me-1" />Upload file</>}
                         </button>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
-            </div>
 
-            <div className="tab-pane fade" id="multiple">
-              <form onSubmit={submitMulti}>
-                <div className="mb-3">
-                  <label htmlFor="multiFiles" className="form-label">Select files</label>
-                  <div className="input-group">
-                    {/* visually-hidden native input to match server template */}
-                    <input id="multiFiles" name="files" className="form-control visually-hidden" type="file" multiple accept=".jpg,.jpeg,.png,.pdf" onChange={onMultiFilesChange} />
-                    <button type="button" id="customFileBtn" className="btn btn-outline-primary" onClick={() => document.getElementById('multiFiles')?.click()}>
-                      <i className="bi bi-upload"></i> Choose Files
-                    </button>
-                  </div>
-                  <div id="fileCountDisplay" className="form-text mt-2 text-primary">{multiFiles.length ? `${multiFiles.length} file(s) selected` : ''}</div>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="batchName" className="form-label text-dark">Batch Name (optional, for grouping) 25 characters max</label>
-                  <input id="batchName" name="batchName" className="form-control" maxLength={25} value={batchName} onChange={e => {
-                    const val = e.target.value;
-                    if (val.includes('_')) {
-                      setBatchNameError('Batch name cannot contain the _ character.');
-                    } else if (val.length > 25) {
-                      setBatchNameError('Batch name cannot exceed 25 characters.');
-                    } else {
-                      setBatchNameError('');
-                    }
-                    setBatchName(val);
-                  }} placeholder="e.g. July Reports" />
-                  {batchNameError && <div className="text-danger mt-1">{batchNameError}</div>}
-                </div>
-                <div className="mb-3" style={{display:'flex',alignItems:'center',gap:12}}>
-                  <button className="btn btn-success" type="submit" disabled={multiUploading || !!batchNameError}>{multiUploading? 'Uploading...':'Upload All'}</button>
-                  {multiFiles.length > 0 && (
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={() => { setMultiFiles([]); setBatchName(''); const el = document.getElementById('multiFiles'); if (el) el.value = ''; }}
-                      disabled={multiUploading}
-                    >
-                      Cancel All
-                    </button>
-                  )}
-                </div>
+              {/* ---------------- multiple ---------------- */}
+              {tab === 'multi' && (
+                <>
+                  <div className="row">
+                    <div className="col-lg-7">
+                      <div {...dropProps('multi', acceptMany)}>
+                        <i className="mdi mdi-cloud-upload-outline text-muted" style={{ fontSize: 44 }} />
+                        <h4 className="mt-1 mb-1">Drop files here, or click to browse</h4>
+                        <span className="text-muted font-13">Accepted types: JPG, PNG, PDF</span>
+                      </div>
+                      <input
+                        ref={multiInput}
+                        type="file"
+                        multiple
+                        accept={ACCEPT}
+                        className="d-none"
+                        onChange={(e) => acceptMany(e.target.files)}
+                      />
+                    </div>
 
-                <div className="row g-3" id="multiPreview">
-                  {multiFiles.map((m, idx)=> (
-                    <div className="col-md-4" key={idx}>
-                      <div className="card p-2 position-relative">
-                        <button type="button" className="btn-close position-absolute" style={{right:8,top:8}} aria-label="Remove" onClick={()=>removeMulti(idx)} />
-                        <div className="card-body text-center pt-4">
-                          {m.file.type.startsWith('image/') ? <img src={URL.createObjectURL(m.file)} alt="thumb" style={{maxWidth:80,maxHeight:80}} /> : m.file.type==='application/pdf' ? <i className="bi bi-file-earmark-pdf" style={{fontSize:'3rem', color:'#d9534f'}} /> : <i className="bi bi-file-earmark" style={{fontSize:'3rem', color:'#6c757d'}} />}
-                          <div className="small text-muted mt-2" title={m.file.name}>{m.file.name.length>25? m.file.name.substring(0,17)+'...': m.file.name}</div>
-                          <input className="form-control mt-2" value={m.customName} onChange={e=>updateCustomName(idx, e.target.value)} placeholder="Custom name (optional)" />
+                    <div className="col-lg-5">
+                      <div className="card shadow-none border h-100 mb-0">
+                        <div className="card-body">
+                          <label className="form-label" htmlFor="batch-name">
+                            Batch name{' '}
+                            <span className="text-muted fw-normal">(optional, groups the files together)</span>
+                          </label>
+                          <input
+                            id="batch-name"
+                            type="text"
+                            className={`form-control${batchError ? ' is-invalid' : ''}`}
+                            maxLength={BATCH_MAX}
+                            placeholder="e.g. July Reports"
+                            value={batch}
+                            onChange={(e) => onBatchChange(e.target.value)}
+                            disabled={multiBusy}
+                          />
+                          <div className="d-flex justify-content-between">
+                            <span className="form-text">Cannot contain the _ character</span>
+                            <span className="form-text">{batch.length} / {BATCH_MAX}</span>
+                          </div>
+
+                          {batchError && (
+                            <div className="text-danger font-13 mt-1">
+                              <i className="mdi mdi-alert-circle-outline me-1" />{batchError}
+                            </div>
+                          )}
+
+                          {batch && !batchError && (
+                            <p className="form-text mt-2 mb-3">
+                              Files will be grouped under <strong>{batch}</strong> in the archive.
+                            </p>
+                          )}
+
+                          {multiBusy && (
+                            <div className="my-2">
+                              <div className="d-flex justify-content-between font-12 mb-1">
+                                <span>Uploading {items.length} file(s)&hellip;</span><span>{multiProgress}%</span>
+                              </div>
+                              <div className="progress progress-sm">
+                                <div className="progress-bar" role="progressbar" style={{ width: `${multiProgress}%` }} />
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="d-flex gap-1 mt-3">
+                            <button
+                              className="btn btn-success flex-grow-1"
+                              onClick={submitMulti}
+                              disabled={items.length === 0 || !!batchError || multiBusy}
+                            >
+                              {multiBusy
+                                ? <><span className="spinner-border spinner-border-sm me-1" role="status" />Uploading&hellip;</>
+                                : <><i className="mdi mdi-cloud-upload-outline me-1" />Upload all</>}
+                            </button>
+                            {items.length > 0 && (
+                              <button className="btn btn-light text-danger" onClick={cancelAll} disabled={multiBusy}>
+                                Cancel all
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </form>
+                  </div>
+
+                  {items.length > 0 ? (
+                    <>
+                      <div className="d-flex justify-content-between align-items-center mt-3 mb-2">
+                        <h5 className="mb-0">{items.length} file{items.length === 1 ? '' : 's'} selected</h5>
+                        <span className="text-muted font-13">Rename any file before uploading</span>
+                      </div>
+
+                      <div className="row g-2">
+                        {items.map((it, idx) => (
+                          <div className="col-xl-3 col-lg-4 col-md-6" key={`${it.file.name}-${idx}`}>
+                            <div className="card shadow-none border m-0">
+                              <div className="p-2">
+                                <div className="d-flex align-items-center mb-2">
+                                  <div className="avatar-sm me-2" style={{ height: '2.2rem', width: '2.2rem' }}>
+                                    {it.preview ? (
+                                      <img
+                                        src={it.preview}
+                                        alt=""
+                                        className="rounded"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                      />
+                                    ) : (
+                                      <span className="avatar-title bg-light rounded">
+                                        <i className={`mdi ${iconFor(it.file)}`} />
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex-grow-1 text-truncate">
+                                    <span className="font-13 d-block text-truncate" title={it.file.name}>
+                                      {it.file.name}
+                                    </span>
+                                    <span className="font-12 text-muted">{humanSize(it.file.size)}</span>
+                                  </div>
+                                  <button
+                                    className="btn btn-sm btn-link text-danger p-0"
+                                    onClick={() => removeItem(idx)}
+                                    disabled={multiBusy}
+                                    title="Remove"
+                                  >
+                                    <i className="mdi mdi-close" />
+                                  </button>
+                                </div>
+
+                                <input
+                                  type="text"
+                                  className="form-control form-control-sm"
+                                  placeholder="Custom name (optional)"
+                                  value={it.custom}
+                                  onChange={(e) => renameItem(idx, e.target.value)}
+                                  disabled={multiBusy}
+                                />
+                                <span
+                                  className="font-12 text-muted d-block mt-1 text-truncate"
+                                  title={finalName(it.custom, it.file.name, batchError ? '' : batch)}
+                                >
+                                  &rarr; {finalName(it.custom, it.file.name, batchError ? '' : batch)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-4 mt-2">
+                      <i className="mdi mdi-file-outline text-muted" style={{ fontSize: 34 }} />
+                      <h5 className="mt-2 mb-1">No files selected</h5>
+                      <p className="text-muted mb-0">Choose files above to rename and upload them together.</p>
+                    </div>
+                  )}
+                </>
+              )}
+
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {toast && (
+        <div className="toast-container position-fixed top-0 end-0 p-3" style={{ zIndex: 2050 }}>
+          <div
+            className={`toast show align-items-center text-white border-0 bg-${toast.type === 'error' ? 'danger' : 'success'}`}
+            role="alert"
+          >
+            <div className="d-flex">
+              <div className="toast-body">
+                <i className={`mdi ${toast.type === 'error' ? 'mdi-alert-circle-outline' : 'mdi-check-circle-outline'} me-1`} />
+                {toast.message}
+              </div>
+              <button type="button" className="btn-close btn-close-white me-2 m-auto" onClick={() => setToast(null)} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
+const PAGE_CSS = `
+.up-drop{border:2px dashed #ced4da;border-radius:6px;padding:28px 16px;background:#fafbfe;cursor:pointer;
+  transition:border-color .15s,background .15s}
+.up-drop:hover,.up-drop-over{border-color:#727cf5;background:#f5f7ff}
+.nav-tabs .nav-link{border:0;background:none}
+`
