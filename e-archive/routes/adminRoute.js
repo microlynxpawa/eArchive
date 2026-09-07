@@ -22,6 +22,8 @@ const {
   dashboardData,
   getFileStructure,
   searchArchive,
+  searchIndexStatus,
+  reindexFile,
   accessControl,
   uploadProfilePicture,
   getUsers,
@@ -97,6 +99,8 @@ app.use(passAuths)
 app.get('/dashboard-data', dashboardData);
 app.get('/file-structure', getFileStructure);
 app.get('/search', searchArchive);
+app.get('/search-index/status', searchIndexStatus);
+app.post('/search-index/reindex', reindexFile);
 app.get('/file-content', fileContent);
 // Health check route (placed just before module.exports)
 app.get('/health', (req, res) => {

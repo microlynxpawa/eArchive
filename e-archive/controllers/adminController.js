@@ -954,8 +954,52 @@ const searchArchive = async (req, res) => {
     return res.status(500).json({ statusCode: 500, message: err.message });
   }
 };
+// How much of the archive is searchable by content, and what is still queued.
+// Admin-only: it exposes counts across every branch, which an ordinary user
+// has no business seeing.
+const searchIndexStatus = async (req, res) => {
+  const userId = req.session.user;
+  try {
+    const Authorizations = require("../model/authorizations");
+    const auth = await Authorizations.findOne({ where: { userId } });
+    if (!auth || (!auth.is_admin && !auth.is_super_admin)) {
+      return res.status(403).json({ statusCode: 403, message: "Admin access required." });
+    }
+    const { getIndexStats } = require("../services/Search/indexer/queue.service");
+    const stats = await getIndexStats();
+    return res.json({ statusCode: 200, ...stats });
+  } catch (err) {
+    console.error('[searchIndexStatus]', err);
+    return res.status(500).json({ statusCode: 500, message: err.message });
+  }
+};
+
+// Re-queues a single file for extraction. Useful when a scan was replaced or
+// a file failed for a reason since fixed.
+const reindexFile = async (req, res) => {
+  const userId = req.session.user;
+  try {
+    const Authorizations = require("../model/authorizations");
+    const auth = await Authorizations.findOne({ where: { userId } });
+    if (!auth || (!auth.is_admin && !auth.is_super_admin)) {
+      return res.status(403).json({ statusCode: 403, message: "Admin access required." });
+    }
+    const fileId = parseInt(req.body.fileId, 10);
+    if (!fileId) return res.status(400).json({ statusCode: 400, message: "fileId is required." });
+
+    const { enqueueForIndex } = require("../services/Search/indexer/queue.service");
+    const outcome = await enqueueForIndex(fileId, { priority: 100, force: true });
+    return res.json({ statusCode: 200, message: `File queued for re-indexing (${outcome}).` });
+  } catch (err) {
+    console.error('[reindexFile]', err);
+    return res.status(500).json({ statusCode: 500, message: err.message });
+  }
+};
+
 module.exports = {
   searchArchive,
+  searchIndexStatus,
+  reindexFile,
   // COMMENTED OUT - EJS rendering functions (kept for reference, not exported)
   // login,
   // dashboard,

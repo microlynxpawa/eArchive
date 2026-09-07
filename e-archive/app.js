@@ -19,6 +19,8 @@ const logger = require("./logger"); // <-- Add this line to initialize logger an
 
 // Daily backup scheduler — started after the server is listening (see startServer)
 const { startScheduler } = require("./services/Backup/backupScheduler.js");
+// Search indexer — runs in its own process, also started after listening
+const { startIndexerProcess } = require("./services/Search/indexer/indexerHost.js");
 
 const DEFAULT_PATH = process.env.FOLDER;
 
@@ -80,6 +82,8 @@ require("./model/authorizations");
 require("./model/branch-department");
 require("./model/file");
 require("./model/systemSettings");
+require("./model/fileIndexState");
+require("./model/fileTextChunk");
 defineAssociations();
 
 // create express app
@@ -184,6 +188,9 @@ const startServer = async () => {
     console.log(`Server started on http://localhost:${PORT}`);
     // Kick off the backup scheduler only once the server is accepting requests
     startScheduler();
+    // The search indexer is forked last: it is the least important thing
+    // running here, and must never delay the API becoming available.
+    startIndexerProcess();
     // console.log(envPaths);
     
   });

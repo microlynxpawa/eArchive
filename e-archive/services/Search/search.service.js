@@ -1,18 +1,24 @@
 const { Op } = require("sequelize");
+const sequelize = require("../../dbConnect");
 const File = require("../../model/file");
 const User = require("../../model/user");
+const FileTextChunk = require("../../model/fileTextChunk");
 const { getFileScope, toRelativePath, branchOfPath } = require("../Display/fileScope");
 const { parseQuery } = require("./query/rulesParser");
+const { parseWithLlm } = require("./query/llmParser");
+const { buildSnippets } = require("./snippet");
 
 /**
  * File search.
  *
- * Phase 0: filename, date, uploader, department, branch and type. No file
- * contents yet - that arrives with the indexer, and this module is written so
- * the content pass slots in beside the filename pass without disturbing it.
+ * Two passes, merged: filenames, and the text the indexer extracted from
+ * inside the documents. A file can match on either or both, and matching on
+ * both ranks it higher than matching on one.
  *
  * Visibility comes from getFileScope, the same source the folder tree uses, so
- * search can never return a file the user could not already open.
+ * search can never return a file the user could not already open. That applies
+ * to the content pass too - a phrase inside a document must not reveal a file
+ * whose name the user is not allowed to see.
  */
 
 const MAX_CANDIDATES = 500;
@@ -103,12 +109,78 @@ function filtersToWhere(filters, vocabUserId) {
 }
 
 /**
+ * The FULLTEXT expression for a parsed query.
+ *
+ * Boolean mode, and deliberately without a leading "+" on each term: requiring
+ * every word would mean a three-word query found nothing unless all three
+ * appeared, which is not how people half-remember a document. Terms are
+ * therefore optional and MySQL ranks a document that contains more of them
+ * higher, which is exactly the behaviour wanted.
+ */
+function booleanExpression(terms, phrases) {
+  const parts = [];
+  for (const phrase of phrases) {
+    // Double quotes are the phrase operator, so a quote inside the phrase
+    // would end it early and change the query's meaning.
+    parts.push(`"${phrase.replace(/"/g, " ")}"`);
+  }
+  for (const term of terms) {
+    // Strip the boolean operators themselves. A user typing "invoice -march"
+    // means two words, not an exclusion, and an unbalanced ( would be a syntax
+    // error rather than a search.
+    const clean = term.replace(/[+\-><()~*"@]/g, " ").trim();
+    // InnoDB ignores tokens below innodb_ft_min_token_size (3 by default), so
+    // shorter ones are dropped here rather than silently matching nothing.
+    if (clean.length >= 3) parts.push(clean);
+  }
+  return parts.join(" ");
+}
+
+/**
+ * Files whose *contents* match, best first.
+ * @returns {Promise<Map<number, number>>} fileId -> raw relevance
+ */
+async function searchContent(terms, phrases, limit) {
+  const expression = booleanExpression(terms, phrases);
+  if (!expression) return new Map();
+
+  // Grouped by file: a phrase appearing on four pages of one document is one
+  // result, ranked above a document that mentions it once.
+  const [rows] = await sequelize.query(
+    `SELECT fileId, SUM(MATCH(content) AGAINST(:expr IN BOOLEAN MODE)) AS relevance
+       FROM file_text_chunks
+      WHERE MATCH(content) AGAINST(:expr IN BOOLEAN MODE)
+      GROUP BY fileId
+      ORDER BY relevance DESC
+      LIMIT :limit`,
+    { replacements: { expr: expression, limit } }
+  );
+
+  return new Map(rows.map((r) => [Number(r.fileId), Number(r.relevance)]));
+}
+
+/**
+ * Reads the typed phrase into a QuerySpec.
+ *
+ * The language model is tried first when it is switched on, because it handles
+ * word order and phrasing the rules cannot. It is not trusted with the outcome
+ * though: it returns null on any failure, and the deterministic parser is both
+ * the fallback and the default. Search works with no model, no key and no
+ * network - it just understands slightly less.
+ */
+async function interpret(q) {
+  const viaLlm = await parseWithLlm(q);
+  if (viaLlm) return viaLlm;
+  return parseQuery(q);
+}
+
+/**
  * @returns {{ query, results, total, page, limit, scope }}
  */
 async function searchFiles({ userId, q = "", page = 1, limit = 20, overrides = {} }) {
   const scope = await getFileScope(userId);
 
-  const spec = await parseQuery(q);
+  const spec = await interpret(q);
   // Explicit UI filters win over anything inferred from the phrase.
   Object.assign(spec.filters, overrides);
 
@@ -144,39 +216,79 @@ async function searchFiles({ userId, q = "", page = 1, limit = 20, overrides = {
     };
   }
 
-  // Name terms are matched in SQL first so we do not pull the whole archive
+  // Pass one: names, matched in SQL first so we do not pull the whole archive
   // back to score it in memory.
   const nameLikes = [...spec.terms, ...spec.phrases].map((t) => ({
     fileName: { [Op.like]: `%${t}%` },
   }));
-  where[Op.and] = [...(where[Op.and] || []), { [Op.or]: nameLikes }];
 
-  const candidates = await File.findAll({
-    where,
+  const nameWhere = { ...where };
+  nameWhere[Op.and] = [...(where[Op.and] || []), { [Op.or]: nameLikes }];
+
+  const nameCandidates = await File.findAll({
+    where: nameWhere,
     include: [{ model: User, attributes: ["id", "username", "fullname"] }],
     order: [["createdAt", "DESC"]],
     limit: MAX_CANDIDATES,
   });
 
+  // Pass two: contents. The FULLTEXT index answers "which files contain this",
+  // and the ids come back through the same permission filter as everything
+  // else - the index itself knows nothing about who may see what.
+  const contentHits = await searchContent(spec.terms, spec.phrases, MAX_CANDIDATES);
+
+  const byId = new Map(nameCandidates.map((f) => [f.id, f]));
+  const missingIds = [...contentHits.keys()].filter((id) => !byId.has(id));
+
+  if (missingIds.length > 0) {
+    const contentFiles = await File.findAll({
+      where: { ...where, id: { [Op.in]: missingIds } },
+      include: [{ model: User, attributes: ["id", "username", "fullname"] }],
+    });
+    for (const file of contentFiles) byId.set(file.id, file);
+  }
+
+  // Relevance is only comparable within one query, so it is normalised against
+  // the best hit rather than used raw.
+  const topRelevance = Math.max(1e-9, ...contentHits.values());
+
   const scored = [];
-  for (const file of candidates) {
+  for (const file of byId.values()) {
     // The tree applies a branch check in JS for department-scoped users; the
     // same check has to run here or search would be broader than the tree.
     if (!scope.matches(file)) continue;
 
     const nameScore = scoreFilename(file.fileName, spec.terms, spec.phrases);
-    if (nameScore === 0) continue;
+    const relevance = contentHits.get(file.id) || 0;
+    const contentScore = relevance > 0 ? Math.min(1, relevance / topRelevance) : 0;
+    if (nameScore === 0 && contentScore === 0) continue;
+
+    const matchedOn = [];
+    if (nameScore > 0) matchedOn.push("filename");
+    if (contentScore > 0) matchedOn.push("content");
 
     scored.push({
       file,
-      score: 1.5 * (nameScore / 4) + 0.2 * recencyBoost(file.createdAt),
-      matchedOn: ["filename"],
+      // A name match still outranks a content match of equal strength: if the
+      // name says "invoice", the file is far more likely to be the one wanted
+      // than a file that merely mentions the word somewhere inside.
+      score: 1.5 * (nameScore / 4) + 1.0 * contentScore + 0.2 * recencyBoost(file.createdAt),
+      matchedOn,
     });
   }
 
   scored.sort((a, b) => b.score - a.score || new Date(b.file.createdAt) - new Date(a.file.createdAt));
 
   const start = (page - 1) * limit;
+  const pageItems = scored.slice(start, start + limit);
+
+  // Snippets are built only for the page actually being shown. Fetching the
+  // text of every match would mean reading megabytes to display twenty rows.
+  const snippetsByFile = await loadSnippets(
+    pageItems.filter((i) => i.matchedOn.includes("content")).map((i) => i.file.id),
+    [...spec.phrases, ...spec.terms]
+  );
+
   return {
     query: {
       raw: q,
@@ -191,16 +303,41 @@ async function searchFiles({ userId, q = "", page = 1, limit = 20, overrides = {
     total: scored.length,
     page,
     limit,
-    // The archive matched more names than we were willing to rank at once, so
+    // The archive matched more than we were willing to rank at once, so
     // `total` is the best N rather than every match. The UI says so.
-    truncated: candidates.length >= MAX_CANDIDATES,
-    results: scored.slice(start, start + limit)
-      .map(({ file, score, matchedOn }) => present(file, score, matchedOn)),
+    truncated: nameCandidates.length >= MAX_CANDIDATES || contentHits.size >= MAX_CANDIDATES,
+    results: pageItems.map(({ file, score, matchedOn }) =>
+      present(file, score, matchedOn, snippetsByFile.get(file.id) || [])
+    ),
   };
 }
 
+/** Extracted text for the given files, turned into display snippets. */
+async function loadSnippets(fileIds, needles) {
+  const out = new Map();
+  if (fileIds.length === 0) return out;
+
+  const chunks = await FileTextChunk.findAll({
+    where: { fileId: { [Op.in]: fileIds } },
+    attributes: ["fileId", "page", "content"],
+    order: [["fileId", "ASC"], ["page", "ASC"]],
+    raw: true,
+  });
+
+  const byFile = new Map();
+  for (const chunk of chunks) {
+    if (!byFile.has(chunk.fileId)) byFile.set(chunk.fileId, []);
+    byFile.get(chunk.fileId).push(chunk);
+  }
+
+  for (const [fileId, fileChunks] of byFile) {
+    out.set(fileId, buildSnippets(fileChunks, needles));
+  }
+  return out;
+}
+
 /** Shapes one File row for the API. */
-function present(file, score, matchedOn) {
+function present(file, score, matchedOn, snippets = []) {
   const relPath = toRelativePath(file.filePath);
   return {
     fileId: file.id,
@@ -217,8 +354,9 @@ function present(file, score, matchedOn) {
       : null,
     createdAt: file.createdAt,
     matchedOn,
+    snippets,
     score: Number(Number(score).toFixed(3)),
   };
 }
 
-module.exports = { searchFiles, displayName, batchOf };
+module.exports = { searchFiles, displayName, batchOf, booleanExpression, interpret };

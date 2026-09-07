@@ -6,6 +6,7 @@ const File = require("../../model/file");
 const AuditLog = require("../../model/auditLogs");
 const { ensureUniqueFileName, toCloudKey } = require("../../util/directory");
 const { getProvider } = require("../../storage/storageProvider");
+const { enqueueForIndex } = require("../Search/indexer/queue.service");
 
 async function uploadMultipleFiles(files, customNames, userId) {
   if (!files || !Array.isArray(files) || files.length === 0) {
@@ -54,13 +55,22 @@ async function uploadMultipleFiles(files, customNames, userId) {
     const cloudKey = folderPrefix + safeName;
     await provider.upload(file.buffer, cloudKey, file.mimetype);
 
-    await File.create({
+    const record = await File.create({
       userId: user.id,
       fileName: safeName,
       filePath: folderPrefix,
       department: user.archive_category.dataValues.name,
       ranchName: user.branch.dataValues.name,
     });
+
+    // See the note in fileUpload.service.js: queued, never indexed inline, and
+    // never allowed to fail the upload - which matters more here, where one bad
+    // file among a hundred must not lose the other ninety-nine.
+    try {
+      await enqueueForIndex(record.id, { priority: 100 });
+    } catch (err) {
+      console.error("[SearchIndex] enqueue failed for file", record.id, err.message);
+    }
 
     savedFiles.push({ filename: safeName, originalname: file.originalname });
   }

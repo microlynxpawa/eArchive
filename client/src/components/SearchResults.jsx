@@ -40,14 +40,75 @@ function shortDate(value) {
   return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
 }
 
+/*
+ * A flex item defaults to min-width:auto, which means it refuses to shrink
+ * below its content. A single unbroken line of document text therefore widens
+ * the whole row and pushes the action buttons off the side of the page.
+ *
+ * min-width:0 is the fix. It is written out here rather than using a utility
+ * class because Bootstrap 5, which this project uses, has no min-w-0.
+ */
+const SR_CSS = `
+.sr-wrap .sr-main{min-width:0}
+.sr-wrap .sr-actions{flex:none}
+`
+
+/**
+ * One "...matched here..." line.
+ *
+ * The API returns the snippet as plain text plus match offsets, never as
+ * markup. The highlighting is applied here by slicing the string, so text
+ * that came out of a scanned document can never be interpreted as HTML.
+ */
+function Snippet({ snippet, clamp = false }) {
+  const parts = []
+  let cursor = 0
+
+  for (const m of snippet.matches || []) {
+    if (m.start < cursor) continue // overlapping match, already covered
+    if (m.start > cursor) parts.push({ text: snippet.text.slice(cursor, m.start), hit: false })
+    parts.push({ text: snippet.text.substr(m.start, m.length), hit: true })
+    cursor = m.start + m.length
+  }
+  if (cursor < snippet.text.length) parts.push({ text: snippet.text.slice(cursor), hit: false })
+
+  // Clamped: one line, ellipsised. Newlines are collapsed to spaces first,
+  // because a scan's line breaks would otherwise fill the single line with
+  // whitespace and push the matched word out of sight.
+  const style = clamp
+    ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.5 }
+    : { whiteSpace: 'pre-wrap', lineHeight: 1.5 }
+
+  return (
+    <div className="font-12 text-muted" style={style}>
+      {snippet.page > 1 && (
+        <span className="badge bg-light text-muted me-1">p.{snippet.page}</span>
+      )}
+      {parts.map((p, i) => {
+        const text = clamp ? p.text.replace(/\s+/g, ' ') : p.text
+        return p.hit
+          ? <mark key={i} style={{ background: '#fff3cd', padding: '0 2px', borderRadius: 2 }}>{text}</mark>
+          : <span key={i}>{text}</span>
+      })}
+    </div>
+  )
+}
+
 export default function SearchResults({ query, onOpen, onShowInTree, onClearQuery }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const [page, setPage] = useState(1)
   const [dropped, setDropped] = useState({}) // filters the user removed
+  const [expanded, setExpanded] = useState({}) // fileId -> showing full matches
 
-  useEffect(() => { setPage(1); setDropped({}) }, [query])
+  const toggleExpanded = useCallback((fileId) => {
+    setExpanded((prev) => ({ ...prev, [fileId]: !prev[fileId] }))
+  }, [])
+
+  // A new search is a new list; nothing should stay open from the last one.
+  useEffect(() => { setPage(1); setDropped({}); setExpanded({}) }, [query])
+  useEffect(() => { setExpanded({}) }, [page])
 
   const run = useCallback(async () => {
     if (!query) return
@@ -116,6 +177,7 @@ export default function SearchResults({ query, onOpen, onShowInTree, onClearQuer
 
   return (
     <div className="sr-wrap">
+      <style>{SR_CSS}</style>
       <div className="d-flex align-items-center mb-2">
         <h5 className="mb-0 flex-grow-1">
           {loading ? 'Searching…' : data ? `${data.total} result${data.total === 1 ? '' : 's'}` : 'Search'}
@@ -199,7 +261,7 @@ export default function SearchResults({ query, onOpen, onShowInTree, onClearQuer
               </span>
             </div>
 
-            <div className="flex-grow-1 min-w-0">
+            <div className="flex-grow-1 sr-main">
               <button
                 className="btn btn-link p-0 fw-bold text-body text-truncate d-block text-start"
                 title={r.fileName}
@@ -220,16 +282,53 @@ export default function SearchResults({ query, onOpen, onShowInTree, onClearQuer
                 {r.matchedOn?.includes('filename') && (
                   <span className="badge bg-secondary-lighten text-secondary ms-2">Name</span>
                 )}
+                {r.matchedOn?.includes('content') && (
+                  <span className="badge bg-info-lighten text-info ms-1">In document</span>
+                )}
               </div>
+
+              {/*
+                * What was found inside the document.
+                *
+                * Collapsed by default, showing one clamped line: enough to tell
+                * whether this is the right file, while keeping every result the
+                * same height so a page of them can be scanned. The full text of
+                * every match is one click away.
+                */}
+              {r.snippets?.length > 0 && (
+                <div className="mt-1">
+                  {expanded[r.fileId]
+                    ? r.snippets.map((sn, i) => <Snippet key={i} snippet={sn} />)
+                    : <Snippet snippet={r.snippets[0]} clamp />}
+
+                  <button
+                    className="btn btn-link btn-sm p-0 font-12"
+                    onClick={() => toggleExpanded(r.fileId)}
+                    aria-expanded={!!expanded[r.fileId]}
+                  >
+                    <i className={`mdi ${expanded[r.fileId] ? 'mdi-chevron-up' : 'mdi-chevron-down'} me-1`} />
+                    {expanded[r.fileId]
+                      ? 'Hide matching text'
+                      : `Show matching text${r.snippets.length > 1 ? ` (${r.snippets.length})` : ''}`}
+                  </button>
+                </div>
+              )}
             </div>
 
-            <div className="flex-shrink-0 ms-2">
+            <div className="sr-actions ms-2 d-flex flex-column" style={{ gap: 4 }}>
               <button
-                className="btn btn-sm btn-light"
+                className="btn btn-sm btn-light text-nowrap"
                 onClick={() => onShowInTree && onShowInTree(r)}
-                title="Show where this file lives"
+                title="Open this file and show it in the folder tree"
               >
                 <i className="mdi mdi-target me-1" />Show in tree
+              </button>
+              <button
+                className="btn btn-sm btn-light text-nowrap"
+                onClick={() => onOpen && onOpen(r)}
+                title="Open this file in the preview pane"
+              >
+                <i className="mdi mdi-eye-outline me-1" />Preview
               </button>
             </div>
           </div>

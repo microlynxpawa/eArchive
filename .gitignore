@@ -36,3 +36,7 @@ docs/
 issues.md
 README.md
 wireframes/assets/
+
+# OCR model: the compressed file is committed so an offline install works.
+# The decompressed copy beside it is a runtime cache and is rebuilt on demand.
+e-archive/vendor/tessdata/*.traineddata

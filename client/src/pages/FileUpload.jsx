@@ -15,6 +15,23 @@ import { LayoutContext } from '../components/Layout'
 
 const ACCEPT = '.jpg,.jpeg,.png,.pdf'
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'pdf']
+
+// Windows reports an empty file.type when the OS has no association for an
+// extension, so judging by MIME alone silently rejects perfectly good files.
+function isAllowed(file) {
+  if (ALLOWED_TYPES.includes(file.type)) return true
+  const ext = (file.name.split('.').pop() || '').toLowerCase()
+  return ALLOWED_EXTENSIONS.includes(ext)
+}
+
+function isPdf(file) {
+  return file.type === 'application/pdf' || /\.pdf$/i.test(file.name)
+}
+
+function isImage(file) {
+  return file.type.startsWith('image/') || /\.(jpe?g|png)$/i.test(file.name)
+}
 const BATCH_MAX = 25
 
 // ---------------------------------------------------------------- helpers
@@ -47,8 +64,8 @@ function finalName(custom, original, batch) {
 }
 
 function iconFor(file) {
-  if (file.type === 'application/pdf') return 'mdi-file-pdf-box text-danger'
-  if (file.type.startsWith('image/')) return 'mdi-file-image-box text-info'
+  if (isPdf(file)) return 'mdi-file-pdf-box text-danger'
+  if (isImage(file)) return 'mdi-file-image-box text-info'
   return 'mdi-file-outline text-muted'
 }
 
@@ -118,7 +135,7 @@ export default function FileUpload() {
 
   const acceptSingle = (file) => {
     if (!file) return
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    if (!isAllowed(file)) {
       setRejected('Unsupported file type. Allowed: JPG, PNG, PDF.')
       return
     }
@@ -161,7 +178,7 @@ export default function FileUpload() {
 
   const acceptMany = (fileList) => {
     const incoming = Array.from(fileList || [])
-    const good = incoming.filter((f) => ALLOWED_TYPES.includes(f.type))
+    const good = incoming.filter(isAllowed)
     const bad = incoming.length - good.length
     setRejected(bad > 0
       ? `${bad} file${bad === 1 ? ' was' : 's were'} skipped. Allowed: JPG, PNG, PDF.`
@@ -172,7 +189,7 @@ export default function FileUpload() {
       ...good.map((file) => ({
         file,
         custom: baseName(file.name),
-        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+        preview: isImage(file) ? URL.createObjectURL(file) : null,
       })),
     ])
   }

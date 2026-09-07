@@ -162,11 +162,17 @@ export default function Gallery() {
   const [mode, setMode] = useState(null)
   const [selected, setSelected] = useState([])
 
+  // A file we have been asked to scroll to once the tree has expanded to it.
+  const [pendingScroll, setPendingScroll] = useState(null)
+  const [flashFile, setFlashFile] = useState(null)
+
   const [preview, setPreview] = useState(null)
   const [previewState, setPreviewState] = useState('idle') // idle | loading | ready | error
   const [fullscreen, setFullscreen] = useState(false)
 
-  const [nameQuery, setNameQuery] = useState('')
+  // Seeded from the URL so a shared or reloaded ?q= link shows its own terms
+  // in the box rather than an empty field beside a list of results.
+  const [nameQuery, setNameQuery] = useState(archiveQuery)
   const [dateQuery, setDateQuery] = useState('')
   const [result, setResult] = useState(null) // { kind, label, files, folders }
   const [showMatched, setShowMatched] = useState(false)
@@ -307,16 +313,21 @@ export default function Gallery() {
     return out
   }, [nodes])
 
+  /*
+   * The file-name box now drives the full archive search.
+   *
+   * It used to filter the tree in the browser, which could only ever match a
+   * name it had already been sent. The same box now asks the server, which
+   * also looks inside the documents - so the field people already use gains
+   * the new capability rather than a second box appearing beside it.
+   */
   const searchByName = () => {
-    const q = nameQuery.trim().toLowerCase()
-    if (!q) return notify('Enter part of a file name.', 'error')
-    const hits = allFiles.filter((f) => f.toLowerCase().includes(q))
-    if (hits.length === 0) {
-      setResult(null)
-      return notify('No files match that name.', 'error')
-    }
-    revealFiles(hits)
-    setResult({ kind: 'name', label: nameQuery.trim(), files: hits })
+    const q = nameQuery.trim()
+    if (!q) return notify('Type something to search for.', 'error')
+    setResult(null)
+    const next = new URLSearchParams(searchParams)
+    next.set('q', q)
+    setSearchParams(next, { replace: true })
   }
 
   const searchByDate = () => {
@@ -346,6 +357,7 @@ export default function Gallery() {
     setResult(null)
     setNameQuery('')
     setDateQuery('')
+    clearArchiveQuery()
   }
 
   // ------------------------------------------------------------- preview
@@ -479,11 +491,43 @@ export default function Gallery() {
     openPreview(result.fileName, result.batch)
   }, [revealFiles, openPreview])
 
-  // Expand the tree to where the file lives and leave search.
+  /*
+   * Take the user to the file itself, not merely to the folder holding it.
+   *
+   * Expanding the folder was not enough: in a folder of two hundred scans the
+   * one that was searched for is still lost. So this also opens it in the
+   * preview (which is what marks the row active), scrolls the row into view,
+   * and flashes it briefly so the eye can find it.
+   */
   const showResultInTree = useCallback((result) => {
     revealFiles([result.fileName])
+    openPreview(result.fileName, result.batch)
     clearArchiveQuery()
-  }, [revealFiles, clearArchiveQuery])
+    setPendingScroll(result.fileName)
+  }, [revealFiles, openPreview, clearArchiveQuery])
+
+  /*
+   * Scrolls to a revealed file.
+   *
+   * This has to wait a render: revealFiles only sets the expanded state, so the
+   * row does not exist in the DOM until React has painted the newly opened
+   * folders. Looking for it in the same tick finds nothing.
+   */
+  useEffect(() => {
+    if (!pendingScroll) return
+    const id = window.requestAnimationFrame(() => {
+      const row = document.querySelector(
+        `[data-file="${window.CSS && window.CSS.escape ? window.CSS.escape(pendingScroll) : pendingScroll}"]`
+      )
+      if (row) {
+        row.scrollIntoView({ block: 'center', behavior: 'smooth' })
+        setFlashFile(pendingScroll)
+        window.setTimeout(() => setFlashFile(null), 2200)
+      }
+      setPendingScroll(null)
+    })
+    return () => window.cancelAnimationFrame(id)
+  }, [pendingScroll, expanded])
 
   // ------------------------------------------------------------- rendering
 
@@ -493,7 +537,8 @@ export default function Gallery() {
     return (
       <div
         key={fileName}
-        className={`ea-row ea-file${active ? ' ea-active' : ''}`}
+        data-file={fileName}
+        className={`ea-row ea-file${active ? ' ea-active' : ''}${flashFile === fileName ? ' ea-flash' : ''}`}
       >
         {mode && (
           <input
@@ -598,6 +643,19 @@ export default function Gallery() {
       <UserPickerModal ref={userPickerRef} />
       <FileSendingHistoryModal ref={historyRef} onNavigateToFile={(name) => revealFiles([name])} />
 
+      {/*
+        * Hyper's page title block, as every other page has.
+        * Without it the first card starts at the exact pixel the fixed topbar
+        * ends, so it reads as tucked underneath it.
+        */}
+      <div className="row">
+        <div className="col-12">
+          <div className="page-title-box">
+            <h4 className="page-title">Files</h4>
+          </div>
+        </div>
+      </div>
+
       <div className="row">
         <div className="col-12">
           <div className="card">
@@ -607,14 +665,15 @@ export default function Gallery() {
               <div className="d-flex flex-wrap align-items-end gap-2 mb-3">
                 <div>
                   <label className="form-label font-12 text-muted mb-1 d-block" htmlFor="ea-name">
-                    Search by file name
+                    Search files
                   </label>
-                  <div className="input-group input-group-sm" style={{ width: 250 }}>
+                  <div className="input-group input-group-sm" style={{ width: 290 }}>
                     <input
                       id="ea-name"
                       type="text"
                       className="form-control"
-                      placeholder="e.g. Payroll"
+                      placeholder="Name, or a word inside the file"
+                      title="Searches file names and the text inside documents and scans"
                       value={nameQuery}
                       onChange={(e) => setNameQuery(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && searchByName()}
@@ -1069,6 +1128,13 @@ const PAGE_CSS = `
 .ea-name{flex:0 0 auto;background:none;border:0;padding:0;text-align:left;color:inherit;white-space:nowrap}
 .ea-name:hover{text-decoration:underline}
 .ea-file.ea-active{background:#e3ebff}
+/* Brief flash when a search result is revealed, so the eye can find the row
+   among the others in a large folder. */
+.ea-file.ea-flash{animation:ea-flash 2.2s ease-out 1}
+@keyframes ea-flash{
+  0%,20%{background:#ffe8a3;box-shadow:0 0 0 2px #f7c948}
+  100%{background:#e3ebff;box-shadow:none}
+}
 .ea-actions{padding-left:16px;flex:none;visibility:hidden;white-space:nowrap;margin-left:auto}
 .ea-row:hover .ea-actions{visibility:visible}
 .ea-viewer{border:1px solid #dee2e6;border-radius:6px;display:flex;flex-direction:column;

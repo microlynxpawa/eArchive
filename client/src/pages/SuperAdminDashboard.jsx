@@ -48,6 +48,94 @@ function MiniBarChart({ data }) {
   )
 }
 
+// How much of the archive can be searched by its contents, and what is left
+// to read. Without this, indexing is invisible: a file that never got read
+// simply does not come back in a search and nobody knows why.
+function SearchIndexCard() {
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const load = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/admin/search-index/status', { credentials: 'include' })
+      if (!res.ok) throw new Error('Failed to load index status')
+      setStats(await res.json())
+      setError(null)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { load() }, [])
+
+  const pct = stats ? Math.round((stats.coverage || 0) * 100) : 0
+  const remaining = stats ? (stats.byStatus.pending + stats.byStatus.running + stats.untracked) : 0
+
+  return (
+    <div className="card mb-4">
+      <div className="card-header" style={{ background: 'rgba(245,245,245,0.95)', borderBottom: '1px solid #e0e0e0' }}>
+        <div className="d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 8 }}>
+          <h6 className="mb-0" style={{ fontWeight: 700, color: '#222' }}>Search Index</h6>
+          <button className="btn btn-sm btn-outline-secondary" onClick={load} disabled={loading}>
+            {loading ? 'Refreshing…' : 'Refresh'}
+          </button>
+        </div>
+      </div>
+      <div className="card-body">
+        {error && <p className="text-danger mb-0">{error}</p>}
+        {!error && !stats && loading && <div className="spinner-border spinner-border-sm text-primary" />}
+        {!error && stats && (
+          <>
+            <div className="d-flex justify-content-between align-items-end mb-1">
+              <span style={{ fontSize: '0.85rem', color: '#333' }}>
+                {stats.byStatus.done + stats.byStatus.skipped} of {stats.totalFiles} files processed
+              </span>
+              <span style={{ fontWeight: 700, color: '#7367f0' }}>{pct}%</span>
+            </div>
+            <div style={{ background: '#e9e9f3', borderRadius: 5, height: 10, marginBottom: 14 }}>
+              <div style={{ width: `${pct}%`, background: '#7367f0', height: '100%', borderRadius: 5 }} />
+            </div>
+
+            <div className="row g-2">
+              {[
+                ['Searchable by content', stats.byStatus.done],
+                ['Waiting to be read', stats.byStatus.pending + stats.untracked],
+                ['Being read now', stats.byStatus.running],
+                ['No text found', stats.byStatus.skipped],
+                ['Failed', stats.byStatus.failed],
+              ].map(([label, value]) => (
+                <div className="col-6 col-md-4 col-lg" key={label}>
+                  <div style={{ background: '#f7f7fb', borderRadius: 6, padding: '8px 10px' }}>
+                    <div style={{ fontWeight: 700, color: '#222', fontSize: '1.1rem' }}>{value}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#555' }}>{label}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {remaining > 0 && (
+              <p className="mb-0 mt-2" style={{ fontSize: '0.78rem', color: '#666' }}>
+                {remaining} file{remaining === 1 ? " is" : "s are"} still queued. They are findable by name,
+                date and uploader in the meantime.
+              </p>
+            )}
+            {stats.byStatus.failed > 0 && (
+              <p className="mb-0 mt-2 text-danger" style={{ fontSize: '0.78rem' }}>
+                {stats.byStatus.failed} file{stats.byStatus.failed === 1 ? " " : "s "}
+                could not be read after several attempts.
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function formatSize(sizeObj) {
   if (!sizeObj) return '—'
   if (sizeObj.gb >= 1) return `${sizeObj.gb} GB`
@@ -216,6 +304,9 @@ export default function SuperAdminDashboard() {
           <StatCard key={i} label={card.label} value={card.value} loading={loadingMetrics && !metrics} />
         ))}
       </div>
+
+      {/* Search index health */}
+      <SearchIndexCard />
 
       {/* Per-user table */}
       <div className="card mb-4">
