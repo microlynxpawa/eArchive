@@ -204,11 +204,17 @@ export default function Dashboard() {
       </div>
 
       <div className="row">
-        {/* who you are, and when you were last here */}
-        {/* h-100 on both cards in this row so the greeting and Your access line
-            up; each was previously only as tall as its own content. */}
-        <div className="col-xl-8">
-          <div className="card h-100">
+        {/*
+          * who you are, and when you were last here
+          *
+          * h-100 makes the two cards in this row equal height. The spacing
+          * below them has to move to the column, though: a card at h-100 fills
+          * the column exactly, so its own margin-bottom falls outside the row
+          * and is swallowed — leaving Quick actions sitting flush against
+          * these two with none of the 24px gap every other card gets.
+          */}
+        <div className="col-xl-8 mb-3">
+          <div className="card h-100 mb-0">
             <div className="card-body">
               <div className="d-flex align-items-center flex-wrap">
                 {picture ? (
@@ -261,8 +267,8 @@ export default function Dashboard() {
         </div>
 
         {/* what you are allowed to do */}
-        <div className="col-xl-4">
-          <div className="card h-100">
+        <div className="col-xl-4 mb-3">
+          <div className="card h-100 mb-0">
             <div className="card-body">
               <h5 className="card-title mb-2">Your access</h5>
 
