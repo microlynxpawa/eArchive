@@ -12,6 +12,8 @@ import Departments from './pages/Departments.jsx'
 import Branches from './pages/Branches.jsx'
 import EditProfile from './pages/EditProfile.jsx'
 import SuperAdminDashboard from './pages/SuperAdminDashboard.jsx'
+import Announcements from './pages/Announcements'
+import RequireAdmin from './components/RequireAdmin'
 
 export default function App() {
   return (
@@ -28,11 +30,12 @@ export default function App() {
               <Route path="see-file" element={<Gallery />} />
               <Route path="file-upload" element={<FileUpload />} />
               <Route path="send-files" element={<SendFiles />} />
-              <Route path="audit-log" element={<AuditTrail />} />
-              <Route path="user-management" element={<UserManagement />} />
-              <Route path="user-group" element={<Departments />} />
-              <Route path="branches" element={<Branches />} />
+              <Route path="audit-log" element={<RequireAdmin><AuditTrail /></RequireAdmin>} />
+              <Route path="user-management" element={<RequireAdmin><UserManagement /></RequireAdmin>} />
+              <Route path="user-group" element={<RequireAdmin><Departments /></RequireAdmin>} />
+              <Route path="branches" element={<RequireAdmin><Branches /></RequireAdmin>} />
               <Route path="edit-profile" element={<EditProfile />} />
+              <Route path="announcements" element={<RequireAdmin allow="announce"><Announcements /></RequireAdmin>} />
               <Route path="super-dashboard" element={<SuperAdminDashboard />} />
             </Route>
 

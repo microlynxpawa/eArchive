@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 /*
@@ -14,8 +14,42 @@ import { Link, useNavigate } from 'react-router-dom'
  * the wireframes.
  */
 
-export default function PageHeader({ user = {}, messages = [], onToggleSidebar }) {
+export default function PageHeader({ user = {}, messages = [] }) {
   const navigate = useNavigate()
+
+  /*
+   * Unread announcements.
+   *
+   * The count comes from the server, which compares each announcement against
+   * this person's lastSeenAnnouncementAt. Opening the dropdown clears it — on
+   * opening, not on page load, because the badge should drop when somebody
+   * actually looks rather than when a page renders.
+   */
+  const [unread, setUnread] = useState(0)
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const res = await fetch('/admin/messages', { credentials: 'include' })
+        const data = await res.json()
+        if (alive && typeof data.unread === 'number') setUnread(data.unread)
+      } catch (err) {
+        console.error('[topbar] unread', err)
+      }
+    })()
+    return () => { alive = false }
+  }, [])
+
+  const markSeen = async () => {
+    if (unread === 0) return
+    setUnread(0)   // the badge goes now; the write is bookkeeping
+    try {
+      await fetch('/admin/messages/seen', { method: 'POST', credentials: 'include' })
+    } catch (err) {
+      console.error('[topbar] mark seen', err)
+    }
+  }
 
   const initials = (user.fullname || user.username || '?')
     .split(/[\s.]+/)
@@ -51,13 +85,18 @@ export default function PageHeader({ user = {}, messages = [], onToggleSidebar }
             role="button"
             aria-haspopup="false"
             aria-expanded="false"
+            onClick={markSeen}
           >
             <i className="mdi mdi-bell-outline noti-icon" />
-            {messages.length > 0 && <span className="noti-icon-badge" />}
+            {unread > 0 && (
+              <span className="badge bg-danger rounded-circle noti-icon-badge">
+                {unread > 9 ? '9+' : unread}
+              </span>
+            )}
           </a>
           <div className="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg">
             <div className="dropdown-item noti-title">
-              <h5 className="m-0">Messages</h5>
+              <h5 className="m-0">Announcements</h5>
             </div>
             <div style={{ maxHeight: 230, overflowY: 'auto' }}>
               {messages.length === 0 && (
@@ -126,7 +165,18 @@ export default function PageHeader({ user = {}, messages = [], onToggleSidebar }
         </li>
       </ul>
 
-      <button className="button-menu-mobile open-left" onClick={onToggleSidebar}>
+      {/*
+        * No onClick here on purpose.
+        *
+        * Hyper's own app.min.js already binds a delegated handler to
+        * .button-menu-mobile which toggles sidebar-enable and then either
+        * hide-menu (mobile) or activateCondensedSidebar/deactivate (desktop).
+        * We had a React handler doing the same work, so every click ran both
+        * and they cancelled each other out - which is why the toggle appeared
+        * to do nothing at all. Hyper's version handles both breakpoints, so it
+        * owns this button.
+        */}
+      <button className="button-menu-mobile open-left" type="button">
         <i className="mdi mdi-menu" />
       </button>
     </div>

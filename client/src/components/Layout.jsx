@@ -72,15 +72,12 @@ export default function Layout() {
     return () => { alive = false }
   }, [navigate])
 
-  const toggleSidebar = useCallback(() => {
-    document.body.classList.toggle('sidebar-enable')
-    if (window.innerWidth >= 768) {
-      document.body.setAttribute(
-        'data-leftbar-compact-mode',
-        document.body.getAttribute('data-leftbar-compact-mode') === 'condensed' ? 'fixed' : 'condensed'
-      )
-    }
-  }, [])
+  /*
+   * The sidebar toggle is handled by Hyper's own app.min.js, which binds a
+   * delegated click handler to .button-menu-mobile. A React handler here did
+   * the same work, so both ran on every click and undid each other. Removed;
+   * see the note on the button in PageHeader.
+   */
 
   if (checking) {
     return (
@@ -105,7 +102,7 @@ export default function Layout() {
 
         <div className="content-page">
           <div className="content">
-            <PageHeader user={user} messages={messages} onToggleSidebar={toggleSidebar} />
+            <PageHeader user={user} messages={messages} />
             <div className="container-fluid">
               <Outlet />
             </div>

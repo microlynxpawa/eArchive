@@ -231,7 +231,11 @@ export default function SuperAdminDashboard() {
         const res = await fetch('/admin/dashboard-data', { credentials: 'include' })
         if (!res.ok) { navigate('/', { replace: true }); return }
         const data = await res.json()
-        if (!data.auths?.is_super_admin) {
+        // Admins as well as super admins, with the same figures. The endpoint
+        // accepts both; gating the page on is_super_admin alone would give
+        // admins a sidebar link that bounced them straight back.
+        const a = data.auths || {}
+        if (!a.is_super_admin && !a.is_admin) {
           navigate('/dashboard', { replace: true })
           return
         }

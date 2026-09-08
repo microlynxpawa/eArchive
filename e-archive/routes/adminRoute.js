@@ -22,6 +22,7 @@ const {
   dashboardData,
   getFileStructure,
   searchArchive,
+  markAnnouncementsSeen,
   searchIndexStatus,
   reindexFile,
   accessControl,
@@ -99,6 +100,7 @@ app.use(passAuths)
 app.get('/dashboard-data', dashboardData);
 app.get('/file-structure', getFileStructure);
 app.get('/search', searchArchive);
+app.post('/messages/seen', markAnnouncementsSeen);
 app.get('/search-index/status', searchIndexStatus);
 app.post('/search-index/reindex', reindexFile);
 app.get('/file-content', fileContent);

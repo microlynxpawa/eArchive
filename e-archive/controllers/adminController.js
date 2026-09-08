@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const ArchiveCategory = require("../model/archiveCategory");
 const branch = require("../model/branch");
 const User = require("../model/user");
@@ -643,18 +644,70 @@ const adminInformationToUsers = async (req, res) => {
   
 }
 
+/**
+ * Who may write announcements.
+ *
+ * Admins and managers, where "manager" means supervision_right. The three write
+ * handlers below had no permission check at all - any signed-in user could
+ * create, edit or delete an announcement shown to everybody. The sidebar hiding
+ * the page was the only thing in the way, which is not a guard.
+ */
+function canManageAnnouncements(auths) {
+  return !!(auths && (auths.is_admin || auths.is_super_admin || auths.supervision_right));
+}
+
 // Fetch latest admin messages (for dashboard display)
 const getAdminMessages = async (req, res) => {
   try {
-    // Fetch latest 5 messages, newest first
-    const messages = await AdminActions.findAll({
+    // Defaults to the newest 5, as before. `page` and `limit` are additive, for
+    // the history tab; nothing is ever removed, so history is simply all of it.
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 5, 1), 100);
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+
+    const { count, rows } = await AdminActions.findAndCountAll({
       order: [["createdAt", "DESC"]],
-      limit: 5,
+      offset: (page - 1) * limit,
+      limit,
       attributes: ["id", "message", "createdAt", "userId"],
     });
-    res.json({ success: true, messages });
+
+    // Unread = written since this person last opened the bell.
+    const viewer = await User.findByPk(req.session.user, {
+      attributes: ["id", "lastSeenAnnouncementAt"],
+    });
+    const seenAt = viewer && viewer.lastSeenAnnouncementAt;
+    const unread = await AdminActions.count(
+      seenAt ? { where: { createdAt: { [Op.gt]: seenAt } } } : {}
+    );
+
+    res.json({ success: true, messages: rows, total: count, page, limit, unread });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+/**
+ * Marks every announcement as seen for the caller.
+ *
+ * Called when the bell is opened, not on page load - the count should drop
+ * because somebody looked, not because a page rendered.
+ *
+ * Both this column and AdminActions.createdAt are DATETIME, which MySQL stores
+ * to the second. An announcement written in the same second that somebody
+ * opened the bell is therefore not "newer" than their marker, and will not show
+ * as unread for that one person. The window is a single second on one account
+ * and the announcement is still listed in full, so it is left as is rather than
+ * carrying a second column purely to close it.
+ */
+const markAnnouncementsSeen = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    if (!userId) return res.status(401).json({ statusCode: 401, message: "Unauthorized" });
+    await User.update({ lastSeenAnnouncementAt: new Date() }, { where: { id: userId } });
+    return res.json({ statusCode: 200, unread: 0 });
+  } catch (err) {
+    console.error("[announcements] seen", err);
+    return res.status(500).json({ statusCode: 500, message: err.message });
   }
 };
 
@@ -688,6 +741,9 @@ const dashboardData = async (req, res) => {
 // Create admin message
 const createAdminMessage = async (req, res) => {
   try {
+    if (!canManageAnnouncements(res.locals.auths)) {
+      return res.status(403).json({ success: false, error: "Not permitted." });
+    }
     const userId = req.session.user; // Admin user ID from session
     const { message } = req.body;
     if (!userId || !message) return res.json({ success: false, error: 'Missing user or message' });
@@ -702,6 +758,9 @@ const createAdminMessage = async (req, res) => {
 // Update admin message
 const updateAdminMessage = async (req, res) => {
   try {
+    if (!canManageAnnouncements(res.locals.auths)) {
+      return res.status(403).json({ success: false, error: "Not permitted." });
+    }
     const { id } = req.params;
     const { message } = req.body;
     const AdminActions = require('../model/adminActions');
@@ -718,6 +777,9 @@ const updateAdminMessage = async (req, res) => {
 // Delete admin message
 const deleteAdminMessage = async (req, res) => {
   try {
+    if (!canManageAnnouncements(res.locals.auths)) {
+      return res.status(403).json({ success: false, error: "Not permitted." });
+    }
     const { id } = req.params;
     const AdminActions = require('../model/adminActions');
     const msg = await AdminActions.findByPk(id);
@@ -878,7 +940,8 @@ function resolvePeriod(period, from, to) {
 const superAdminDashboard = async (req, res) => {
   try {
     const auths = res.locals.auths;
-    if (!auths || !auths.is_super_admin) {
+    // Admins see this too, with the same figures a super admin sees.
+    if (!auths || (!auths.is_super_admin && !auths.is_admin)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
     const { period = 'month', from, to } = req.query;
@@ -898,7 +961,8 @@ const superAdminDashboard = async (req, res) => {
 const storageInfo = async (req, res) => {
   try {
     const auths = res.locals.auths;
-    if (!auths || !auths.is_super_admin) {
+    // Admins see this too, with the same figures a super admin sees.
+    if (!auths || (!auths.is_super_admin && !auths.is_admin)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
     const info = await getStorageInfo();
@@ -998,6 +1062,7 @@ const reindexFile = async (req, res) => {
 
 module.exports = {
   searchArchive,
+  markAnnouncementsSeen,
   searchIndexStatus,
   reindexFile,
   // COMMENTED OUT - EJS rendering functions (kept for reference, not exported)

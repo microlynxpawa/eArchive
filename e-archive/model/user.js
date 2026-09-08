@@ -29,6 +29,9 @@ const User = sequelize.define(
     },
     folderPath: { type: DataTypes.STRING },
     profilePicturePath: { type: DataTypes.STRING },
+    // When this person last opened the announcements bell. Anything newer than
+    // this counts as unread; NULL means they have never opened it.
+    lastSeenAnnouncementAt: { type: DataTypes.DATE, allowNull: true },
   },
   { timestamps: true }
 );
