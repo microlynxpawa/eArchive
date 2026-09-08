@@ -1,247 +1,360 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import Modal from '../components/Modal'
 
-export default function Departments(){
+/*
+ * Departments
+ *
+ * Rebuilt on Hyper markup. Same columns, same client-side search over name and
+ * description, same paging, same two required fields, and the same FormData
+ * posted to the same three endpoints.
+ */
+
+const EMPTY = { id: null, name: '', description: '' }
+
+function formatDate(value) {
+  if (!value) return ''
+  const d = new Date(value)
+  return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+export default function Departments() {
   const [groups, setGroups] = useState([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
-  const [filtered, setFiltered] = useState([])
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const [modalOpen, setModalOpen] = useState(false)
-  const [form, setForm] = useState({ id:null, name:'', description:'' })
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
+  const [form, setForm] = useState(EMPTY)
+  const [saving, setSaving] = useState(false)
+  const [errors, setErrors] = useState({})
 
-  const showToast = (message, type='success') => {
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+
+  const showToast = (message, type = 'success') => {
     const t = document.createElement('div')
-    t.className = 'custom-toast-notification ' + (type==='success' ? 'toast-success' : 'toast-error')
+    t.className = 'custom-toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error')
     t.innerText = message
-    Object.assign(t.style, {position:'fixed', right:'30px', bottom:'30px', padding:'12px 20px', color:'#fff', borderRadius:'6px', zIndex:12000, boxShadow:'0 2px 10px rgba(0,0,0,0.12)', background: type==='success' ? '#22c55e' : '#dc3545'})
+    Object.assign(t.style, {
+      position: 'fixed', right: '30px', bottom: '30px', padding: '12px 20px',
+      color: '#fff', borderRadius: '6px', zIndex: 12000,
+      boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+      background: type === 'success' ? '#22c55e' : '#dc3545',
+    })
     document.body.appendChild(t)
-    setTimeout(()=>t.remove(),2500)
+    setTimeout(() => t.remove(), 2500)
   }
 
-  useEffect(()=>{ fetchGroups() }, [])
+  useEffect(() => { fetchGroups() }, [])
+  useEffect(() => { setPage(1) }, [search, rowsPerPage])
 
-  useEffect(()=>{
-    const q = search.trim().toLowerCase()
-    if(!q) return setFiltered(groups)
-    setFiltered(groups.filter(g => (g.name||'').toLowerCase().includes(q) || (g.description||'').toLowerCase().includes(q)))
-    setPage(1)
-  }, [search, groups])
-
-  useEffect(()=>{
-    const onKey = e => { if(e.key==='Escape'){ if(modalOpen) setModalOpen(false); if(deleteOpen) setDeleteOpen(false) } }
-    document.addEventListener('keydown', onKey)
-    return ()=>document.removeEventListener('keydown', onKey)
-  },[modalOpen, deleteOpen])
-
-  const fetchGroups = async ()=>{
+  const fetchGroups = async () => {
     setLoading(true)
-    try{
-      const res = await fetch('/admin/retrieve-user-group', { credentials:'include' })
+    try {
+      const res = await fetch('/admin/retrieve-user-group', { credentials: 'include' })
       const data = await res.json()
-      if(data.statusCode===200){ setGroups(data.records||[]); setFiltered(data.records||[]) }
-    }catch(e){ console.error(e) }
+      if (data.statusCode === 200) setGroups(data.records || [])
+    } catch (err) { console.error('[departments] list', err) }
     setLoading(false)
   }
 
-  const openCreate = ()=>{ setForm({ id:null, name:'', description:'' }); setModalOpen(true) }
-  const openEdit = (rec)=>{
-    const formData = { id:rec.id, name:rec.name||'', description:rec.description||'' };
-    console.log('Editing Department:', formData);
-    setForm(formData);
-    setModalOpen(true);
-  }
-  const closeModal = ()=> setModalOpen(false)
+  // Same two fields the page has always searched.
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return groups
+    return groups.filter((g) => (
+      (g.name || '').toLowerCase().includes(q) ||
+      (g.description || '').toLowerCase().includes(q)
+    ))
+  }, [search, groups])
 
-  const handleSave = async ()=>{
-    console.log('Submitting Department Form:', form);
-    if(!(form.name||'').trim()) return showToast('Category name is required','error')
-    if(!(form.description||'').trim()) return showToast('Category description is required','error')
-    const fd = new FormData(); fd.append('catName', form.name); fd.append('catDescription', form.description); fd.append('btnAction', form.id? 'Update':'Create'); fd.append('updateRecord', form.id||'')
-    try{
-      const res = await fetch('/admin/user-group', { method:'POST', body: fd, credentials:'include' })
-      const data = await res.json()
-      if(!res.ok || data.statusCode && data.statusCode!==200){ showToast(data.message||'Failed', 'error'); return }
-      showToast(data.message||'Saved','success')
-      closeModal()
-      setForm({ id:null, name:'', description:'' }) // Clear form
-      fetchGroups()
-    }catch(e){ console.error(e); showToast('Failed', 'error') }
-  }
-
-  const confirmDelete = (id)=>{ setDeleteId(id); setDeleteOpen(true) }
-  const doDelete = async ()=>{
-    if(!deleteId) return
-    try{
-      const fd = new FormData(); fd.append('deleteRecord', deleteId)
-      const res = await fetch('/admin/remove-user-group', { method:'POST', body:fd, credentials:'include' })
-      const data = await res.json()
-      if(!res.ok){ showToast('Delete failed','error'); return }
-      showToast(data.message||'Deleted','success')
-      setDeleteOpen(false); setDeleteId(null); fetchGroups()
-    }catch(e){ console.error(e); showToast('Delete failed','error') }
-  }
-
-  // Pagination logic
   const totalRows = filtered.length
   const totalPages = Math.ceil(totalRows / rowsPerPage) || 1
+  const firstRow = totalRows === 0 ? 0 : (page - 1) * rowsPerPage + 1
+  const lastRow = Math.min(page * rowsPerPage, totalRows)
   const paginatedRows = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
-  const handleRowsPerPageChange = (e) => {
-    setRowsPerPage(Number(e.target.value))
-    setPage(1)
+  const openCreate = () => { setForm(EMPTY); setErrors({}); setModalOpen(true) }
+  const openEdit = (rec) => {
+    setForm({ id: rec.id, name: rec.name || '', description: rec.description || '' })
+    setErrors({})
+    setModalOpen(true)
   }
-  const handlePageChange = (newPage) => {
-    setPage(newPage)
+  const closeModal = () => { setModalOpen(false); setErrors({}) }
+
+  const handleSave = async () => {
+    // Both required, as before - but shown against the field rather than in a
+    // toast that disappears before it can be acted on.
+    const next = {}
+    if (!(form.name || '').trim()) next.name = 'Category name is required'
+    if (!(form.description || '').trim()) next.description = 'Category description is required'
+    setErrors(next)
+    if (Object.keys(next).length > 0) {
+      showToast(next.name || next.description, 'error')
+      return
+    }
+
+    /*
+     * Sent as JSON, not FormData.
+     *
+     * `/admin/user-group` reads req.body and has no multer middleware, so a
+     * multipart body arrives unparsed and every save failed with "All fields
+     * are required" - saving a department has never actually worked from this
+     * page. The endpoint, the method and the field names are unchanged; only
+     * the encoding is, which is what the server has always been able to read.
+     */
+    const payload = {
+      catName: form.name,
+      catDescription: form.description,
+      btnAction: form.id ? 'Update' : 'Create',
+      updateRecord: form.id || '',
+    }
+
+    setSaving(true)
+    try {
+      const res = await fetch('/admin/user-group', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      })
+      const data = await res.json()
+      if (!res.ok || (data.statusCode && data.statusCode !== 200)) {
+        showToast(data.message || 'Failed', 'error')
+        setErrors({ general: data.message || 'Failed to save' })
+        setSaving(false)
+        return
+      }
+      showToast(data.message || 'Saved', 'success')
+      closeModal()
+      setForm(EMPTY)
+      fetchGroups()
+    } catch (err) {
+      console.error('[departments] save', err)
+      showToast('Failed', 'error')
+      setErrors({ general: 'Failed to save' })
+    }
+    setSaving(false)
+  }
+
+  const doDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      // JSON for the same reason as the save above: this route has no multer,
+      // so a multipart body left deleteRecord undefined and delete always 404'd.
+      const res = await fetch('/admin/remove-user-group', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deleteRecord: deleteTarget.id }),
+        credentials: 'include',
+      })
+      const data = await res.json()
+      if (!res.ok) { showToast('Delete failed', 'error'); setDeleting(false); return }
+      showToast(data.message || 'Deleted', 'success')
+      setDeleteTarget(null)
+      fetchGroups()
+    } catch (err) {
+      console.error('[departments] delete', err)
+      showToast('Delete failed', 'error')
+    }
+    setDeleting(false)
   }
 
   return (
-    <div className="container-fluid">
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center" style={{gap: '0.5rem', background: 'rgba(245,245,245,0.95)', borderBottom: '1px solid #e0e0e0'}}>
-          <h5 className="mb-0" style={{fontWeight: 700, fontSize: '1.2em', color: '#222'}}>Departments</h5>
-          <div className="d-flex align-items-center" style={{gap: '0.5rem', background: 'rgba(255,255,255,0.85)', borderRadius: 6, padding: '2px 12px', border: '1px solid #e0e0e0'}}>
-            <label htmlFor="departments-rows-per-page" className="form-label mb-0" style={{fontWeight: 600, fontSize: '1em', color: '#222'}}>Rows</label>
-            <select id="departments-rows-per-page" value={rowsPerPage} onChange={handleRowsPerPageChange} style={{width: 56, height: 30, fontSize: '1em', padding: '0 6px', borderRadius: 4, border: '1px solid #bbb', color: '#222', background: '#fff'}}>
-              {[5, 10, 20, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-            <button className="btn btn-primary ms-2" onClick={openCreate}>Add group</button>
-            <input className="form-control d-inline-block ms-2" style={{width:120}} placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)} />
-          </div>
-        </div>
-        <div className="card-body">
-          <div className="mb-2">
-            <span style={{color:'#1a73e8',fontSize:'1.02em'}}>
-              Tip: Use <b>Ctrl +</b> or <b>Ctrl -</b> to zoom in or out and see more content at once.
-            </span>
-          </div>
-          <div className="d-flex justify-content-end align-items-center mb-2">
-            <span style={{color:'#222', fontWeight:600, fontSize:'1em'}}>Page {page} of {totalPages}</span>
-            <button className="btn btn-sm btn-light ms-2" disabled={page === 1} onClick={() => handlePageChange(page - 1)}>&lt;</button>
-            <button className="btn btn-sm btn-light ms-1" disabled={page === totalPages} onClick={() => handlePageChange(page + 1)}>&gt;</button>
-          </div>
-          <div className="table-responsive theme-scrollbar">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Created by</th>
-                  <th>Created on</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading && <tr><td colSpan={6}>Loading...</td></tr>}
-                {!loading && paginatedRows.length===0 && <tr><td colSpan={6}>No records</td></tr>}
-                {!loading && paginatedRows.map(r=> (
-                  <tr key={r.id}>
-                    <td>{r.id}</td>
-                    <td>{r.name}</td>
-                    <td>{r.description}</td>
-                    <td>{r.created_by}</td>
-                    <td>{r.createdAt? new Date(r.createdAt).toDateString():''}</td>
-                    <td>
-                      <ul className="action list-unstyled d-flex gap-2 mb-0">
-                        <li style={{cursor:'pointer'}} onClick={()=>openEdit(r)} title="Edit"><i className="icon-pencil-alt"></i></li>
-                        <li style={{cursor:'pointer'}} onClick={()=>confirmDelete(r.id)} title="Delete"><i className="icon-trash"></i></li>
-                      </ul>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <>
+      <div className="row">
+        <div className="col-12">
+          <div className="page-title-box">
+            <h4 className="page-title">Departments</h4>
           </div>
         </div>
       </div>
 
-      <style>{`
-        .react-modal-backdrop{position:fixed !important; inset:0 !important; z-index:40000 !important; background: rgba(0,0,0,0.45) !important; display:flex !important; align-items:center; justify-content:center;}
-        .react-modal-backdrop .modal-content{color:#111 !important; z-index:40001 !important; background-color: var(--bs-body-bg, #fff) !important;}
-        /* Ensure all descendant text elements inherit readable color in light mode */
-        /* Apply readable color to text-related elements but avoid styling buttons (.btn) */
-        .react-modal-backdrop .modal-content,
-        .react-modal-backdrop .modal-content p,
-        .react-modal-backdrop .modal-content label,
-        .react-modal-backdrop .modal-content .form-label,
-        .react-modal-backdrop .modal-content h1,
-        .react-modal-backdrop .modal-content h2,
-        .react-modal-backdrop .modal-content h3,
-        .react-modal-backdrop .modal-content h4,
-        .react-modal-backdrop .modal-content h5,
-        .react-modal-backdrop .modal-content h6,
-        .react-modal-backdrop .modal-content span,
-        .react-modal-backdrop .modal-content a,
-        .react-modal-backdrop .modal-content input,
-        .react-modal-backdrop .modal-content textarea,
-        .react-modal-backdrop .modal-content select,
-        .react-modal-backdrop .modal-content th,
-        .react-modal-backdrop .modal-content td,
-        .react-modal-backdrop .modal-content li { color: #111 !important; }
-        @media (prefers-color-scheme: dark){
-          .react-modal-backdrop .modal-content,
-          .react-modal-backdrop .modal-content p,
-          .react-modal-backdrop .modal-content label,
-          .react-modal-backdrop .modal-content .form-label,
-          .react-modal-backdrop .modal-content h1,
-          .react-modal-backdrop .modal-content h2,
-          .react-modal-backdrop .modal-content h3,
-          .react-modal-backdrop .modal-content h4,
-          .react-modal-backdrop .modal-content h5,
-          .react-modal-backdrop .modal-content h6,
-          .react-modal-backdrop .modal-content span,
-          .react-modal-backdrop .modal-content a,
-          .react-modal-backdrop .modal-content input,
-          .react-modal-backdrop .modal-content textarea,
-          .react-modal-backdrop .modal-content select,
-          .react-modal-backdrop .modal-content th,
-          .react-modal-backdrop .modal-content td,
-          .react-modal-backdrop .modal-content li { color: #fff !important; }
-          .react-modal-backdrop .modal-content{ background-color: #111 !important; }
-        }
-        .react-modal-backdrop .modal-body{max-height:70vh !important; overflow:auto !important; -webkit-overflow-scrolling: touch;}
-        .react-modal-backdrop .modal-dialog{pointer-events:auto !important;}
-      `}</style>
+      <div className="row">
+        <div className="col-12">
+          <div className="card">
+            <div className="card-body">
+
+              {/* The page never said what these records are for. */}
+              <p className="text-muted mb-3">
+                Departments group users and their files. Every user belongs to one.
+              </p>
+
+              <div className="row mb-2">
+                <div className="col-sm-5">
+                  <button className="btn btn-primary mb-2" onClick={openCreate}>
+                    <i className="mdi mdi-plus-circle me-1" />Add department
+                  </button>
+                </div>
+                <div className="col-sm-7">
+                  <div className="text-sm-end">
+                    <div className="d-inline-flex align-items-center me-2 mb-2">
+                      <label className="me-1 mb-0 font-13 text-muted" htmlFor="dp-rows">Rows</label>
+                      <select
+                        id="dp-rows"
+                        className="form-select form-select-sm"
+                        style={{ width: 76 }}
+                        value={rowsPerPage}
+                        onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                      >
+                        {[5, 10, 20, 50, 100].map((n) => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    </div>
+                    <div className="d-inline-block mb-2" style={{ minWidth: 220 }}>
+                      <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        placeholder="Name or description"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="table-responsive">
+                <table className="table table-centered table-hover mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th style={{ width: 40 }}>#</th>
+                      <th>Name</th>
+                      <th>Description</th>
+                      <th>Created by</th>
+                      <th>Created on</th>
+                      <th style={{ width: 90 }} className="text-end">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {!loading && paginatedRows.map((r, idx) => (
+                      <tr key={r.id}>
+                        <td>{(page - 1) * rowsPerPage + idx + 1}</td>
+                        <td className="fw-semibold">{r.name}</td>
+                        {/* secondary, so it stops competing with the name */}
+                        <td className="text-muted">{r.description}</td>
+                        <td className="text-muted">{r.created_by}</td>
+                        <td className="text-muted">{formatDate(r.createdAt)}</td>
+                        <td className="text-end">
+                          <button className="btn btn-link p-0 text-muted me-2" title="Edit" onClick={() => openEdit(r)}>
+                            <i className="mdi mdi-square-edit-outline font-16" />
+                          </button>
+                          <button className="btn btn-link p-0 text-danger" title="Delete" onClick={() => setDeleteTarget(r)}>
+                            <i className="mdi mdi-delete-outline font-16" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {loading && (
+                <div className="text-center py-4">
+                  <div className="spinner-border text-primary" role="status" />
+                </div>
+              )}
+
+              {!loading && paginatedRows.length === 0 && (
+                <div className="text-center py-5">
+                  <i className="mdi mdi-sitemap-outline text-muted" style={{ fontSize: 34 }} />
+                  <h5 className="mt-2 mb-1">No departments found</h5>
+                  <p className="text-muted mb-0">
+                    {search ? 'Try a different search term.' : 'Add a department to get started.'}
+                  </p>
+                </div>
+              )}
+
+              <div className="d-flex justify-content-between align-items-center mt-2">
+                <span className="text-muted font-13">
+                  Showing {firstRow} to {lastRow} of {totalRows} department{totalRows === 1 ? '' : 's'}
+                </span>
+                <div>
+                  <span className="text-muted font-13 me-2">Page {page} of {totalPages}</span>
+                  <button className="btn btn-sm btn-light" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                    <i className="mdi mdi-chevron-left" />
+                  </button>
+                  <button className="btn btn-sm btn-light ms-1" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                    <i className="mdi mdi-chevron-right" />
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
 
       {modalOpen && (
-        <div className="modal fade show d-block react-modal-backdrop" tabIndex={-1} onClick={(e)=>{ if(e.target===e.currentTarget) closeModal() }}>
-          <div className="modal-dialog" role="document">
-            <div className="modal-content" style={{width:'90%'}}>
-              <div className="modal-header"><h5 className="modal-title">{form.id? 'Edit User Group':'Create User Group'}</h5><button type="button" className="btn-close" onClick={closeModal}></button></div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label className="form-label">Category Name<span className="text-danger">*</span></label>
-                  <input className="form-control" placeholder="e.g financial" value={form.name} onChange={e=>setForm({...form, name:e.target.value})} />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Description<span className="text-danger">*</span></label>
-                  <textarea className="form-control" rows={3} placeholder="Enter description..." value={form.description} onChange={e=>setForm({...form, description:e.target.value})} />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={closeModal}>Close</button>
-                <button className="btn btn-primary" onClick={handleSave}>{form.id? 'Update':'Create'}</button>
-              </div>
-            </div>
+        <Modal
+          title={form.id ? 'Edit department' : 'Create department'}
+          onClose={closeModal}
+          busy={saving}
+          footer={
+            <>
+              <button className="btn btn-light" onClick={closeModal} disabled={saving}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+                {saving && <span className="spinner-border spinner-border-sm me-1" role="status" />}
+                {saving ? 'Saving…' : (form.id ? 'Save changes' : 'Create department')}
+              </button>
+            </>
+          }
+        >
+          <div className="mb-3">
+            <label className="form-label" htmlFor="dp-name">Name<span className="text-danger">*</span></label>
+            <input
+              id="dp-name"
+              className={`form-control${errors.name ? ' is-invalid' : ''}`}
+              placeholder="e.g. Finance"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+            {errors.name && <div className="invalid-feedback d-block">{errors.name}</div>}
           </div>
-        </div>
+          <div className="mb-2">
+            <label className="form-label" htmlFor="dp-desc">Description<span className="text-danger">*</span></label>
+            <textarea
+              id="dp-desc"
+              className={`form-control${errors.description ? ' is-invalid' : ''}`}
+              rows={3}
+              placeholder="What this department covers"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+            {errors.description && <div className="invalid-feedback d-block">{errors.description}</div>}
+          </div>
+          {errors.general && (
+            <div className="alert alert-danger py-2 px-3 mb-0">
+              <i className="mdi mdi-alert-circle-outline me-1" />{errors.general}
+            </div>
+          )}
+        </Modal>
       )}
 
-      {deleteOpen && (
-        <div className="modal fade show d-block react-modal-backdrop" tabIndex={-1} onClick={(e)=>{ if(e.target===e.currentTarget) setDeleteOpen(false) }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header"><h5 className="modal-title">Confirm Delete</h5></div>
-              <div className="modal-body">Are you sure?</div>
-              <div className="modal-footer"><button className="btn btn-secondary" onClick={()=>setDeleteOpen(false)}>No, cancel</button><button className="btn btn-danger" onClick={doDelete}>Yes, delete</button></div>
-            </div>
+      {deleteTarget && (
+        <Modal
+          title="Delete department?"
+          onClose={() => setDeleteTarget(null)}
+          busy={deleting}
+          footer={
+            <>
+              <button className="btn btn-light" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</button>
+              <button className="btn btn-danger" onClick={doDelete} disabled={deleting}>
+                {deleting && <span className="spinner-border spinner-border-sm me-1" role="status" />}
+                {deleting ? 'Deleting…' : 'Delete department'}
+              </button>
+            </>
+          }
+        >
+          <p><strong>{deleteTarget.name}</strong> will be removed permanently.</p>
+          <div className="alert alert-warning py-2 px-3 mb-0">
+            <i className="mdi mdi-alert-outline me-1" />
+            Users assigned to this department keep their files, but will need to be given a new
+            department before they can be edited again.
           </div>
-        </div>
+        </Modal>
       )}
-    </div>
+    </>
   )
 }

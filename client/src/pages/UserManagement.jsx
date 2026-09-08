@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import Modal from '../components/Modal'
 
 /*
  * Users
@@ -134,15 +135,7 @@ export default function UserManagement() {
 
   useEffect(() => { fetchBranches(); fetchGroups(); fetchUsers() }, [])
 
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key !== 'Escape') return
-      if (modalOpen) setModalOpen(false)
-      if (deleteTarget) setDeleteTarget(null)
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [modalOpen, deleteTarget])
+  // Escape is handled by Modal itself, which also knows not to close mid-save.
 
   // ------------------------------------------------------------ data
 
@@ -352,8 +345,6 @@ export default function UserManagement() {
 
   return (
     <>
-      <style>{PAGE_CSS}</style>
-
       <div className="row">
         <div className="col-12">
           <div className="page-title-box">
@@ -514,19 +505,25 @@ export default function UserManagement() {
 
       {/* ------------------------------------------------ create / edit */}
       {modalOpen && (
-        <div
-          className="modal fade show d-block um-backdrop"
-          role="dialog"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal() }}
+        <Modal
+          title={form.id ? 'Edit user' : 'Create user'}
+          onClose={closeModal}
+          busy={saving}
+          size="lg"
+          scrollable
+          footer={
+            <>
+              <button type="button" className="btn btn-light" onClick={closeModal} disabled={saving}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving}>
+                {saving && <span className="spinner-border spinner-border-sm me-1" role="status" />}
+                {saving ? 'Saving…' : (form.id ? 'Save changes' : 'Create user')}
+              </button>
+            </>
+          }
         >
-          <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable um-modal">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h4 className="modal-title">{form.id ? 'Edit user' : 'Create user'}</h4>
-                <button type="button" className="btn-close" onClick={closeModal} />
-              </div>
-
-              <div className="modal-body">
+          <>
                 <h5 className="mb-2">Details</h5>
                 <div className="row">
                   <div className="col-md-6 mb-2">
@@ -733,69 +730,39 @@ export default function UserManagement() {
                     <i className="mdi mdi-alert-circle-outline me-1" />{formError.message}
                   </div>
                 )}
-              </div>
-
-              <div className="modal-footer">
-                <button type="button" className="btn btn-light" onClick={closeModal} disabled={saving}>
-                  Cancel
-                </button>
-                <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving}>
-                  {saving && <span className="spinner-border spinner-border-sm me-1" role="status" />}
-                  {saving ? 'Saving…' : (form.id ? 'Save changes' : 'Create user')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+          </>
+        </Modal>
       )}
 
       {/* ------------------------------------------------------- delete */}
       {deleteTarget && (
-        <div
-          className="modal fade show d-block um-backdrop"
-          role="dialog"
-          onClick={(e) => { if (e.target === e.currentTarget && !deleting) setDeleteTarget(null) }}
+        <Modal
+          title="Delete user?"
+          onClose={() => setDeleteTarget(null)}
+          busy={deleting}
+          footer={
+            <>
+              <button className="btn btn-light" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={doDelete} disabled={deleting}>
+                {deleting && <span className="spinner-border spinner-border-sm me-1" role="status" />}
+                {deleting ? 'Deleting…' : 'Delete user'}
+              </button>
+            </>
+          }
         >
-          <div className="modal-dialog modal-dialog-centered um-modal">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h4 className="modal-title">Delete user?</h4>
-                <button type="button" className="btn-close" onClick={() => setDeleteTarget(null)} disabled={deleting} />
-              </div>
-              <div className="modal-body">
+          <>
                 <p><strong>{deleteTarget.fullname || deleteTarget.username}</strong> will be removed permanently.</p>
                 <div className="alert alert-warning py-2 px-3 mb-0">
                   <i className="mdi mdi-alert-outline me-1" />
                   Their files, audit history and permissions are deleted with the account. Files they
                   sent to other people stay in those people&rsquo;s folders.
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-light" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-                  Cancel
-                </button>
-                <button className="btn btn-danger" onClick={doDelete} disabled={deleting}>
-                  {deleting && <span className="spinner-border spinner-border-sm me-1" role="status" />}
-                  {deleting ? 'Deleting…' : 'Delete user'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+          </>
+        </Modal>
       )}
     </>
   )
 }
 
-/*
- * The modals are rendered by React rather than driven by Bootstrap's JS, so the
- * backdrop and stacking have to be declared here - Hyper's own modal CSS only
- * positions the dialog once something else has placed the backdrop.
- */
-const PAGE_CSS = `
-.um-backdrop{position:fixed;inset:0;z-index:1055;background:rgba(0,0,0,.45);
-  display:flex;align-items:center;justify-content:center;overflow-y:auto}
-.um-modal{pointer-events:auto}
-.um-modal .modal-content{background-color:#fff}
-.um-modal .modal-body{max-height:70vh;overflow-y:auto}
-`
