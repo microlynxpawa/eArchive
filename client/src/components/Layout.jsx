@@ -27,9 +27,11 @@ export default function Layout() {
   const [auths, setAuths] = useState({})
   const [messages, setMessages] = useState([])
 
-  // The sidebar modals still listen on window; replacing that belongs to the
-  // modals ticket, so the shell keeps dispatching the events they expect.
-  const fire = useCallback((name) => window.dispatchEvent(new CustomEvent(name)), [])
+  // Which sidebar modal is open. These used to be window CustomEvents that each
+  // modal listened for, which meant the shell had no idea what was on screen and
+  // two could be opened at once.
+  const [openModal, setOpenModal] = useState(null)   // 'scan' | 'access' | 'storage' | null
+  const closeModal = useCallback(() => setOpenModal(null), [])
 
   useEffect(() => {
     let alive = true
@@ -96,9 +98,9 @@ export default function Layout() {
 
         <Sidebar
           auths={auths}
-          onOpenScan={() => fire('open-scan-modal')}
-          onOpenAccessControl={() => fire('open-access-control')}
-          onOpenStorage={() => fire('open-storage-settings')}
+          onOpenScan={() => setOpenModal('scan')}
+          onOpenAccessControl={() => setOpenModal('access')}
+          onOpenStorage={() => setOpenModal('storage')}
         />
 
         <div className="content-page">
@@ -113,9 +115,9 @@ export default function Layout() {
       </div>
 
       {/* Shell modals, unchanged until their own ticket */}
-      <AccessControl />
-      <StorageSettingsModal />
-      <ScanModalOptions />
+      <AccessControl open={openModal === 'access'} onClose={closeModal} />
+      <StorageSettingsModal open={openModal === 'storage'} onClose={closeModal} />
+      <ScanModalOptions open={openModal === 'scan'} onClose={closeModal} />
       <DisplayDepartmentsModal />
     </LayoutContext.Provider>
   )

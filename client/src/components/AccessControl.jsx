@@ -1,352 +1,280 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import Modal from './Modal'
 import UserPickerModal from './UserPickerModal'
 
-export default function AccessControl() {
-  const [visible, setVisible] = useState(false)
-  const [selectedUsers, setSelectedUsers] = useState([])
+/*
+ * Access control
+ *
+ * Choose people, then set one level for all of them. Unchanged: the picker,
+ * GET /admin/searchUsers to load their current data, the level derived from the
+ * permissions array, the confirmation step, and the POST body of three booleans
+ * with exactly one true.
+ *
+ * The levels were checkboxes that a DOM handler kept unticking to fake
+ * exclusivity. They are radios now, which is what they always were.
+ */
+
+const LEVELS = [
+  {
+    key: 'admin',
+    label: 'Admin',
+    grants: 'Manage users, branches, departments and access control, view the audit trail, and delete any file they can see.',
+  },
+  {
+    key: 'supervisor',
+    label: 'Supervisor',
+    grants: 'Supervision rights over their department, without the administration pages.',
+  },
+  {
+    key: 'personnel',
+    label: 'Personnel',
+    grants: 'Ordinary access: their own work, with no supervision or administration rights.',
+  },
+]
+
+/** The level a person currently holds, from their permissions array. */
+function currentLevel(user) {
+  let perms = user?.permissions
+  if (typeof perms === 'string') {
+    try { perms = JSON.parse(perms) } catch { perms = [] }
+  }
+  const list = Array.isArray(perms) ? perms : []
+  if (list.includes('is_admin')) return 'admin'
+  if (list.includes('supervision-right')) return 'supervisor'
+  return 'personnel'
+}
+
+const LEVEL_LABEL = { admin: 'Admin', supervisor: 'Supervisor', personnel: 'Personnel' }
+const LEVEL_TONE = { admin: 'primary', supervisor: 'info', personnel: 'secondary' }
+
+export default function AccessControl({ open = false, onClose = () => {} }) {
+  const [usernames, setUsernames] = useState([])
   const [usersData, setUsersData] = useState([])
-  const [permissionsVisible, setPermissionsVisible] = useState(false)
-  const userPickerRef = useRef(null)
+  const [level, setLevel] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [applying, setApplying] = useState(false)
+  const [confirming, setConfirming] = useState(false)
+  const [error, setError] = useState(null)
+
+  const pickerRef = useRef(null)
 
   useEffect(() => {
-    // expose function for legacy button id
-    window.openAccessControl = function() { openModal() }
-    // also hook to DOM id used in sidebar
-    const btn = document.getElementById('access-control-button')
-    if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); openModal() })
-  }, [])
-
-  const openModal = async () => {
-    setVisible(true)
-    setPermissionsVisible(false)
-    setSelectedUsers([])
-    setUsersData([])
-  }
-
-  const selectUsers = async () => {
-    if (!userPickerRef.current) return
-    
-    // Hide this modal temporarily
-    setVisible(false)
-    
-    // Show UserPickerModal immediately
-    const users = await userPickerRef.current.show()
-    
-    // Show this modal again after user selection
-    setVisible(true)
-    
-    if (users && users.length > 0) {
-      setSelectedUsers(users)
-      // Fetch full user data including permissions
-      await fetchUsersData(users)
-      setPermissionsVisible(true)
+    if (!open) {
+      setUsernames([]); setUsersData([]); setLevel('')
+      setConfirming(false); setError(null)
     }
+  }, [open])
+
+  const showToast = (type, message) => {
+    if (window.Swal?.mixin) {
+      window.Swal.mixin({
+        toast: true, position: 'top-end', showConfirmButton: false,
+        timer: 3000, timerProgressBar: true,
+      }).fire({ icon: type, title: message })
+      return
+    }
+    const t = document.createElement('div')
+    t.innerText = message
+    Object.assign(t.style, {
+      position: 'fixed', right: '30px', bottom: '30px', padding: '12px 20px',
+      color: '#fff', borderRadius: '6px', zIndex: 12000,
+      background: type === 'success' ? '#22c55e' : '#dc3545',
+    })
+    document.body.appendChild(t)
+    setTimeout(() => t.remove(), 2500)
   }
 
-  const fetchUsersData = async (usernames) => {
+  const choosePeople = async () => {
+    if (!pickerRef.current?.show) return
+    const picked = await pickerRef.current.show()
+    if (!picked || picked.length === 0) return
+
+    setUsernames(picked)
+    setLoading(true)
+    setError(null)
     try {
-      const res = await fetch(`/admin/searchUsers?usernames=${encodeURIComponent(usernames.join(','))}`, {
-        credentials: 'include',
-        headers: { Accept: 'application/json' }
-      })
+      const res = await fetch(
+        `/admin/searchUsers?usernames=${encodeURIComponent(picked.join(','))}`,
+        { credentials: 'include', headers: { Accept: 'application/json' } }
+      )
+      if (!res.ok) throw new Error('Failed to load the selected people')
       const data = await res.json()
-      console.log('AccessControl - Fetched user data:', data)
-      const users = Array.isArray(data) ? data : [data]
-      users.forEach(user => {
-        console.log('User:', user.username, 'Permissions:', user.permissions)
-      })
-      setUsersData(users)
-    } catch (err) { 
-      console.error(err)
-      alert('Error fetching user data')
-    }
-  }
-
-  const parsePermissions = (permString) => {
-    console.log('=== PARSING PERMISSIONS ===')
-    console.log('Raw permissions value:', permString)
-    console.log('Type:', typeof permString)
-    
-    try {
-      // If it's already an object, return it
-      if (typeof permString === 'object' && permString !== null) {
-        console.log('Already an object:', permString)
-        return permString
-      }
-      
-      // If it's a string, try to parse it
-      const parsed = permString ? JSON.parse(permString) : {}
-      console.log('Parsed from string:', parsed)
-      return parsed
-    } catch (e) {
-      console.error('Error parsing permissions:', e)
-      console.error('Could not parse value:', permString)
-      return {}
-    }
-  }
-
-  const getCurrentRole = (perms) => {
-    console.log('=== DETERMINING ROLE ===')
-    console.log('Permissions object:', perms)
-    
-    // Permissions come as an array of strings like: ["scanning", "archiving", "is_admin"]
-    // Convert to array if it isn't already
-    const permArray = Array.isArray(perms) ? perms : []
-    
-    console.log('Permission array:', permArray)
-    console.log('Has is_admin?', permArray.includes('is_admin'))
-    console.log('Has supervision-right?', permArray.includes('supervision-right'))
-    console.log('Has scanning?', permArray.includes('scanning'))
-    
-    // Based on backend logic:
-    // Admin: has "is_admin" in permissions array
-    // Supervisor: has "supervision-right" in permissions array (and not admin)
-    // Personnel: has any of "scanning", "archiving", "view-upload"
-    
-    if (permArray.includes('is_admin')) {
-      console.log('→ Determined role: Admin')
-      return 'Admin'
-    }
-    
-    if (permArray.includes('supervision-right')) {
-      console.log('→ Determined role: Supervisor')
-      return 'Supervisor'
-    }
-    
-    if (permArray.includes('scanning') || permArray.includes('archiving') || permArray.includes('view-upload')) {
-      console.log('→ Determined role: Personnel')
-      return 'Personnel'
-    }
-    
-    console.log('→ Determined role: No Role Assigned')
-    return 'No Role Assigned'
-  }
-
-  // Handle mutual exclusion for permission checkboxes
-  const handlePermissionCheckboxChange = (e) => {
-    const checkedId = e.target.id
-    // Uncheck all other permission checkboxes
-    const checkboxes = ['perm-admin', 'perm-supervisor', 'perm-personnel']
-    checkboxes.forEach(id => {
-      if (id !== checkedId) {
-        const cb = document.getElementById(id)
-        if (cb) cb.checked = false
-      }
-    })
-  }
-
-  async function updatePermissions() {
-    if (selectedUsers.length === 0) return alert('No users selected')
-    
-    // Gather permission inputs from DOM
-    const isAdmin = document.getElementById('perm-admin')?.checked || false
-    const isSupervisor = document.getElementById('perm-supervisor')?.checked || false
-    const isPersonnel = document.getElementById('perm-personnel')?.checked || false
-    
-    if (!isAdmin && !isSupervisor && !isPersonnel) {
-      return alert('Please select at least one permission level')
-    }
-    
-    // Use SweetAlert2 for confirmation
-    const result = await window.Swal?.fire({
-      title: 'Confirm Update',
-      text: 'Are you sure you want to update permissions for all selected users?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#22c55e',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Yes, update',
-      cancelButtonText: 'Cancel'
-    })
-    
-    if (!result?.isConfirmed) return
-    
-    try {
-      const res = await fetch(`/admin/searchUsers/permissions?usernames=${encodeURIComponent(selectedUsers.join(','))}`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        credentials: 'include',
-        body: JSON.stringify({
-          admin: isAdmin,
-          supervisor: isSupervisor,
-          personnel: isPersonnel
-        })
-      })
-      
-      if (!res.ok) throw new Error('Failed')
-      
-      const Toast = window.Swal?.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-      })
-      
-      if (Toast) {
-        Toast.fire({ icon: 'success', title: 'Permissions updated successfully for all selected users.' })
-      } else {
-        alert('Permissions updated successfully for all selected users.')
-      }
-      
-      setVisible(false)
-      setPermissionsVisible(false)
-      setSelectedUsers([])
+      setUsersData(Array.isArray(data) ? data : [data])
+    } catch (err) {
+      console.error('[access] load', err)
+      setError('Error fetching user data')
       setUsersData([])
-    } catch (err) { 
-      console.error(err)
-      alert('Update failed')
     }
+    setLoading(false)
   }
 
-  if (!visible) return <UserPickerModal ref={userPickerRef} />
+  const apply = async () => {
+    setApplying(true)
+    setError(null)
+    try {
+      // Three booleans, exactly one true - unchanged.
+      const res = await fetch(
+        `/admin/searchUsers/permissions?usernames=${encodeURIComponent(usernames.join(','))}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            admin: level === 'admin',
+            supervisor: level === 'supervisor',
+            personnel: level === 'personnel',
+          }),
+        }
+      )
+      if (!res.ok) throw new Error('Failed')
+      showToast('success', 'Permissions updated successfully for all selected users.')
+      setConfirming(false)
+      onClose()
+    } catch (err) {
+      console.error('[access] apply', err)
+      setError('Update failed')
+      showToast('error', 'Update failed')
+      setConfirming(false)
+    }
+    setApplying(false)
+  }
+
+  if (!open) return <UserPickerModal ref={pickerRef} />
 
   return (
     <>
-      <UserPickerModal ref={userPickerRef} />
-      
-      <div style={{
-        position:'fixed',
-        inset:0,
-        display:'flex',
-        justifyContent:'center',
-        alignItems:'center',
-        background:'rgba(0,0,0,0.5)',
-        zIndex:99998
-      }}>
-        <div className="card" style={{
-          width: '700px',
-          maxWidth:'95vw',
-          maxHeight:'90vh',
-          overflow:'auto',
-          margin: '20px',
-          backgroundColor: '#fff',
-          color: '#000'
-        }}>
-          <div className="card-header d-flex justify-content-between align-items-center" style={{color: '#000'}}>
-            <h4 className="mb-0" style={{color: '#000'}}>Access Control</h4>
-            <button 
-              className="btn-close" 
-              onClick={() => {
-                setVisible(false)
-                setPermissionsVisible(false)
-                setSelectedUsers([])
-                setUsersData([])
-              }}
-            ></button>
+      <UserPickerModal ref={pickerRef} />
+
+      {/* The confirmation replaces the main dialog rather than stacking on it. */}
+      {confirming ? (
+        <Modal
+          title="Apply this level?"
+          onClose={() => setConfirming(false)}
+          busy={applying}
+          footer={
+            <>
+              <button className="btn btn-light" onClick={() => setConfirming(false)} disabled={applying}>
+                Cancel
+              </button>
+              <button className="btn btn-primary" onClick={apply} disabled={applying}>
+                {applying && <span className="spinner-border spinner-border-sm me-1" role="status" />}
+                {applying ? 'Applying…' : `Apply to ${usernames.length} ${usernames.length === 1 ? 'person' : 'people'}`}
+              </button>
+            </>
+          }
+        >
+          <p>
+            <strong>{LEVEL_LABEL[level]}</strong> will be set for{' '}
+            <strong>{usernames.length}</strong> {usernames.length === 1 ? 'person' : 'people'}.
+          </p>
+          <div className="alert alert-warning py-2 px-3 mb-0">
+            <i className="mdi mdi-alert-outline me-1" />
+            This replaces whatever level each of them holds now, including anyone who is currently
+            an Admin.
           </div>
-          
-          <div className="card-body" style={{color: '#000'}}>
-            {!permissionsVisible ? (
-              <div className="text-center py-4">
-                <p className="mb-3" style={{color: '#000'}}>Select users to manage their permissions</p>
-                <button 
-                  className="btn btn-primary btn-lg"
-                  onClick={selectUsers}
-                >
-                  <i className="fa fa-users me-2"></i>
-                  Select Users
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="mb-4">
-                  <h5 className="mb-3" style={{color: '#000'}}>Selected Users ({selectedUsers.length})</h5>
-                  <div className="list-group">
-                    {usersData.map((user, idx) => {
-                      const perms = parsePermissions(user.permissions)
-                      const permArray = Array.isArray(perms) ? perms : []
-                      const currentRole = getCurrentRole(perms)
-                      return (
-                        <div key={idx} className="list-group-item" style={{backgroundColor: '#f8f9fa', color: '#000'}}>
-                          <div className="d-flex justify-content-between align-items-start">
-                            <div>
-                              <h6 className="mb-1" style={{color: '#000'}}>{user.username}</h6>
-                              <small className="text-muted" style={{color: '#6c757d'}}>{user.email}</small>
-                            </div>
-                            <div className="text-end">
-                              <div style={{fontSize: '12px', fontWeight: '500', color: '#6c757d', marginBottom: '4px'}}>
-                                Current Role:
-                              </div>
-                              <div className="mt-1">
-                                {currentRole === 'Admin' && (
-                                  <span className="badge bg-danger" style={{color: '#fff', fontSize: '11px'}}>Admin</span>
-                                )}
-                                {currentRole === 'Supervisor' && (
-                                  <span className="badge bg-warning" style={{color: '#000', fontSize: '11px'}}>Supervisor</span>
-                                )}
-                                {currentRole === 'Personnel' && (
-                                  <span className="badge bg-info" style={{color: '#fff', fontSize: '11px'}}>Personnel</span>
-                                )}
-                                {currentRole === 'No Role Assigned' && (
-                                  <span className="badge bg-secondary" style={{color: '#fff', fontSize: '11px'}}>No Role</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <h5 className="mb-3" style={{color: '#000'}}>Select or modify user permissions</h5>
-                  <p className="text-muted small mb-3" style={{color: '#6c757d'}}>Only one role can be selected at a time</p>
-                  
-                  <div className="d-flex flex-column gap-2">
-                    <div className="form-check">
-                      <input 
-                        className="form-check-input" 
-                        type="checkbox" 
-                        id="perm-admin" 
-                        onChange={handlePermissionCheckboxChange}
-                      />
-                      <label className="form-check-label" htmlFor="perm-admin" style={{color: '#000'}}>
-                        <strong>Admin Roles</strong>
-                      </label>
-                    </div>
-                    
-                    <div className="form-check">
-                      <input 
-                        className="form-check-input" 
-                        type="checkbox" 
-                        id="perm-supervisor" 
-                        onChange={handlePermissionCheckboxChange}
-                      />
-                      <label className="form-check-label" htmlFor="perm-supervisor" style={{color: '#000'}}>
-                        <strong>Supervisor Roles</strong>
-                      </label>
-                    </div>
-                    
-                    <div className="form-check">
-                      <input 
-                        className="form-check-input" 
-                        type="checkbox" 
-                        id="perm-personnel" 
-                        onChange={handlePermissionCheckboxChange}
-                      />
-                      <label className="form-check-label" htmlFor="perm-personnel" style={{color: '#000'}}>
-                        <strong>User Roles</strong>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="d-flex gap-2">
-                  <button 
-                    className="btn btn-success w-100"
-                    onClick={updatePermissions}
-                  >
-                    <i className="fa fa-check me-2"></i>
-                    Update Permissions
-                  </button>
-                </div>
-              </>
+        </Modal>
+      ) : (
+        <Modal
+          title="Access control"
+          onClose={onClose}
+          size="lg"
+          scrollable
+          footer={
+            <>
+              <button className="btn btn-light" onClick={onClose}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                disabled={!level || usernames.length === 0}
+                onClick={() => setConfirming(true)}
+                title={!level ? 'Choose a level first' : undefined}
+              >
+                {usernames.length > 0
+                  ? `Apply to ${usernames.length} ${usernames.length === 1 ? 'person' : 'people'}`
+                  : 'Apply'}
+              </button>
+            </>
+          }
+        >
+          <div className="d-flex align-items-center mb-3" style={{ gap: 8 }}>
+            <button className="btn btn-light border btn-sm" onClick={choosePeople}>
+              <i className="mdi mdi-account-multiple-plus-outline me-1" />
+              {usernames.length > 0 ? 'Change selection' : 'Choose people'}
+            </button>
+            {usernames.length > 0 && (
+              <span className="text-muted font-13">
+                {usernames.length} selected
+              </span>
             )}
           </div>
-        </div>
-      </div>
+
+          {loading && (
+            <div className="text-center py-4">
+              <div className="spinner-border text-primary" role="status" />
+            </div>
+          )}
+
+          {!loading && usernames.length === 0 && (
+            <div className="text-center py-4">
+              <i className="mdi mdi-account-multiple-outline text-muted" style={{ fontSize: 34 }} />
+              <h5 className="mt-2 mb-1">Nobody selected yet</h5>
+              <p className="text-muted mb-0">
+                Choose the people whose access level you want to change.
+              </p>
+            </div>
+          )}
+
+          {!loading && usersData.length > 0 && (
+            <>
+              {/* You are replacing something, so show what. */}
+              <label className="form-label mb-2">Selected people and their level now</label>
+              <div className="mb-3">
+                {usersData.map((u) => {
+                  const lvl = currentLevel(u)
+                  return (
+                    <div key={u.username} className="d-flex align-items-center py-1" style={{ gap: 8 }}>
+                      <i className="mdi mdi-account-outline text-muted" />
+                      <span>{u.fullname || u.username}</span>
+                      <span className="text-muted font-12">{u.username}</span>
+                      <span className={`badge bg-${LEVEL_TONE[lvl]}-lighten text-${LEVEL_TONE[lvl]} ms-auto`}>
+                        {LEVEL_LABEL[lvl]}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <label className="form-label mb-2">Set everyone selected to</label>
+              {LEVELS.map((l) => (
+                <div className="form-check mb-2" key={l.key}>
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="ac-level"
+                    id={`ac-${l.key}`}
+                    checked={level === l.key}
+                    onChange={() => setLevel(l.key)}
+                  />
+                  <label className="form-check-label" htmlFor={`ac-${l.key}`}>
+                    <span className="fw-semibold">{l.label}</span>
+                    <span className="text-muted font-12 d-block">{l.grants}</span>
+                  </label>
+                </div>
+              ))}
+
+              <div className="alert alert-warning py-2 px-3 mt-3 mb-0">
+                <i className="mdi mdi-alert-outline me-1" />
+                The level applies to everyone selected and replaces the one they hold now.
+              </div>
+            </>
+          )}
+
+          {error && (
+            <div className="alert alert-danger py-2 px-3 mt-3 mb-0">
+              <i className="mdi mdi-alert-circle-outline me-1" />{error}
+            </div>
+          )}
+        </Modal>
+      )}
     </>
   )
 }
