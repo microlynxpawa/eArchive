@@ -453,7 +453,7 @@ export default function SuperAdminDashboard() {
                 value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}
               />
               <select
-                className="form-select form-select-sm" style={{ width: 76 }}
+                className="form-select form-select-sm" style={{ width: 92 }}
                 value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}
               >
                 {[10, 20, 50].map((n) => <option key={n} value={n}>{n}</option>)}

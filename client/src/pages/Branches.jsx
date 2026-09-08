@@ -252,7 +252,7 @@ export default function Branches() {
                       <select
                         id="br-rows"
                         className="form-select form-select-sm"
-                        style={{ width: 76 }}
+                        style={{ width: 92 }}
                         value={rowsPerPage}
                         onChange={(e) => setRowsPerPage(Number(e.target.value))}
                       >
