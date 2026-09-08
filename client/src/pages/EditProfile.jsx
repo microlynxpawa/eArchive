@@ -1,272 +1,324 @@
-import React, { useState, useEffect } from 'react'
-import PageTitle from '../components/PageTitle'
+import React, { useEffect, useRef, useState } from 'react'
+
+/*
+ * My profile
+ *
+ * Rebuilt on Hyper markup. The details stay read-only - none of them was ever
+ * editable here - and both actions keep their endpoints and payloads: a
+ * multipart picture upload, and oldPass/newPass as FormData, which
+ * /admin/update-password can read because its route carries upload.none().
+ */
+
+const ACCEPT = '.jpg,.jpeg,.png'
+const ALLOWED = ['image/jpeg', 'image/jpg', 'image/png']
+
+function initialsOf(name) {
+  return String(name || '?')
+    .split(/[\s.@-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+}
+
+/** A read-only detail, shown as a disabled input so it still reads as a field. */
+function ReadOnlyField({ label, value, col = 'col-md-6' }) {
+  return (
+    <div className={`${col} mb-3`}>
+      <label className="form-label">{label}</label>
+      <input type="text" className="form-control" value={value || '—'} disabled readOnly />
+    </div>
+  )
+}
 
 export default function EditProfile() {
   const [user, setUser] = useState(null)
+
   const [oldPass, setOldPass] = useState('')
   const [newPass, setNewPass] = useState('')
   const [confirmPass, setConfirmPass] = useState('')
-  const [profilePicture, setProfilePicture] = useState(null)
+  const [reveal, setReveal] = useState({ old: false, next: false, confirm: false })
+  const [pwErrors, setPwErrors] = useState({})
+  const [pwResult, setPwResult] = useState(null)   // { ok, message }
+  const [updating, setUpdating] = useState(false)
 
-  useEffect(() => {
-    fetchUserData()
-  }, [])
+  const [uploading, setUploading] = useState(false)
+  const [picResult, setPicResult] = useState(null)
+  const fileRef = useRef(null)
+
+  useEffect(() => { fetchUserData() }, [])
+
+  const showToast = (type, message) => {
+    // Keep SweetAlert when the app has loaded it, as before - but never fall
+    // back to alert(), which blocks the page until it is dismissed.
+    if (window.Swal && window.Swal.mixin) {
+      window.Swal.mixin({
+        toast: true, position: 'top-end', showConfirmButton: false,
+        timer: 3000, timerProgressBar: true,
+      }).fire({ icon: type, title: message })
+      return
+    }
+    const t = document.createElement('div')
+    t.innerText = message
+    Object.assign(t.style, {
+      position: 'fixed', right: '30px', bottom: '30px', padding: '12px 20px',
+      color: '#fff', borderRadius: '6px', zIndex: 12000, fontSize: '0.95rem',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+      background: type === 'success' ? '#22c55e' : '#dc3545',
+    })
+    document.body.appendChild(t)
+    setTimeout(() => t.remove(), 2500)
+  }
 
   const fetchUserData = async () => {
     try {
-      const res = await fetch('/admin/dashboard-data', { 
-        credentials: 'include', 
-        headers: { Accept: 'application/json' } 
-      })
-      const data = await res.json()
-      if (res.ok && data.user) {
-        setUser(data.user)
-      }
-    } catch (err) {
-      console.error('Error fetching user data:', err)
-    }
-  }
-
-  const showToast = (type, message) => {
-    if (window.Swal && window.Swal.mixin) {
-      const Toast = window.Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-      })
-      Toast.fire({ icon: type, title: message })
-    } else {
-      alert(message)
-    }
-  }
-
-  const handleChangePassword = async (e) => {
-    e.preventDefault()
-    
-    if (!oldPass.trim()) return showToast('error', 'Old password required')
-    if (!newPass.trim()) return showToast('error', 'New password required')
-    if (!confirmPass.trim()) return showToast('error', 'Confirm password required')
-    if (newPass !== confirmPass) return showToast('error', 'New password mis-match')
-
-    try {
-      const formData = new FormData()
-      formData.append('oldPass', oldPass)
-      formData.append('newPass', newPass)
-
-      console.log('Sending password change request...')
-      const res = await fetch('/admin/update-password', {
-        method: 'POST',
-        body: formData,
+      const res = await fetch('/admin/dashboard-data', {
         credentials: 'include',
+        headers: { Accept: 'application/json' },
       })
-
-      console.log('Response status:', res.status)
       const data = await res.json()
-      console.log('Response data:', data)
-      
-      if (data.statusCode === 404) {
-        showToast('error', data.message)
-      } else if (data.statusCode === 200) {
-        showToast('success', data.message)
-        setOldPass('')
-        setNewPass('')
-        setConfirmPass('')
-      } else {
-        showToast('error', data.message || 'Unexpected response')
-      }
+      if (res.ok && data.user) setUser(data.user)
     } catch (err) {
-      console.error('Password update error:', err)
-      showToast('error', 'Error updating password')
+      console.error('[profile] load', err)
     }
   }
+
+  // ------------------------------------------------------------- picture
 
   const handleProfilePictureChange = async (e) => {
     const file = e.target.files[0]
     if (!file) return
 
-    console.log('=== Profile Picture Upload ===')
-    console.log('File selected:', file.name, file.type, file.size)
+    // Windows can report an empty file.type, so judge on the extension too.
+    const ext = (file.name.split('.').pop() || '').toLowerCase()
+    if (!ALLOWED.includes(file.type) && !['jpg', 'jpeg', 'png'].includes(ext)) {
+      setPicResult({ ok: false, message: 'Choose a JPG or PNG image.' })
+      showToast('error', 'Choose a JPG or PNG image.')
+      if (fileRef.current) fileRef.current.value = ''
+      return
+    }
 
     const formData = new FormData()
     formData.append('profilePicture', file)
 
+    setUploading(true)
+    setPicResult(null)
     try {
-      console.log('Sending upload request...')
       const res = await fetch('/admin/upload-profile-picture', {
         method: 'POST',
         body: formData,
         credentials: 'include',
       })
-
-      console.log('Response status:', res.status)
       const data = await res.json()
-      console.log('Response data:', data)
-      
       if (data.success) {
+        setPicResult({ ok: true, message: 'Profile picture updated.' })
         showToast('success', 'Profile picture updated successfully!')
         fetchUserData()
       } else {
+        setPicResult({ ok: false, message: data.message || 'Error uploading file' })
         showToast('error', data.message || 'Error uploading file')
       }
     } catch (err) {
-      console.error('Upload error:', err)
+      console.error('[profile] upload', err)
+      setPicResult({ ok: false, message: 'Error uploading file' })
       showToast('error', 'Error uploading file')
     }
+    setUploading(false)
+    if (fileRef.current) fileRef.current.value = ''
   }
+
+  // ------------------------------------------------------------ password
+
+  const handleChangePassword = async (e) => {
+    if (e) e.preventDefault()
+    setPwResult(null)
+
+    // Same three rules as before, now also shown against the field at fault.
+    const next = {}
+    if (!oldPass.trim()) next.old = 'Old password required'
+    if (!newPass.trim()) next.next = 'New password required'
+    if (!confirmPass.trim()) next.confirm = 'Confirm password required'
+    if (!next.next && !next.confirm && newPass !== confirmPass) {
+      next.confirm = 'New password mis-match'
+    }
+    setPwErrors(next)
+    if (Object.keys(next).length > 0) {
+      showToast('error', Object.values(next)[0])
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('oldPass', oldPass)
+    formData.append('newPass', newPass)
+
+    setUpdating(true)
+    try {
+      const res = await fetch('/admin/update-password', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+      const data = await res.json()
+
+      if (data.statusCode === 200) {
+        showToast('success', data.message)
+        setPwResult({ ok: true, message: data.message })
+        setOldPass(''); setNewPass(''); setConfirmPass('')
+      } else {
+        // The server's own wording, surfaced rather than replaced.
+        const message = data.message || 'Unexpected response'
+        showToast('error', message)
+        setPwResult({ ok: false, message })
+      }
+    } catch (err) {
+      console.error('[profile] password', err)
+      showToast('error', 'Error updating password')
+      setPwResult({ ok: false, message: 'Error updating password' })
+    }
+    setUpdating(false)
+  }
+
+  const passwordField = (key, label, value, setValue) => (
+    <div className="mb-3">
+      <label className="form-label" htmlFor={`pf-${key}`}>{label}<span className="text-danger">*</span></label>
+      <div className="input-group">
+        <input
+          id={`pf-${key}`}
+          type={reveal[key] ? 'text' : 'password'}
+          className={`form-control${pwErrors[key] ? ' is-invalid' : ''}`}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+        <button
+          className="btn btn-light border"
+          type="button"
+          onClick={() => setReveal((r) => ({ ...r, [key]: !r[key] }))}
+          title={reveal[key] ? 'Hide' : 'Show'}
+          aria-label={reveal[key] ? 'Hide password' : 'Show password'}
+        >
+          <i className={`mdi ${reveal[key] ? 'mdi-eye-off-outline' : 'mdi-eye-outline'}`} />
+        </button>
+      </div>
+      {pwErrors[key] && <div className="invalid-feedback d-block">{pwErrors[key]}</div>}
+    </div>
+  )
 
   if (!user) {
     return (
-      <div className="container-fluid">
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+      <div className="text-center py-5">
+        <div className="spinner-border text-primary" role="status" />
       </div>
     )
   }
 
-  const profilePicUrl = user.profilePicturePath 
-    ? `/profile-pictures/${user.profilePicturePath.split(/\/|\\/).pop()}?t=${Date.now()}` 
-    : '/assets/images/user/7.jpg'
+  const picUrl = user.profilePicturePath
+    ? `/profile-pictures/${String(user.profilePicturePath).split(/[\\/]/).pop()}?t=${Date.now()}`
+    : null
 
   return (
     <>
-      <PageTitle title="Edit Profile" />
-      <div className="container-fluid">
-        <div className="edit-profile">
-          <div className="row">
-            <div className="col-xl-4 col-lg-5">
-              <div className="card">
-                <div className="card-header pb-0">
-                  <h4 className="card-title mb-0">My Profile</h4>
-                </div>
-                <div className="card-body">
-                  <div className="row mb-2">
-                    <div className="profile-title">
-                      <div className="d-lg-flex d-block align-items-center">
-                        <div className="pp position-relative" 
-                             style={{ cursor: 'pointer' }}
-                             onMouseEnter={(e) => e.currentTarget.querySelector('.edit-text').style.display = 'block'}
-                             onMouseLeave={(e) => e.currentTarget.querySelector('.edit-text').style.display = 'none'}
-                             onClick={() => document.getElementById('file-input').click()}>
-                          <div className="profile-picture-container" style={{ width: '70px', height: '70px', borderRadius: '50%', overflow: 'hidden' }}>
-                            <img
-                              className="img-70 rounded-circle"
-                              alt="Profile Picture"
-                              src={profilePicUrl}
-                              onError={(e) => { e.target.src = '/assets/images/user/7.jpg' }}
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                          </div>
-                          <span className="edit-text" style={{ 
-                            position: 'absolute', 
-                            bottom: '10px', 
-                            left: '50%', 
-                            transform: 'translateX(-50%)', 
-                            display: 'none', 
-                            background: 'rgba(0, 0, 0, 0.6)', 
-                            color: 'white', 
-                            padding: '5px 10px', 
-                            borderRadius: '5px', 
-                            fontSize: '10px',
-                            whiteSpace: 'nowrap'
-                          }}>
-                            Edit
-                          </span>
-                          <input 
-                            type="file" 
-                            id="file-input" 
-                            style={{ display: 'none' }} 
-                            onChange={handleProfilePictureChange}
-                            accept="image/*"
-                          />
-                        </div>
-                        <div className="flex-grow-1 ms-3">
-                          <h3 className="mb-1 f-20 txt-primary">{user.fullname}</h3>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+      <div className="row">
+        <div className="col-12">
+          <div className="page-title-box">
+            <h4 className="page-title">My profile</h4>
+          </div>
+        </div>
+      </div>
 
-                  <div className="mb-3">
-                    <label className="form-label f-w-500">Email Address</label>
-                    <input className="form-control" value={user.email || ''} disabled />
+      <div className="row">
+        {/* ------------------------------------------------ profile card */}
+        <div className="col-lg-4">
+          <div className="card">
+            <div className="card-body text-center">
+              {picUrl
+                ? <img src={picUrl} alt="Profile" className="rounded-circle avatar-lg img-thumbnail" />
+                : (
+                  <div className="avatar-lg mx-auto">
+                    <span className="avatar-title bg-primary-lighten text-primary rounded-circle" style={{ fontSize: 24 }}>
+                      {initialsOf(user.fullname || user.username)}
+                    </span>
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label f-w-500">Private Email Address</label>
-                    <input className="form-control" value={user.private_email || ''} disabled />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label f-w-500">Username</label>
-                    <input className="form-control" value={user.username || ''} disabled />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label f-w-500">Branch</label>
-                    <input className="form-control" value={user.branch?.name || ''} disabled />
-                  </div>
+                )}
+
+              <h4 className="mb-0 mt-2">{user.fullname || user.username}</h4>
+              <p className="text-muted font-14 mb-1">{user.username}</p>
+              {/*
+                * Branch only. /admin/dashboard-data returns the branch object but
+                * not the department - just userGroupId - and resolving that name
+                * would need either an API change or a call to an admin-only
+                * endpoint, which this page cannot make: it has to work for users
+                * with no administration permission at all. Left out rather than
+                * designed around.
+                */}
+              <p className="text-muted font-13 mb-3">{user.branch?.name || '—'}</p>
+
+              <input
+                ref={fileRef}
+                type="file"
+                className="d-none"
+                accept={ACCEPT}
+                onChange={handleProfilePictureChange}
+              />
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => fileRef.current && fileRef.current.click()}
+                disabled={uploading}
+              >
+                {uploading && <span className="spinner-border spinner-border-sm me-1" role="status" />}
+                {uploading ? 'Uploading…' : <><i className="mdi mdi-camera-outline me-1" />Change picture</>}
+              </button>
+              <p className="text-muted font-12 mt-2 mb-0">JPG or PNG.</p>
+
+              {picResult && (
+                <div className={`alert ${picResult.ok ? 'alert-success' : 'alert-danger'} py-2 px-3 mt-2 mb-0 font-13`}>
+                  {picResult.message}
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ---------------------------------------------------- details */}
+        <div className="col-lg-8">
+          <div className="card">
+            <div className="card-body">
+              <h5 className="mb-1">Details</h5>
+              {/* Four disabled inputs with no explanation read as broken. */}
+              <p className="text-muted font-13 mb-3">
+                These are set by an administrator. Ask them if something needs changing.
+              </p>
+
+              <div className="row">
+                <ReadOnlyField label="Full name" value={user.fullname} />
+                <ReadOnlyField label="Username" value={user.username} />
+                <ReadOnlyField label="Work email" value={user.email} />
+                <ReadOnlyField label="Private email" value={user.private_email} />
+                <ReadOnlyField label="Branch" value={user.branch?.name} />
               </div>
             </div>
+          </div>
 
-            <div className="col-xl-8 col-lg-7">
-              <form className="card" onSubmit={handleChangePassword}>
-                <div className="card-header pb-0">
-                  <h4 className="card-title mb-0">Change Password</h4>
-                </div>
-                <div className="card-body">
-                  <div className="row">
-                    <div className="col-md-12">
-                      <div className="mb-3">
-                        <label className="form-label f-w-500">Old Password</label>
-                        <div className="position-relative">
-                          <input
-                            className="form-control"
-                            type="password"
-                            placeholder="Provide old password"
-                            value={oldPass}
-                            onChange={(e) => setOldPass(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-sm-6 col-md-6">
-                      <div className="mb-3">
-                        <label className="form-label f-w-500">New Password</label>
-                        <div className="position-relative">
-                          <input
-                            className="form-control"
-                            type="password"
-                            placeholder="Provide new password"
-                            value={newPass}
-                            onChange={(e) => setNewPass(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-sm-6 col-md-6">
-                      <div className="mb-3">
-                        <label className="form-label f-w-500">Confirm Password</label>
-                        <div className="position-relative">
-                          <input
-                            className="form-control"
-                            type="password"
-                            placeholder="Confirm new password"
-                            value={confirmPass}
-                            onChange={(e) => setConfirmPass(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
+          <div className="card">
+            <div className="card-body">
+              <h5 className="mb-3">Change password</h5>
+
+              <form onSubmit={handleChangePassword}>
+                {passwordField('old', 'Current password', oldPass, setOldPass)}
+                {passwordField('next', 'New password', newPass, setNewPass)}
+                {passwordField('confirm', 'Confirm new password', confirmPass, setConfirmPass)}
+
+                {pwResult && (
+                  <div className={`alert ${pwResult.ok ? 'alert-success' : 'alert-danger'} py-2 px-3 mb-3`}>
+                    <i className={`mdi ${pwResult.ok ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline'} me-1`} />
+                    {pwResult.message}
                   </div>
-                </div>
-                <div className="card-footer text-end">
-                  <button className="btn btn-primary" type="submit">
-                    Change password
-                  </button>
-                </div>
+                )}
+
+                <button type="submit" className="btn btn-primary" disabled={updating}>
+                  {updating && <span className="spinner-border spinner-border-sm me-1" role="status" />}
+                  {updating ? 'Updating…' : 'Update password'}
+                </button>
               </form>
             </div>
           </div>
@@ -275,4 +327,3 @@ export default function EditProfile() {
     </>
   )
 }
-

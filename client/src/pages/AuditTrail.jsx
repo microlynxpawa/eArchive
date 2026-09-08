@@ -1,265 +1,336 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import UserPickerModal from '../components/UserPickerModal'
-import FileSendingHistoryModal from '../components/FileSendingHistoryModal'
+
+/*
+ * Audit trail
+ *
+ * The log is per user, so the page shows nothing until somebody is chosen.
+ * Both ways of choosing are kept: typing a username, and the picker. Each
+ * resolves through /admin/getUser/:username to an id and then loads
+ * /admin/audit-log/:userId - unchanged.
+ *
+ * One row per sign-in session. `viewed`, `uploaded` and `deleted` are booleans
+ * the backend flips the first time each thing happens in a session, so they are
+ * shown as Yes / No with that stated - a bare column of true/false invites
+ * being read as a tally.
+ */
+
+function formatMoment(value) {
+  if (!value) return ''
+  const d = new Date(value)
+  return isNaN(d) ? '' : d.toLocaleString(undefined, {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+}
+
+function initialsOf(name) {
+  return String(name || '?')
+    .split(/[\s.@-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+}
+
+/** Yes / No, deliberately not a count. */
+function Flag({ value }) {
+  return value
+    ? <span className="badge bg-success-lighten text-success"><i className="mdi mdi-check me-1" />Yes</span>
+    : <span className="badge bg-light text-muted"><i className="mdi mdi-minus me-1" />No</span>
+}
 
 export default function AuditTrail() {
   const [searchValue, setSearchValue] = useState('')
+  const [subject, setSubject] = useState(null)   // the user whose log is shown
   const [logs, setLogs] = useState([])
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const lastUserIdRef = useRef(null)
-  const lastUsernameRef = useRef(null)
-  const userPickerModalRef = useRef(null)
-  const fileSendingHistoryModalRef = useRef(null)
+
+  const userPickerRef = useRef(null)
 
   const showToast = (message, type = 'success') => {
     const toast = document.createElement('div')
     toast.className = 'custom-toast-notification ' + (type === 'success' ? 'toast-success' : 'toast-error')
     toast.innerText = message
-    toast.style.position = 'fixed'
-    toast.style.bottom = '30px'
-    toast.style.right = '30px'
-    toast.style.background = type === 'success' ? '#22c55e' : '#dc3545'
-    toast.style.color = '#fff'
-    toast.style.padding = '12px 20px'
-    toast.style.borderRadius = '6px'
-    toast.style.fontSize = '0.95rem'
-    toast.style.boxShadow = '0 2px 10px rgba(0,0,0,0.12)'
-    toast.style.zIndex = 12000
+    Object.assign(toast.style, {
+      position: 'fixed', bottom: '30px', right: '30px', padding: '12px 20px',
+      color: '#fff', borderRadius: '6px', fontSize: '0.95rem', zIndex: 12000,
+      boxShadow: '0 2px 10px rgba(0,0,0,0.12)',
+      background: type === 'success' ? '#22c55e' : '#dc3545',
+    })
     document.body.appendChild(toast)
     setTimeout(() => toast.remove(), 2500)
   }
 
-  const normalizeDateTime = (str) => {
-    return (str || '')
-      .toString()
-      .replace(/[\/\-]/g, '-')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .toLowerCase()
-  }
+  useEffect(() => { setPage(1) }, [rowsPerPage, subject])
 
-  const matchesDateTime = (cellValue, searchValue) => {
-    if (!cellValue) return false
-    const normCell = normalizeDateTime(cellValue.toString())
-    const normSearch = normalizeDateTime(searchValue)
-    return normCell.includes(normSearch)
-  }
-
-  const fetchAndDisplayAuditLogs = async (userId, dateSearch = null, username = null) => {
-    if (!userId) return
+  const loadLogs = async (userId) => {
     setLoading(true)
     setError(null)
     try {
       const res = await fetch(`/admin/audit-log/${encodeURIComponent(userId)}`, { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to fetch audit logs')
       const data = await res.json()
-      let filtered = data
-      if (dateSearch) {
-        filtered = data.filter((log) => {
-          return (
-            matchesDateTime(log.loginTime ? new Date(log.loginTime).toLocaleString() : '', dateSearch) ||
-            matchesDateTime(log.logoutTime ? new Date(log.logoutTime).toLocaleString() : '', dateSearch)
-          )
-        })
-      }
-      setLogs(filtered)
-      lastUserIdRef.current = userId
-      lastUsernameRef.current = username
+      setLogs(Array.isArray(data) ? data : [])
     } catch (err) {
-      console.error(err)
+      console.error('[audit] logs', err)
       setError(err.message || 'Failed to fetch audit logs')
       setLogs([])
       showToast('Failed to fetch audit logs.', 'error')
-    } finally {
+    }
+    setLoading(false)
+  }
+
+  /** Both routes to choosing a person come through here. */
+  const selectUsername = async (username) => {
+    const name = (username || '').trim()
+    if (!name) {
+      showToast('Please enter a username.', 'error')
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(`/admin/getUser/${encodeURIComponent(name)}`, { credentials: 'include' })
+      if (!res.ok) throw new Error('User not found')
+      const user = await res.json()
+      setSubject(user)
+      setSearchValue(user.username || name)
+      showToast(`User found: ${user.fullname || user.username}`, 'success')
+      await loadLogs(user.id)
+    } catch (err) {
+      console.error('[audit] getUser', err)
+      setSubject(null)
+      setLogs([])
+      setError('User not found or an error occurred.')
+      showToast('User not found or an error occurred.', 'error')
       setLoading(false)
     }
   }
 
-  const handleSearchClick = async () => {
-    const username = (searchValue || '').trim()
-    if (!username) {
-      showToast('Please enter a username.', 'error')
-      return
-    }
-    try {
-      const res = await fetch(`/admin/getUser/${encodeURIComponent(username)}`, { credentials: 'include' })
-      if (!res.ok) throw new Error('User not found')
-      const userData = await res.json()
-      showToast(`User found: ${userData.fullname || userData.username}`, 'success')
-      await fetchAndDisplayAuditLogs(userData.id, null, userData.username)
-    } catch (err) {
-      console.error('Error fetching user', err)
-      showToast('User not found or an error occurred.', 'error')
-    }
+  const pickUser = async () => {
+    if (!userPickerRef.current?.show) return
+    const picked = await userPickerRef.current.show()
+    if (!picked || picked.length === 0) return
+    await selectUsername(picked[0])
   }
 
-  const handleInputChange = async (e) => {
-    const val = e.target.value
-    setSearchValue(val)
-    if (!val) return
-
-    // Try to resolve as username first
-    try {
-      const res = await fetch(`/admin/getUser/${encodeURIComponent(val)}`, { credentials: 'include' })
-      if (!res.ok) return // not a username
-      const userData = await res.json()
-      await fetchAndDisplayAuditLogs(userData.id, null, userData.username)
-      return
-    } catch (err) {
-      // ignore and treat as date/time
-    }
-
-    // If not a username, treat as date/time filter for the last fetched user
-    const lastUserId = lastUserIdRef.current
-    if (lastUserId) {
-      await fetchAndDisplayAuditLogs(lastUserId, val)
-    }
+  const clearSubject = () => {
+    setSubject(null)
+    setLogs([])
+    setSearchValue('')
+    setError(null)
   }
 
-  useEffect(() => {
-    // wire up username modal search button
-    setTimeout(() => {
-      const btn = document.getElementById('search-username-btn')
-      if (btn && userPickerModalRef.current?.show) {
-        btn.onclick = async () => {
-          const selectedUsernames = await userPickerModalRef.current.show()
-          if (!selectedUsernames || !selectedUsernames.length) return
-          const username = selectedUsernames[0]
-          setSearchValue(username)
-          try {
-            const res = await fetch(`/admin/getUser/${encodeURIComponent(username)}`, { credentials: 'include' })
-            if (!res.ok) throw new Error('User not found')
-            const userData = await res.json()
-            showToast(`User found: ${userData.fullname || userData.username}`, 'success')
-            await fetchAndDisplayAuditLogs(userData.id, null, userData.username)
-          } catch (err) {
-            showToast('User not found or an error occurred.', 'error')
-          }
-        }
-      }
-    }, 200)
-    // on mount nothing to do; we wait for a user search
-  }, [])
-
-  // Pagination logic
   const totalRows = logs.length
   const totalPages = Math.ceil(totalRows / rowsPerPage) || 1
-  const paginatedLogs = logs.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+  const firstRow = totalRows === 0 ? 0 : (page - 1) * rowsPerPage + 1
+  const lastRow = Math.min(page * rowsPerPage, totalRows)
+  const paginated = useMemo(
+    () => logs.slice((page - 1) * rowsPerPage, page * rowsPerPage),
+    [logs, page, rowsPerPage]
+  )
 
-  const handleRowsPerPageChange = (e) => {
-    setRowsPerPage(Number(e.target.value))
-    setPage(1)
-  }
-  const handlePageChange = (newPage) => {
-    setPage(newPage)
-  }
+  // Department and branch are captured at sign-in and stored on the log row,
+  // so read them from the first session rather than from the user record.
+  const captured = logs[0] || {}
 
   return (
-    <div className="container-fluid">
-      <UserPickerModal ref={userPickerModalRef} />
-      <FileSendingHistoryModal ref={fileSendingHistoryModalRef} />
-      <div className="mb-3">
-        <div className="input-group mb-2">
-          <div className="input-group-prepend" id="searchButton">
-            <button className="input-group-text mobile-search btn" onClick={handleSearchClick} style={{cursor:'pointer'}}>
-              <i className="fa fa-search" />
-            </button>
+    <>
+      <UserPickerModal ref={userPickerRef} />
+
+      <div className="row">
+        <div className="col-12">
+          <div className="page-title-box">
+            <h4 className="page-title">Audit trail</h4>
           </div>
-          <input
-            id="search-input"
-            className="form-control"
-            type="text"
-            placeholder="Search Here........"
-            value={searchValue}
-            onChange={handleInputChange}
-          />
         </div>
-        <button id="search-username-btn" className="btn btn-outline-primary btn-sm" type="button" style={{marginTop:4}}>Search by Username</button>
-        <small id="search-format-hint" style={{display:'none', color:'#22c55e', fontSize:'0.95em'}}>Tip: Search by date (e.g. 2024-06-20, 20/06/2024) or time (e.g. 14:30)</small>
       </div>
 
       <div className="row">
-        <div className="col-sm-12">
+        <div className="col-12">
           <div className="card">
-            <div className="card-header pb-0 d-flex justify-content-between align-items-center" style={{gap: '0.5rem', background: 'rgba(245,245,245,0.95)', borderBottom: '1px solid #e0e0e0'}}>
-              <h3 className="mb-0" style={{fontWeight: 700, fontSize: '1.35em', color: '#222'}}>User Audit Trail</h3>
-              <div className="d-flex align-items-center" style={{gap: '0.5rem'}}>
-                <button
-                  className="btn btn-info btn-sm"
-                  onClick={() => {
-                    const userToShow = lastUsernameRef.current
-                    if (!userToShow) {
-                      alert('Please search for a user first to view their file sending history')
-                      return
-                    }
-                    fileSendingHistoryModalRef.current?.show(userToShow)
-                  }}
-                  title="View file sending history for selected user"
-                  disabled={!lastUsernameRef.current}
-                  style={{visibility: 'hidden'}}
-                >
-                  📋 File Sending History
-                </button>
-                <div style={{background: 'rgba(255,255,255,0.85)', borderRadius: 6, padding: '2px 12px', border: '1px solid #e0e0e0'}}>
-                  <label htmlFor="audit-rows-per-page" className="form-label mb-0" style={{fontWeight: 600, fontSize: '1em', color: '#222'}}>Rows</label>
-                  <select id="audit-rows-per-page" value={rowsPerPage} onChange={handleRowsPerPageChange} style={{width: 56, height: 30, fontSize: '1em', padding: '0 6px', borderRadius: 4, border: '1px solid #bbb', color: '#222', background: '#fff'}}>
-                    {[5, 10, 20, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="px-3 pt-1 pb-0"><p className="text-green mb-0" style={{fontSize: '0.98em'}}>Search User to view their history.</p></div>
             <div className="card-body">
-              <div className="d-flex justify-content-end align-items-center mb-2">
-                <span style={{color:'#222', fontWeight:600, fontSize:'1em'}}>Page {page} of {totalPages}</span>
-                <button className="btn btn-sm btn-light ms-2" disabled={page === 1} onClick={() => handlePageChange(page - 1)}>&lt;</button>
-                <button className="btn btn-sm btn-light ms-1" disabled={page === totalPages} onClick={() => handlePageChange(page + 1)}>&gt;</button>
+
+              {/* Two routes to the same thing, now labelled as such. */}
+              <div className="d-flex flex-wrap align-items-end mb-3" style={{ gap: 12 }}>
+                <div>
+                  <label className="form-label font-12 text-muted mb-1 d-block" htmlFor="au-username">
+                    Type a username
+                  </label>
+                  <div className="input-group input-group-sm" style={{ width: 300 }}>
+                    <input
+                      id="au-username"
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. akosua-mensah@headoffice"
+                      value={searchValue}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') selectUsername(searchValue) }}
+                    />
+                    <button
+                      className="btn btn-primary"
+                      type="button"
+                      onClick={() => selectUsername(searchValue)}
+                      title="Load this user's log"
+                    >
+                      <i className="mdi mdi-magnify" />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="form-label font-12 text-muted mb-1 d-block">Or pick from the list</label>
+                  <button className="btn btn-sm btn-light border" style={{ width: 190 }} onClick={pickUser}>
+                    <i className="mdi mdi-account-search-outline me-1" />Choose a user
+                  </button>
+                </div>
+
+                {subject && (
+                  <div className="ms-auto">
+                    <label className="form-label font-12 text-muted mb-1 d-block" htmlFor="au-rows">Rows</label>
+                    <select
+                      id="au-rows"
+                      className="form-select form-select-sm"
+                      style={{ width: 76 }}
+                      value={rowsPerPage}
+                      onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                    >
+                      {[5, 10, 20, 50, 100].map((n) => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
-              <div className="table-responsive theme-scrollbar">
-                <table className="display table" id="audit-log-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Department</th>
-                      <th>Branch</th>
-                      <th>Login Time</th>
-                      <th>Logout Time</th>
-                      <th>Viewed</th>
-                      <th>Uploaded</th>
-                      <th>Deleted</th>
-                    </tr>
-                  </thead>
-                  <tbody id="audit-log-tbody">
-                    {loading && (
-                      <tr><td colSpan={9}>Loading...</td></tr>
-                    )}
-                    {!loading && paginatedLogs.length === 0 && (
-                      <tr><td colSpan={9}>No records</td></tr>
-                    )}
-                    {!loading && paginatedLogs.map((log, idx) => (
-                      <tr key={idx}>
-                        <td>{(page - 1) * rowsPerPage + idx + 1}</td>
-                        <td>{log.name || 'N/A'}</td>
-                        <td>{log.department || 'N/A'}</td>
-                        <td>{log.branch || 'N/A'}</td>
-                        <td>{log.loginTime ? new Date(log.loginTime).toLocaleString() : 'N/A'}</td>
-                        <td>{log.logoutTime ? new Date(log.logoutTime).toLocaleString() : 'N/A'}</td>
-                        <td>{log.viewed ? 'Viewed' : 'No activity'}</td>
-                        <td>{log.uploaded ? 'Uploaded' : 'No activity'}</td>
-                        <td>{log.deleted ? 'Deleted' : 'No activity'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+
+              {/* Whose log is on screen - the page gave no persistent sign of this. */}
+              {subject && (
+                <div className="card shadow-none border mb-3">
+                  <div className="card-body py-2 d-flex align-items-center flex-wrap" style={{ gap: 12 }}>
+                    <div className="avatar-sm" style={{ height: '2.2rem', width: '2.2rem' }}>
+                      <span className="avatar-title bg-primary-lighten text-primary rounded-circle">
+                        {initialsOf(subject.fullname || subject.username)}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="fw-bold">{subject.fullname || subject.username}</div>
+                      <div className="text-muted font-12">{subject.username}</div>
+                    </div>
+                    <div className="text-muted font-13">
+                      {(captured.department || captured.branch)
+                        ? [captured.department, captured.branch].filter(Boolean).join(' · ')
+                        : <span className="fst-italic">no department or branch recorded</span>}
+                    </div>
+                    <div className="text-muted font-13">
+                      {totalRows} session{totalRows === 1 ? '' : 's'}
+                    </div>
+                    <button className="btn btn-sm btn-link text-muted p-0 ms-auto" onClick={clearSubject}>
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {loading && (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status" />
+                </div>
+              )}
+
+              {!loading && error && (
+                <div className="alert alert-danger" role="alert">
+                  <i className="mdi mdi-alert-circle-outline me-1" />{error}
+                </div>
+              )}
+
+              {/* Resting state: nothing chosen yet. */}
+              {!loading && !error && !subject && (
+                <div className="text-center py-5">
+                  <i className="mdi mdi-account-search-outline text-muted" style={{ fontSize: 38 }} />
+                  <h5 className="mt-2 mb-1">Choose a user to begin</h5>
+                  <p className="text-muted mb-0">
+                    The audit trail is kept per person. Type a username or pick one from the list.
+                  </p>
+                </div>
+              )}
+
+              {/* Chosen, but they have never signed in - a different thing. */}
+              {!loading && !error && subject && totalRows === 0 && (
+                <div className="text-center py-5">
+                  <i className="mdi mdi-history text-muted" style={{ fontSize: 38 }} />
+                  <h5 className="mt-2 mb-1">No sessions recorded</h5>
+                  <p className="text-muted mb-0">
+                    {subject.fullname || subject.username} has not signed in yet.
+                  </p>
+                </div>
+              )}
+
+              {!loading && !error && subject && totalRows > 0 && (
+                <>
+                  <p className="text-muted font-13 mb-2">
+                    One row per sign-in session. <strong>Viewed</strong>, <strong>uploaded</strong> and{' '}
+                    <strong>deleted</strong> show whether the action happened at least once during that
+                    session — they are not counts.
+                  </p>
+
+                  <div className="table-responsive">
+                    <table className="table table-centered table-nowrap table-hover mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th>Name</th>
+                          <th>Department</th>
+                          <th>Branch</th>
+                          <th>Signed in</th>
+                          <th>Signed out</th>
+                          <th>Viewed</th>
+                          <th>Uploaded</th>
+                          <th>Deleted</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginated.map((log) => (
+                          <tr key={log.id}>
+                            <td>{log.name}</td>
+                            <td className="text-muted">{log.department}</td>
+                            <td className="text-muted">{log.branch}</td>
+                            <td className="text-muted">{formatMoment(log.loginTime)}</td>
+                            <td>
+                              {log.logoutTime
+                                ? <span className="text-muted">{formatMoment(log.logoutTime)}</span>
+                                : <span className="badge bg-info-lighten text-info">Still signed in</span>}
+                            </td>
+                            <td><Flag value={log.viewed} /></td>
+                            <td><Flag value={log.uploaded} /></td>
+                            <td><Flag value={log.deleted} /></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="d-flex justify-content-between align-items-center mt-2">
+                    <span className="text-muted font-13">
+                      Showing {firstRow} to {lastRow} of {totalRows} session{totalRows === 1 ? '' : 's'}
+                    </span>
+                    <div>
+                      <span className="text-muted font-13 me-2">Page {page} of {totalPages}</span>
+                      <button className="btn btn-sm btn-light" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                        <i className="mdi mdi-chevron-left" />
+                      </button>
+                      <button className="btn btn-sm btn-light ms-1" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                        <i className="mdi mdi-chevron-right" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
