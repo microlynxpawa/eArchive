@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { LayoutContext } from '../components/Layout'
 
 /*
@@ -125,24 +125,36 @@ export default function Dashboard() {
    * card's own scroll box and flash it, so "which one was that" is answered.
    */
   const [flashId, setFlashId] = useState(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const wanted = searchParams.get('announcement')
 
+  /*
+   * This watches the router's search params, not window.location.
+   *
+   * Clicking a bell item while already ON the dashboard changes only the URL —
+   * the component does not remount and `messages` does not change — so an
+   * effect keyed on `messages` never re-ran and nothing happened. That is the
+   * common case, since the bell is where you are looking when you click it.
+   */
   useEffect(() => {
-    const wanted = new URLSearchParams(window.location.search).get('announcement')
     if (!wanted || messages.length === 0) return
 
     setTab('latest')
-    const id = window.requestAnimationFrame(() => {
+    const raf = window.requestAnimationFrame(() => {
       const row = document.querySelector(`[data-announcement="${CSS.escape(wanted)}"]`)
       if (row) {
         row.scrollIntoView({ block: 'center', behavior: 'smooth' })
         setFlashId(wanted)
         window.setTimeout(() => setFlashId(null), 2400)
       }
-      // Drop the parameter so a refresh does not keep re-flashing it.
-      window.history.replaceState({}, '', window.location.pathname)
+      // Drop the parameter through the router so a refresh does not re-flash,
+      // and so clicking the same announcement again still registers as a change.
+      const next = new URLSearchParams(searchParams)
+      next.delete('announcement')
+      setSearchParams(next, { replace: true })
     })
-    return () => window.cancelAnimationFrame(id)
-  }, [messages])
+    return () => window.cancelAnimationFrame(raf)
+  }, [wanted, messages, searchParams, setSearchParams])
 
   useEffect(() => {
     if (tab !== 'history') return

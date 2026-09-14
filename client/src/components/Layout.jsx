@@ -26,6 +26,7 @@ export default function Layout() {
   const [user, setUser] = useState({})
   const [auths, setAuths] = useState({})
   const [messages, setMessages] = useState([])
+  const [loadError, setLoadError] = useState(false)
 
   // Which sidebar modal is open. These used to be window CustomEvents that each
   // modal listened for, which meant the shell had no idea what was on screen and
@@ -53,14 +54,26 @@ export default function Layout() {
           headers: { Accept: 'application/json' },
         })
         if (!alive) return
-        if (dataRes.ok) {
-          const data = await dataRes.json()
-          if (data && data.statusCode === 200) {
-            setUser(data.user || {})
-            setAuths(data.auths || {})
-            setMessages(Array.isArray(data.messages) ? data.messages : [])
-          }
+
+        const data = dataRes.ok ? await dataRes.json().catch(() => null) : null
+        if (!data || data.statusCode !== 200 || !data.auths) {
+          /*
+           * Permissions come from this one call. Carrying on without them used
+           * to render the whole app with auths = {}, which silently disabled
+           * every administration control - the sidebar entries, the analytics
+           * page, the announcements button - with nothing on screen to say why.
+           * A transient failure looked exactly like a demotion. Say so instead.
+           */
+          console.error('[layout] dashboard-data did not return permissions', dataRes.status)
+          setLoadError(true)
+          setChecking(false)
+          return
         }
+
+        setUser(data.user || {})
+        setAuths(data.auths)
+        setMessages(Array.isArray(data.messages) ? data.messages : [])
+        setLoadError(false)
         setChecking(false)
       } catch (err) {
         if (!alive) return
@@ -84,6 +97,25 @@ export default function Layout() {
       <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading…</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Rendering without permissions would look like a demotion, so it is refused.
+  if (loadError) {
+    return (
+      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+        <div className="text-center" style={{ maxWidth: 420 }}>
+          <i className="mdi mdi-alert-circle-outline text-warning" style={{ fontSize: 40 }} />
+          <h4 className="mt-2">Could not load your permissions</h4>
+          <p className="text-muted">
+            You are signed in, but the server did not return what you are allowed to do. Nothing
+            has changed about your account — this is a loading problem.
+          </p>
+          <button className="btn btn-primary" onClick={() => window.location.reload()}>
+            <i className="mdi mdi-refresh me-1" />Try again
+          </button>
         </div>
       </div>
     )
