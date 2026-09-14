@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { LayoutContext } from '../components/Layout'
+import Modal from '../components/Modal'
 
 /*
  * Scanning is not in use at this deployment - there is no scanner integration
@@ -53,28 +54,43 @@ function scopeSentence(auths, user) {
   return <>You do not currently have access to any files.</>
 }
 
-/** One announcement row, shared by the Latest and History tabs. */
-function Announcement({ m, last, flash }) {
+/**
+ * One announcement row, shared by the Latest and History tabs.
+ *
+ * Fixed height, with the message clamped to two lines. Rows used to grow with
+ * their text, so "show three at a time" was not something a height could
+ * express - one long announcement filled the card on its own. Uniform rows make
+ * three rows a fixed size; Details opens the full text for anything longer.
+ */
+function Announcement({ m, last, flash, onDetails }) {
   return (
     <div
       data-announcement={m.id}
-      className={`d-flex align-items-start ${last ? '' : 'border-bottom pb-2 mb-2'}${flash ? ' an-flash' : ''}`}
+      className={`an-row d-flex align-items-start${last ? '' : ' border-bottom'}${flash ? ' an-flash' : ''}`}
     >
       <div className="avatar-sm me-2 flex-shrink-0">
         <span className="avatar-title bg-primary-lighten text-primary rounded">
           <i className="mdi mdi-bullhorn-outline font-18" />
         </span>
       </div>
+
       <div className="flex-grow-1 min-w-0">
-        <p className="mb-0">{m.message}</p>
+        <p className="mb-0 an-msg" title={m.message}>{m.message}</p>
         {m.createdAt && <span className="font-12 text-muted">{formatMoment(m.createdAt)}</span>}
       </div>
-      {/* who wrote it */}
+
       <div className="flex-shrink-0 ms-2 text-end">
-        <span className="font-12 text-muted d-block">
+        {/* who wrote it */}
+        <span className="font-12 text-muted d-block text-truncate" title={m.user?.fullname || ''}>
           <i className="mdi mdi-account-outline me-1" />
           {m.user?.username || '—'}
         </span>
+        <button
+          className="btn btn-link btn-sm p-0 font-12"
+          onClick={() => onDetails(m)}
+        >
+          Details
+        </button>
       </div>
     </div>
   )
@@ -128,6 +144,8 @@ export default function Dashboard() {
    * card's own scroll box and flash it, so "which one was that" is answered.
    */
   const [flashId, setFlashId] = useState(null)
+  // The announcement being read in full, if any.
+  const [details, setDetails] = useState(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const wanted = searchParams.get('announcement')
 
@@ -474,6 +492,7 @@ export default function Dashboard() {
                       m={m}
                       last={i === messages.length - 1}
                       flash={String(m.id) === String(flashId)}
+                      onDetails={setDetails}
                     />
                   ))}
                 </div>
@@ -495,6 +514,7 @@ export default function Dashboard() {
                           m={m}
                           last={i === history.rows.length - 1}
                           flash={String(m.id) === String(flashId)}
+                          onDetails={setDetails}
                         />
                       ))}
                     </div>
@@ -533,13 +553,39 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {details && (
+        <Modal
+          title="Announcement"
+          onClose={() => setDetails(null)}
+          footer={<button className="btn btn-light" onClick={() => setDetails(null)}>Close</button>}
+        >
+          <p style={{ whiteSpace: 'pre-wrap' }}>{details.message}</p>
+          <div className="text-muted font-13 border-top pt-2 mb-0">
+            <i className="mdi mdi-account-outline me-1" />
+            {details.user?.fullname || details.user?.username || 'Unknown'}
+            {details.user?.fullname && details.user?.username ? ` (${details.user.username})` : ''}
+            {details.createdAt && (
+              <>
+                <span className="mx-2">·</span>
+                <i className="mdi mdi-clock-outline me-1" />{formatMoment(details.createdAt)}
+              </>
+            )}
+          </div>
+        </Modal>
+      )}
+
       <style>{ANNOUNCEMENT_CSS}</style>
     </>
   )
 }
 
 const ANNOUNCEMENT_CSS = `
-.an-scroll{max-height:340px;overflow-y:auto;padding-right:4px}
+.an-scroll{--an-row-h:88px}
+/* Exactly three rows tall, always - not "up to". */
+.an-scroll{height:calc(var(--an-row-h) * 3);overflow-y:auto;padding-right:4px}
+.an-row{--an-row-h:88px;height:var(--an-row-h);padding:8px 0;overflow:hidden}
+/* Two lines, then ellipsis. The rest is behind Details. */
+.an-msg{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 /* Brief highlight when arriving from the notification bell. */
 .an-flash{animation:an-flash 2.4s ease-out 1;border-radius:4px}
 @keyframes an-flash{
