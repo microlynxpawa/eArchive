@@ -113,6 +113,9 @@ export default function Dashboard() {
    * posted - nothing is deleted - paged twenty at a time, and only requested
    * when the tab is actually opened.
    */
+  // Admins and managers (supervision_right) may write announcements.
+  const canAnnounce = !!(auths.is_admin || auths.is_super_admin || auths.supervision_right)
+
   const [tab, setTab] = useState('latest')
   const [history, setHistory] = useState({ rows: [], total: 0, page: 1, loading: false })
 
@@ -410,7 +413,20 @@ export default function Dashboard() {
           <div className="card">
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="card-title mb-0">Announcements</h5>
+                <h5 className="card-title mb-0">
+                  Announcements
+                  {/*
+                    * Writing one happens on its own page, reached from the
+                    * sidebar. That was not obvious from here, so anyone who may
+                    * write them gets a way in from the card they are already
+                    * looking at.
+                    */}
+                  {canAnnounce && (
+                    <Link to="/announcements" className="btn btn-sm btn-link p-0 ms-2 font-13">
+                      <i className="mdi mdi-plus-circle me-1" />New / manage
+                    </Link>
+                  )}
+                </h5>
                 {/* Tabs only once there is something to page through. */}
                 {messages.length > 0 && (
                   <ul className="nav nav-tabs card-header-tabs border-0" style={{ marginBottom: -1 }}>
