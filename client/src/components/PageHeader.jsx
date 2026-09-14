@@ -102,18 +102,29 @@ export default function PageHeader({ user = {}, messages = [] }) {
               {messages.length === 0 && (
                 <div className="text-center p-3 text-muted font-13">No messages</div>
               )}
+              {/*
+                * Each one links to itself on the dashboard, which scrolls to
+                * it and flashes it. The bell only ever lists the newest five,
+                * and those are exactly the dashboard's Latest tab, so the
+                * target is always present there.
+                */}
               {messages.map((m) => (
-                <a key={m.id} href="#" className="dropdown-item notify-item" onClick={(e) => e.preventDefault()}>
+                <Link
+                  key={m.id}
+                  to={`/dashboard?announcement=${m.id}`}
+                  className="dropdown-item notify-item"
+                >
                   <div className="notify-icon bg-primary">
                     <i className="mdi mdi-bullhorn-outline" />
                   </div>
                   <p className="notify-details">{m.message}</p>
-                  {m.createdAt && (
-                    <p className="text-muted mb-0 user-msg">
-                      <small>{new Date(m.createdAt).toLocaleString()}</small>
-                    </p>
-                  )}
-                </a>
+                  <p className="text-muted mb-0 user-msg">
+                    <small>
+                      {m.user?.username ? `${m.user.username} · ` : ''}
+                      {m.createdAt ? new Date(m.createdAt).toLocaleString() : ''}
+                    </small>
+                  </p>
+                </Link>
               ))}
             </div>
           </div>

@@ -7,6 +7,7 @@ const BranchDepartment = require("./branch-department");
 const File = require("./file");
 const FileSendingHistory = require("./fileSendingHistory");
 const FileIndexState = require("./fileIndexState");
+const AdminActions = require("./adminActions");
 const FileTextChunk = require("./fileTextChunk");
 
 const defineAssociations = () => {
@@ -48,6 +49,11 @@ const defineAssociations = () => {
   // contents after it is gone.
   FileIndexState.belongsTo(File, { foreignKey: 'fileId', onDelete: 'CASCADE' });
   File.hasOne(FileIndexState, { foreignKey: 'fileId' });
+
+  // Announcements and their author. The table already declared the foreign
+  // key but no association, so the writer's name could not be read back.
+  AdminActions.belongsTo(User, { foreignKey: 'userId' });
+  User.hasMany(AdminActions, { foreignKey: 'userId' });
 
   FileTextChunk.belongsTo(File, { foreignKey: 'fileId', onDelete: 'CASCADE' });
   File.hasMany(FileTextChunk, { foreignKey: 'fileId' });

@@ -669,6 +669,8 @@ const getAdminMessages = async (req, res) => {
       offset: (page - 1) * limit,
       limit,
       attributes: ["id", "message", "createdAt", "userId"],
+      // Who wrote it. The row carried only userId, so the name could not be shown.
+      include: [{ model: User, attributes: ["id", "username", "fullname"] }],
     });
 
     // Unread = written since this person last opened the bell.
@@ -729,7 +731,12 @@ const dashboardData = async (req, res) => {
 
     const auths = await Auths.findOne({ where: { userId: userSession } });
 
-    const messages = await AdminActions.findAll({ order: [['createdAt', 'DESC']], limit: 5, attributes: ['id', 'message', 'createdAt', 'userId'] });
+    const messages = await AdminActions.findAll({
+      order: [['createdAt', 'DESC']],
+      limit: 5,
+      attributes: ['id', 'message', 'createdAt', 'userId'],
+      include: [{ model: User, attributes: ['id', 'username', 'fullname'] }],
+    });
 
     return res.json({ statusCode: 200, user, auths, messages });
   } catch (err) {

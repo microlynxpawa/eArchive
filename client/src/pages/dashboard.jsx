@@ -54,17 +54,27 @@ function scopeSentence(auths, user) {
 }
 
 /** One announcement row, shared by the Latest and History tabs. */
-function Announcement({ m, last }) {
+function Announcement({ m, last, flash }) {
   return (
-    <div className={`d-flex align-items-start ${last ? '' : 'border-bottom pb-2 mb-2'}`}>
-      <div className="avatar-sm me-2">
+    <div
+      data-announcement={m.id}
+      className={`d-flex align-items-start ${last ? '' : 'border-bottom pb-2 mb-2'}${flash ? ' an-flash' : ''}`}
+    >
+      <div className="avatar-sm me-2 flex-shrink-0">
         <span className="avatar-title bg-primary-lighten text-primary rounded">
           <i className="mdi mdi-bullhorn-outline font-18" />
         </span>
       </div>
-      <div className="flex-grow-1">
+      <div className="flex-grow-1 min-w-0">
         <p className="mb-0">{m.message}</p>
         {m.createdAt && <span className="font-12 text-muted">{formatMoment(m.createdAt)}</span>}
+      </div>
+      {/* who wrote it */}
+      <div className="flex-shrink-0 ms-2 text-end">
+        <span className="font-12 text-muted d-block">
+          <i className="mdi mdi-account-outline me-1" />
+          {m.user?.username || '—'}
+        </span>
       </div>
     </div>
   )
@@ -105,6 +115,34 @@ export default function Dashboard() {
    */
   const [tab, setTab] = useState('latest')
   const [history, setHistory] = useState({ rows: [], total: 0, page: 1, loading: false })
+
+  /*
+   * Arriving from the notification bell.
+   *
+   * The bell links to /dashboard?announcement=<id>. The bell only ever lists
+   * the newest five, which are exactly the Latest tab, so the target is always
+   * in that list - no searching through history needed. Scroll to it inside the
+   * card's own scroll box and flash it, so "which one was that" is answered.
+   */
+  const [flashId, setFlashId] = useState(null)
+
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get('announcement')
+    if (!wanted || messages.length === 0) return
+
+    setTab('latest')
+    const id = window.requestAnimationFrame(() => {
+      const row = document.querySelector(`[data-announcement="${CSS.escape(wanted)}"]`)
+      if (row) {
+        row.scrollIntoView({ block: 'center', behavior: 'smooth' })
+        setFlashId(wanted)
+        window.setTimeout(() => setFlashId(null), 2400)
+      }
+      // Drop the parameter so a refresh does not keep re-flashing it.
+      window.history.replaceState({}, '', window.location.pathname)
+    })
+    return () => window.cancelAnimationFrame(id)
+  }, [messages])
 
   useEffect(() => {
     if (tab !== 'history') return
@@ -394,9 +432,24 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {tab === 'latest' && messages.map((m, i) => (
-                <Announcement key={m.id ?? i} m={m} last={i === messages.length - 1} />
-              ))}
+              {/*
+                * Capped height, scrolled. The card used to grow with every
+                * announcement posted, eventually pushing the rest of the
+                * dashboard off the screen. The pager stays outside the box so
+                * it does not scroll away.
+                */}
+              {tab === 'latest' && (
+                <div className="an-scroll">
+                  {messages.map((m, i) => (
+                    <Announcement
+                      key={m.id ?? i}
+                      m={m}
+                      last={i === messages.length - 1}
+                      flash={String(m.id) === String(flashId)}
+                    />
+                  ))}
+                </div>
+              )}
 
               {tab === 'history' && (
                 <>
@@ -406,9 +459,18 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  {!history.loading && history.rows.map((m, i) => (
-                    <Announcement key={m.id ?? i} m={m} last={i === history.rows.length - 1} />
-                  ))}
+                  {!history.loading && (
+                    <div className="an-scroll">
+                      {history.rows.map((m, i) => (
+                        <Announcement
+                          key={m.id ?? i}
+                          m={m}
+                          last={i === history.rows.length - 1}
+                          flash={String(m.id) === String(flashId)}
+                        />
+                      ))}
+                    </div>
+                  )}
 
                   {!history.loading && history.total > 20 && (
                     <div className="d-flex justify-content-between align-items-center mt-2">
@@ -442,6 +504,18 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <style>{ANNOUNCEMENT_CSS}</style>
     </>
   )
 }
+
+const ANNOUNCEMENT_CSS = `
+.an-scroll{max-height:340px;overflow-y:auto;padding-right:4px}
+/* Brief highlight when arriving from the notification bell. */
+.an-flash{animation:an-flash 2.4s ease-out 1;border-radius:4px}
+@keyframes an-flash{
+  0%,20%{background:#ffe8a3}
+  100%{background:transparent}
+}
+`

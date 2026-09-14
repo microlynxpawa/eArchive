@@ -226,6 +226,13 @@ export default function Announcements() {
                     <p className="mb-1" style={{ whiteSpace: 'pre-wrap' }}>{m.message}</p>
                     <span className="font-12 text-muted">{formatMoment(m.createdAt)}</span>
                   </div>
+                  {/* who wrote it */}
+                  <div className="flex-shrink-0 ms-2 text-end" style={{ minWidth: 120 }}>
+                    <span className="font-12 text-muted d-block text-truncate" title={m.user?.fullname || ''}>
+                      <i className="mdi mdi-account-outline me-1" />
+                      {m.user?.username || '—'}
+                    </span>
+                  </div>
                   {canManage && (
                     <div className="flex-shrink-0 ms-2">
                       <button
