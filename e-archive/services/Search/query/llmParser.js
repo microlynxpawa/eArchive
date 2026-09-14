@@ -31,13 +31,29 @@ const MAX_QUERY_CHARS = 300;
 // and the ones that actually disambiguate) but not every username.
 const MAX_USERS_IN_PROMPT = 200;
 
+/**
+ * The key, from AI_API_KEY or from a provider-named variable.
+ *
+ * AI_API_KEY is the canonical name and wins. The fallbacks exist so a key that
+ * is already in .env under its vendor's usual name does not have to be copied
+ * to a second variable - duplicating a secret is how the two drift apart, and
+ * how the wrong one ends up in a commit.
+ */
+function apiKey() {
+  return process.env.AI_API_KEY
+    || process.env.DEEPSEEK_API_KEY
+    || process.env.OPENAI_API_KEY
+    || process.env.ANTHROPIC_API_KEY
+    || "";
+}
+
 function config() {
   return {
     enabled: process.env.AI_QUERY_ENABLED === "true",
     provider: (process.env.AI_PROVIDER || "openai-compatible").toLowerCase(),
     baseUrl: process.env.AI_BASE_URL || "",
     model: process.env.AI_MODEL || "",
-    apiKey: process.env.AI_API_KEY || "",
+    apiKey: apiKey(),
     timeoutMs: parseInt(process.env.AI_TIMEOUT_MS, 10) || DEFAULT_TIMEOUT_MS,
   };
 }
